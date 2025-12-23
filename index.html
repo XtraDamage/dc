@@ -7,6 +7,30 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        /* Блокировка выделения и контекстного меню */
+        * {
+            -webkit-user-select: none; /* Safari/Chrome */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* IE/Edge */
+            user-select: none; /* Standard */
+            -webkit-touch-callout: none; /* iOS Safari - убирает меню при долгом нажатии */
+        }
+        
+        /* Разрешаем ввод текста в инпутах */
+        input {
+            -webkit-user-select: text !important;
+            -moz-user-select: text !important;
+            -ms-user-select: text !important;
+            user-select: text !important;
+        }
+
+        /* Запрет перетаскивания картинок */
+        img {
+            -webkit-user-drag: none;
+            user-drag: none;
+            pointer-events: none; /* Игнорирует клики по самой картинке (клики ловят родители) */
+        }
+
         body { background-color: #000; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
         .dool-card { background: #0a0a0a; border: 1px solid rgba(255,255,255,0.05); }
         .gradient-text { background: linear-gradient(135deg, #FF4D00, #FF005C); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -23,23 +47,24 @@
         .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
     </style>
 </head>
-<body class="overflow-hidden bg-black">
+<body class="overflow-hidden bg-black" oncontextmenu="return false;"> <!-- Блокировка правой кнопки мыши -->
 
     <div id="app" class="max-w-[480px] mx-auto h-[100dvh] flex flex-col relative bg-black shadow-2xl overflow-hidden">
         
-        <!-- Уведомления -->
+        <!-- Уведомления (Toast) -->
         <div id="toast" class="fixed top-4 left-4 right-4 z-[200] glass-panel p-3 rounded-[2rem] flex items-center gap-3 shadow-2xl pointer-events-none border border-white/10">
-            <div class="relative">
+            <div class="relative shrink-0">
                 <img id="toast-avatar" src="" class="w-12 h-12 rounded-full object-cover bg-neutral-800 border-2 border-white/10" onerror="this.src='https://ui-avatars.com/api/?background=333&color=fff&size=128'">
-                <div class="absolute -bottom-1 -right-1 bg-green-500 w-4 h-4 rounded-full border-2 border-black flex items-center justify-center">
+                <!-- Индикатор статуса (зеленый) -->
+                <div id="toast-status" class="absolute -bottom-1 -right-1 bg-green-500 w-4 h-4 rounded-full border-2 border-black flex items-center justify-center">
                     <svg width="8" height="8" fill="none" stroke="black" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
                 </div>
             </div>
             <div class="flex-1 min-w-0 pr-2">
-                <p id="toast-title" class="text-[10px] font-black uppercase text-neutral-400 tracking-widest mb-0.5">Входящий перевод</p>
+                <p id="toast-title" class="text-[10px] font-black uppercase text-neutral-400 tracking-widest mb-0.5">Система</p>
                 <div class="flex items-center justify-between">
-                    <p id="toast-sender" class="text-xs font-bold text-white truncate mr-2">User</p>
-                    <p id="toast-amount" class="text-sm font-black text-[#FF4D00] whitespace-nowrap">+0.00 Đ</p>
+                    <p id="toast-msg" class="text-xs font-bold text-white truncate mr-2">Сообщение</p>
+                    <p id="toast-amount" class="text-sm font-black text-[#FF4D00] whitespace-nowrap hidden"></p>
                 </div>
             </div>
         </div>
@@ -76,7 +101,7 @@
         <!-- Главный экран -->
         <div id="view-main" class="hidden flex flex-col h-full">
             <header class="px-6 pt-14 pb-4 flex justify-between items-center z-20">
-                <div class="flex items-center gap-3 active:opacity-70 transition-opacity" onclick="openModal('profile')">
+                <div class="flex items-center gap-3 active:opacity-70 transition-opacity cursor-pointer" onclick="openModal('profile')">
                     <div class="p-[2px] gradient-bg rounded-full shadow-[0_0_20px_rgba(255,77,0,0.3)]">
                         <img id="main-avatar" src="" class="w-10 h-10 rounded-full object-cover bg-black border-2 border-black">
                     </div>
@@ -85,7 +110,7 @@
                         <p class="text-[9px] font-black text-neutral-500 uppercase tracking-widest leading-tight">Профиль</p>
                     </div>
                 </div>
-                <button id="btn-logout" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-all">
+                <button id="btn-logout" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer">
                     <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
                 </button>
             </header>
@@ -107,8 +132,8 @@
                         </div>
 
                         <div class="grid grid-cols-2 gap-3 mt-6 relative z-10">
-                            <button onclick="openModal('send')" class="h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 active:scale-95 transition-all shadow-lg shadow-white/5">Отправить</button>
-                            <button onclick="openModal('receive')" class="h-14 glass-panel text-white border border-white/10 rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-white/10 active:scale-95 transition-all">Получить</button>
+                            <button onclick="openModal('send')" class="h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 active:scale-95 transition-all shadow-lg shadow-white/5 cursor-pointer">Отправить</button>
+                            <button onclick="openModal('receive')" class="h-14 glass-panel text-white border border-white/10 rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-white/10 active:scale-95 transition-all cursor-pointer">Получить</button>
                         </div>
                     </div>
 
@@ -139,7 +164,7 @@
                                     <p class="text-[9px] font-black text-neutral-600 uppercase tracking-widest mb-1">Ваша ссылка</p>
                                     <p id="ref-link" class="text-[10px] font-mono text-neutral-400 truncate bg-transparent outline-none">...</p>
                                 </div>
-                                <button onclick="copyRef()" class="w-10 h-10 flex items-center justify-center bg-white text-black rounded-xl hover:scale-105 transition-transform">
+                                <button onclick="copyRef()" class="w-10 h-10 flex items-center justify-center bg-white text-black rounded-xl hover:scale-105 transition-transform cursor-pointer">
                                     <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                                 </button>
                             </div>
@@ -167,10 +192,10 @@
 
             <!-- Навигация -->
             <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] h-16 bg-[#111]/90 backdrop-blur-xl border border-white/10 rounded-[2rem] flex items-center justify-around px-2 z-50 shadow-2xl">
-                <button onclick="switchTab('wallet')" id="nav-wallet" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-orange-500">
+                <button onclick="switchTab('wallet')" id="nav-wallet" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-orange-500 cursor-pointer">
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
                 </button>
-                <button onclick="switchTab('referrals')" id="nav-referrals" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600">
+                <button onclick="switchTab('referrals')" id="nav-referrals" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
                 </button>
             </nav>
@@ -191,7 +216,7 @@
                         </label>
                     </div>
                     <p id="profile-email" class="text-xs text-neutral-500 font-bold mb-6 truncate px-2">...</p>
-                    <button onclick="closeModal('profile')" class="w-full h-12 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-colors">Закрыть</button>
+                    <button onclick="closeModal('profile')" class="w-full h-12 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer">Закрыть</button>
                 </div>
             </div>
         </div>
@@ -214,8 +239,8 @@
                          </div>
                     </div>
                     <div class="flex gap-3 pt-4">
-                        <button onclick="closeModal('send')" class="flex-1 h-14 bg-white/5 text-neutral-400 rounded-2xl font-bold text-xs uppercase tracking-wider">Отмена</button>
-                        <button id="btn-do-send" class="flex-[2] h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200">Отправить</button>
+                        <button onclick="closeModal('send')" class="flex-1 h-14 bg-white/5 text-neutral-400 rounded-2xl font-bold text-xs uppercase tracking-wider cursor-pointer">Отмена</button>
+                        <button id="btn-do-send" class="flex-[2] h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer">Отправить</button>
                     </div>
                 </div>
             </div>
@@ -232,7 +257,7 @@
                 <div onclick="copyMyEmail()" class="bg-white/5 p-4 rounded-2xl font-mono text-orange-500 mb-6 truncate text-sm border border-white/5 cursor-pointer hover:bg-white/10 transition-colors active:scale-95">
                     <span id="my-email-addr">...</span>
                 </div>
-                <button onclick="closeModal('receive')" class="text-neutral-500 font-bold uppercase text-[10px] hover:text-white transition-colors">Закрыть</button>
+                <button onclick="closeModal('receive')" class="text-neutral-500 font-bold uppercase text-[10px] hover:text-white transition-colors cursor-pointer">Закрыть</button>
             </div>
         </div>
 
@@ -269,9 +294,6 @@
             let info = { avatar: defaultAv, email: email };
 
             try {
-                // Ищем пользователя по email
-                // ВАЖНО: Это может не сработать если нет индекса на email, но для единичных запросов ок
-                // Если нет доступа к списку юзеров, используем заглушку
                 const q = query(collection(db, "users"), where("email", "==", email));
                 const res = await getDocs(q);
                 if (!res.empty) {
@@ -308,22 +330,47 @@
             setTimeout(() => m.classList.add('hidden'), 300);
         };
 
-        window.showT = async (title, msg, amountStr = '', senderEmail = null) => {
+        // Обновленная функция уведомлений (Toast)
+        // Если isError = true, показываем красную точку и стандартную иконку, иначе зеленую и аватар
+        window.showT = async (title, msg, amountStr = '', senderEmail = null, isError = false) => {
             const t = document.getElementById('toast');
+            const status = document.getElementById('toast-status');
+            const amtEl = document.getElementById('toast-amount');
+            
             document.getElementById('toast-title').textContent = title;
-            document.getElementById('toast-sender').textContent = msg;
-            document.getElementById('toast-amount').textContent = amountStr;
+            document.getElementById('toast-msg').textContent = msg;
+            
+            if (amountStr) {
+                amtEl.textContent = amountStr;
+                amtEl.classList.remove('hidden');
+            } else {
+                amtEl.classList.add('hidden');
+            }
             
             const img = document.getElementById('toast-avatar');
-            if (senderEmail) {
-                const u = await getUserInfo(senderEmail);
-                img.src = u.avatar;
+            
+            if (isError) {
+                // Стиль ошибки
+                status.classList.remove('bg-green-500');
+                status.classList.add('bg-red-500');
+                status.innerHTML = '<svg width="8" height="8" fill="none" stroke="black" stroke-width="3" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>';
+                img.src = `https://ui-avatars.com/api/?background=333&color=fff&name=!`;
             } else {
-                img.src = `https://ui-avatars.com/api/?background=333&color=fff&name=S`;
+                // Стиль успеха/инфо
+                status.classList.remove('bg-red-500');
+                status.classList.add('bg-green-500');
+                status.innerHTML = '<svg width="8" height="8" fill="none" stroke="black" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>';
+                
+                if (senderEmail) {
+                    const u = await getUserInfo(senderEmail);
+                    img.src = u.avatar;
+                } else {
+                    img.src = `https://ui-avatars.com/api/?background=333&color=fff&name=S`;
+                }
             }
             
             t.classList.add('active');
-            setTimeout(() => t.classList.remove('active'), 5000);
+            setTimeout(() => t.classList.remove('active'), 4000);
         };
 
         window.switchTab = (tab) => {
@@ -345,7 +392,6 @@
         // --- Logic ---
         onAuthStateChanged(auth, async (u) => {
             if (u) {
-                // Ensure user doc
                 const userRef = doc(db, "users", u.uid);
                 const snap = await getDoc(userRef);
                 if (!snap.exists()) {
@@ -365,16 +411,19 @@
         document.getElementById('btn-login').onclick = async () => {
             const e = document.getElementById('auth-email').value;
             const p = document.getElementById('auth-password').value;
-            try { await signInWithEmailAndPassword(auth, e, p); } catch { alert('Ошибка входа'); }
+            try { 
+                await signInWithEmailAndPassword(auth, e, p); 
+            } catch { 
+                showT('Ошибка', 'Неверный логин или пароль', '', null, true);
+            }
         };
 
         document.getElementById('btn-register').onclick = async () => {
             const e = document.getElementById('auth-email').value;
             const p = document.getElementById('auth-password').value;
-            if (p.length < 6) return alert('Пароль > 6 символов');
+            if (p.length < 6) return showT('Ошибка', 'Пароль слишком короткий', '', null, true);
             try {
                 await createUserWithEmailAndPassword(auth, e, p);
-                // Реферальная система (упрощенная)
                 const ref = new URLSearchParams(window.location.search).get('ref');
                 if (ref) {
                     const q = query(collection(db, "users"), where("email", "==", ref));
@@ -385,7 +434,9 @@
                         });
                     }
                 }
-            } catch { alert('Ошибка регистрации'); }
+            } catch { 
+                showT('Ошибка', 'Не удалось создать аккаунт', '', null, true);
+            }
         };
 
         function startApp(u) {
@@ -399,7 +450,6 @@
                 const d = snap.data();
                 if (!d) return;
 
-                // Баланс обновился
                 if (lastBal !== null && d.balance > lastBal) {
                     const diff = d.balance - lastBal;
                     handleIncomingTransfer(u.email, diff);
@@ -421,8 +471,7 @@
                 document.getElementById('view-main').classList.replace('hidden', 'flex');
             });
 
-            // 2. История транзакций (БЕЗ сложного индекса)
-            // Запрашиваем транзакции, где мы участвуем
+            // 2. История
             const qTx = query(collection(db, "transactions"), where("parties", "array-contains", u.email));
             
             onSnapshot(qTx, async (snap) => {
@@ -432,19 +481,15 @@
                     return;
                 }
 
-                // Сортируем в JS (по дате убывания)
                 const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date);
                 
                 let html = '';
                 for (const tx of docs) {
                     const isSent = tx.from === u.email;
                     const partner = isSent ? tx.to : tx.from;
-                    // Асинхронно данные подгружать в UI сложно без фреймворка,
-                    // поэтому ставим заглушку и обновляем позже или используем кэш
                     let av = `https://ui-avatars.com/api/?background=222&color=666&name=${partner.charAt(0)}`;
                     if (userCache[partner]) av = userCache[partner].avatar;
                     else {
-                         // Фоновая подгрузка (не блокируем рендер)
                          getUserInfo(partner).then(inf => {
                              const el = document.getElementById(`av-${tx.date.toMillis()}`);
                              if(el) el.src = inf.avatar;
@@ -472,28 +517,22 @@
             });
         }
 
-        // Логика поиска отправителя при изменении баланса
         async function handleIncomingTransfer(myEmail, amountDiff) {
             try {
-                // Ищем свежие транзакции ГДЕ Я получатель
                 const q = query(collection(db, "transactions"), where("to", "==", myEmail));
                 const snap = await getDocs(q);
                 
                 if (!snap.empty) {
-                    // Сортируем JS
                     const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date);
-                    const lastTx = docs[0]; // Самая свежая
+                    const lastTx = docs[0];
                     
-                    // Если сумма совпадает (с погрешностью)
                     if (Math.abs(lastTx.amount - amountDiff) < 0.01) {
                         showT('Входящий перевод', lastTx.from, `+${amountDiff.toFixed(2)} Đ`, lastTx.from);
                         return;
                     }
                 }
                 showT('Пополнение', 'Система', `+${amountDiff.toFixed(2)} Đ`);
-            } catch(e) {
-                console.log(e);
-            }
+            } catch(e) { console.log(e); }
         }
 
         // --- Actions ---
@@ -504,7 +543,10 @@
             reader.onload = async (ev) => {
                 try {
                     await updateDoc(doc(db, "users", auth.currentUser.uid), { avatar: ev.target.result });
-                } catch { alert('Ошибка сохранения фото'); }
+                    showT('Профиль', 'Аватар обновлен');
+                } catch { 
+                    showT('Ошибка', 'Не удалось загрузить фото', '', null, true);
+                }
             };
             reader.readAsDataURL(file);
         };
@@ -514,23 +556,22 @@
             const amt = parseFloat(document.getElementById('send-amt').value);
             const myEmail = auth.currentUser.email;
 
-            if (to === myEmail) return alert('Нельзя отправить себе');
-            if (!amt || amt <= 0 || amt > myData.balance) return alert('Неверная сумма');
+            if (to === myEmail) return showT('Ошибка', 'Нельзя отправить себе', '', null, true);
+            if (!amt || amt <= 0 || amt > myData.balance) return showT('Ошибка', 'Некорректная сумма', '', null, true);
 
             const btn = document.getElementById('btn-do-send');
             btn.disabled = true; btn.textContent = '...';
 
             try {
-                // Получаем ID получателя
                 const q = query(collection(db, "users"), where("email", "==", to));
                 const res = await getDocs(q);
-                if (res.empty) throw new Error("Email не найден");
+                if (res.empty) throw new Error("Пользователь не найден");
                 const receiverRef = res.docs[0].ref;
 
                 await runTransaction(db, async (t) => {
                     const senderRef = doc(db, "users", auth.currentUser.uid);
                     const sDoc = await t.get(senderRef);
-                    if (sDoc.data().balance < amt) throw new Error("Мало средств");
+                    if (sDoc.data().balance < amt) throw new Error("Недостаточно средств");
 
                     t.update(senderRef, { balance: increment(-amt) });
                     t.update(receiverRef, { balance: increment(amt) });
@@ -544,15 +585,22 @@
                 closeModal('send');
                 document.getElementById('send-amt').value = '';
                 document.getElementById('send-email').value = '';
-                // Toast об успехе
                 showT('Успешно', `Перевод для ${to}`, `-${amt.toFixed(2)} Đ`);
 
-            } catch (e) { alert(e.message); }
+            } catch (e) { 
+                showT('Ошибка', e.message, '', null, true); 
+            }
             finally { btn.disabled = false; btn.textContent = 'Отправить'; }
         };
 
-        window.copyRef = () => { navigator.clipboard.writeText(document.getElementById('ref-link').textContent); };
-        window.copyMyEmail = () => { navigator.clipboard.writeText(auth.currentUser.email); };
+        window.copyRef = () => { 
+            navigator.clipboard.writeText(document.getElementById('ref-link').textContent); 
+            showT('Успешно', 'Ссылка скопирована');
+        };
+        window.copyMyEmail = () => { 
+            navigator.clipboard.writeText(auth.currentUser.email); 
+            showT('Успешно', 'Email скопирован');
+        };
         document.getElementById('btn-logout').onclick = () => signOut(auth);
 
     </script>
