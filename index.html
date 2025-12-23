@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Doolcoin Wallet</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
@@ -13,218 +13,187 @@
                 extend: {
                     fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
                     backgroundImage: {
-                        'dool-gradient': 'linear-gradient(135deg, #FF3D00 0%, #FF8F00 50%, #FF0080 100%)',
+                        'dool-gradient': 'linear-gradient(135deg, #FF4D00 0%, #FF8A00 50%, #FF005C 100%)',
+                        'glass': 'linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)'
                     }
                 }
             }
         }
     </script>
     <style>
-        body { background-color: #030303; color: #ffffff; -webkit-tap-highlight-color: transparent; overflow: hidden; }
+        body { background-color: #000000; color: #ffffff; -webkit-tap-highlight-color: transparent; overflow: hidden; }
         
-        /* Стеклянные карты */
         .dool-card {
-            background: rgba(18, 18, 18, 0.7);
-            backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            background: #0a0a0a;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.7);
         }
 
-        /* Анимация переключения вкладок */
-        .tab-content {
-            display: none;
-            width: 100%;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .tab-content.active {
-            display: block;
-            animation: slideIn 0.4s ease-out;
-        }
+        .tab-content { display: none; width: 100%; }
+        .tab-content.active { display: block; animation: tabFade 0.3s ease-out; }
+        @keyframes tabFade { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(20px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
+        #notification { transform: translateY(-120%); transition: transform 0.4s cubic-bezier(0.17, 0.89, 0.32, 1.27); }
+        #notification.active { transform: translateY(0); }
 
-        /* Уведомление */
-        #notification-popup {
-            transform: translateY(-150%);
-            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-        }
-        #notification-popup.show { transform: translateY(0); }
-
-        .hide-scroll::-webkit-scrollbar { display: none; }
+        .avatar-ring { padding: 2px; background: linear-gradient(135deg, #FF4D00, #FF005C); border-radius: 999px; }
         
-        /* Необрезаемый символ Đ */
-        .currency-symbol {
-            display: inline-block;
-            min-width: 1.5em;
-            text-align: center;
-        }
+        .logo-glow { filter: drop-shadow(0 0 10px rgba(255, 77, 0, 0.4)); }
     </style>
 </head>
 <body class="font-sans antialiased">
 
     <div id="app" class="relative w-full max-w-[480px] mx-auto h-[100dvh] flex flex-col">
         
-        <!-- ВСПЛЫВАЮЩЕЕ УВЕДОМЛЕНИЕ -->
-        <div id="notification-popup" class="fixed top-6 left-4 right-4 z-[200] dool-card rounded-3xl p-4 flex items-center gap-4 pointer-events-none">
-            <div class="w-12 h-12 bg-dool-gradient rounded-2xl flex items-center justify-center shadow-lg shrink-0">
-                <span class="text-xl font-bold">Đ</span>
-            </div>
-            <div class="flex-1">
-                <h4 id="notif-title" class="text-xs font-black uppercase tracking-widest text-orange-500">Уведомление</h4>
-                <p id="notif-body" class="text-sm font-bold text-white">Вам пришел перевод!</p>
+        <!-- УМНЫЕ УВЕДОМЛЕНИЯ -->
+        <div id="notification" class="fixed top-4 left-4 right-4 z-[200] bg-[#111] border border-white/10 p-4 rounded-3xl flex items-center gap-4 pointer-events-none shadow-2xl">
+            <div class="w-10 h-10 bg-dool-gradient rounded-full flex items-center justify-center font-bold text-white shrink-0">Đ</div>
+            <div>
+                <h4 id="notif-title" class="text-[10px] font-black uppercase text-orange-500 tracking-widest">Система</h4>
+                <p id="notif-body" class="text-sm font-medium text-white/90">Уведомление</p>
             </div>
         </div>
 
-        <!-- ЭКРАН ЗАГРУЗКИ -->
-        <div id="view-loading" class="absolute inset-0 z-[100] bg-[#030303] flex flex-col items-center justify-center">
-            <div class="w-20 h-20 bg-dool-gradient rounded-3xl animate-bounce flex items-center justify-center">
-                <span class="text-3xl font-bold">Đ</span>
-            </div>
+        <!-- ЗАГРУЗКА -->
+        <div id="view-loading" class="absolute inset-0 z-[100] bg-black flex flex-col items-center justify-center">
+            <div class="text-6xl font-black bg-dool-gradient bg-clip-text text-transparent logo-glow animate-pulse">Đ</div>
         </div>
 
-        <!-- ЭКРАН АВТОРИЗАЦИИ -->
-        <div id="view-auth" class="hidden flex-col h-full p-10 z-50 bg-[#030303]">
+        <!-- ВХОД / РЕГИСТРАЦИЯ -->
+        <div id="view-auth" class="hidden flex-col h-full p-10 z-50 bg-black">
             <div class="flex-1 flex flex-col justify-center">
-                <div class="mb-12">
-                    <div class="w-16 h-16 bg-dool-gradient rounded-2xl flex items-center justify-center shadow-2xl mb-6">
-                        <span class="text-3xl font-bold">Đ</span>
-                    </div>
-                    <h1 class="text-4xl font-extrabold tracking-tight mb-2">Doolcoin</h1>
-                    <p class="text-neutral-500 text-sm font-medium">Безопасная платёжная система</p>
+                <div class="mb-14 text-center">
+                    <div class="text-7xl font-black bg-dool-gradient bg-clip-text text-transparent mb-4 logo-glow">Đ</div>
+                    <h1 class="text-3xl font-extrabold tracking-tight">Doolcoin</h1>
                 </div>
                 <div class="space-y-4">
-                    <input type="email" id="auth-email" placeholder="Email" class="w-full bg-white/5 border border-white/10 rounded-2xl p-5 text-sm font-semibold outline-none focus:border-orange-500/50 transition-all">
-                    <input type="password" id="auth-password" placeholder="Пароль" class="w-full bg-white/5 border border-white/10 rounded-2xl p-5 text-sm font-semibold outline-none focus:border-orange-500/50 transition-all">
-                    <div class="flex flex-col gap-3 pt-4">
-                        <button id="btn-login" class="w-full bg-white text-black h-16 rounded-2xl font-black text-sm uppercase tracking-widest active:scale-95 transition-all">Войти</button>
-                        <button id="btn-register" class="w-full bg-dool-gradient text-white h-16 rounded-2xl font-black text-sm uppercase tracking-widest active:scale-95 transition-all shadow-lg">Создать кошелек</button>
+                    <input type="email" id="auth-email" placeholder="Электронная почта" class="w-full bg-white/5 border border-white/10 rounded-2xl p-5 text-sm font-medium outline-none focus:border-orange-500/50 transition-all">
+                    <input type="password" id="auth-password" placeholder="Пароль" class="w-full bg-white/5 border border-white/10 rounded-2xl p-5 text-sm font-medium outline-none focus:border-orange-500/50 transition-all">
+                    <div class="flex flex-col gap-3 pt-6">
+                        <button id="btn-login" class="w-full bg-white text-black h-16 rounded-2xl font-bold active:scale-95 transition-all">Войти</button>
+                        <button id="btn-register" class="w-full border border-white/10 text-white h-16 rounded-2xl font-bold active:scale-95 transition-all">Создать кошелек</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ГЛАВНЫЙ ИНТЕРФЕЙС -->
-        <div id="view-main" class="hidden flex-col h-full overflow-hidden">
-            <header class="px-6 pt-10 pb-4 flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-dool-gradient flex items-center justify-center font-bold text-white shadow-lg">Đ</div>
-                    <div class="flex flex-col">
-                        <span id="user-display" class="text-xs font-bold text-neutral-200 truncate max-w-[140px]">...</span>
-                        <span class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest">Premium Account</span>
+        <!-- ОСНОВНОЙ ЭКРАН -->
+        <div id="view-main" class="hidden flex-col h-full">
+            <header class="px-6 pt-12 pb-4 flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <div id="user-avatar-container" onclick="openModal('profile')" class="cursor-pointer relative">
+                        <div class="avatar-ring">
+                            <div id="user-avatar" class="w-12 h-12 bg-neutral-900 rounded-full flex items-center justify-center text-sm font-bold border-2 border-black overflow-hidden">
+                                <!-- Сюда вставится фото или инициалы -->
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black text-neutral-500 uppercase tracking-widest">Кошелек</p>
+                        <h4 id="user-display" class="text-sm font-bold text-neutral-100 truncate max-w-[120px]">...</h4>
                     </div>
                 </div>
-                <button id="btn-logout" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-neutral-400">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                <button id="btn-logout" class="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-neutral-400">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                 </button>
             </header>
 
-            <main class="flex-1 overflow-y-auto px-6 hide-scroll pt-4 pb-32 relative">
-                
+            <main class="flex-1 overflow-y-auto px-6 hide-scroll pt-4 pb-32">
                 <!-- ВКЛАДКА КОШЕЛЕК -->
                 <div id="tab-wallet" class="tab-content active space-y-8">
-                    <div class="relative dool-card rounded-[2.5rem] p-10 overflow-hidden">
+                    <div class="dool-card rounded-[2.5rem] p-10 relative overflow-hidden">
                         <div class="relative z-10">
-                            <span class="text-[11px] font-bold text-neutral-500 uppercase tracking-widest">Доступные средства</span>
-                            <div class="flex items-center gap-1 mt-4">
+                            <span class="text-[11px] font-bold text-neutral-500 uppercase tracking-widest">Доступный баланс</span>
+                            <div class="flex items-center gap-3 mt-4">
                                 <h2 class="text-6xl font-extrabold tracking-tighter" id="balance-amount">0.00</h2>
-                                <span class="currency-symbol text-3xl font-bold bg-dool-gradient bg-clip-text text-transparent italic">Đ</span>
+                                <span class="text-4xl font-black bg-dool-gradient bg-clip-text text-transparent italic shrink-0">Đ</span>
                             </div>
                         </div>
-                        <div class="absolute top-0 right-0 w-32 h-32 bg-dool-gradient rounded-full blur-[80px] opacity-20 -mr-10 -mt-10"></div>
+                        <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-dool-gradient rounded-full blur-[90px] opacity-10"></div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
-                        <button onclick="openModal('send')" class="h-16 bg-white text-black rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all">
+                        <button onclick="openModal('send')" class="h-16 bg-white text-black rounded-3xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-all">
                             Отправить
                         </button>
-                        <button onclick="openModal('receive')" class="h-16 bg-white/5 border border-white/10 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all">
+                        <button onclick="openModal('receive')" class="h-16 bg-white/5 border border-white/10 rounded-3xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-all">
                             Получить
                         </button>
                     </div>
 
                     <div class="space-y-4">
-                        <h3 class="text-[11px] font-bold text-neutral-600 uppercase tracking-widest px-2">История операций</h3>
-                        <div id="transactions-list" class="space-y-3 pb-4"></div>
+                        <h3 class="text-[11px] font-black text-neutral-600 uppercase tracking-[0.2em] px-2">История операций</h3>
+                        <div id="tx-list" class="space-y-3">
+                            <!-- Транзакции -->
+                        </div>
                     </div>
                 </div>
 
                 <!-- ВКЛАДКА РЕФЕРАЛЫ -->
                 <div id="tab-referrals" class="tab-content space-y-6">
-                    <div class="dool-card rounded-[2.5rem] p-8 relative overflow-hidden">
-                        <h3 class="text-2xl font-extrabold mb-2">Реферальная программа</h3>
-                        <p class="text-neutral-500 text-sm mb-8 leading-relaxed">Вы получите <span class="text-orange-500 font-bold">10.00 Đ</span> за каждого приглашенного друга.</p>
+                    <div class="dool-card rounded-[2.5rem] p-8">
+                        <h3 class="text-2xl font-extrabold mb-3">Зарабатывайте Đ</h3>
+                        <p class="text-neutral-500 text-sm leading-relaxed mb-8">Получайте <span class="text-white font-bold">10.00 Đ</span> за каждого приглашенного пользователя.</p>
                         
-                        <div class="bg-black/60 border border-white/10 p-5 rounded-2xl flex flex-col gap-3">
-                            <span class="text-[9px] font-black text-neutral-500 uppercase tracking-[0.2em]">Ваша ссылка</span>
+                        <div class="bg-black border border-white/5 p-5 rounded-2xl space-y-3">
+                            <span class="text-[9px] font-black text-neutral-500 uppercase tracking-widest">Ваша ссылка</span>
                             <div class="flex items-center justify-between gap-4">
-                                <span class="text-[10px] font-mono text-neutral-300 truncate" id="ref-link-url">...</span>
-                                <button onclick="copyRefLink()" class="bg-dool-gradient text-white text-[9px] px-4 py-2 rounded-xl font-black uppercase tracking-widest shrink-0 shadow-lg">Копировать</button>
+                                <span id="ref-url" class="text-[11px] font-mono text-neutral-400 truncate">...</span>
+                                <button onclick="copyRef()" class="shrink-0 bg-white text-black text-[9px] px-4 py-2 rounded-xl font-bold uppercase tracking-widest">Копия</button>
                             </div>
                         </div>
                     </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="dool-card p-6 rounded-[2rem] text-center">
-                            <span class="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Команда</span>
-                            <div class="text-3xl font-extrabold mt-1" id="ref-count">0</div>
-                        </div>
-                        <div class="dool-card p-6 rounded-[2rem] text-center">
-                            <span class="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Бонус Đ</span>
-                            <div class="text-3xl font-extrabold text-orange-500 mt-1" id="ref-earned">0.00</div>
-                        </div>
-                    </div>
                 </div>
-
             </main>
 
             <!-- НАВИГАЦИЯ -->
-            <nav class="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] h-20 dool-card rounded-[2.5rem] flex items-center justify-around px-4 border border-white/10 z-50">
-                <button onclick="switchTab('wallet')" class="nav-item flex flex-col items-center gap-1.5 transition-colors" id="nav-wallet">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon-wallet"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-                    <span class="text-[9px] font-black uppercase tracking-tighter">Кошелек</span>
+            <nav class="fixed bottom-8 left-1/2 -translate-x-1/2 w-[85%] max-w-[380px] h-20 bg-[#0a0a0a]/80 backdrop-blur-3xl border border-white/5 rounded-[2.5rem] flex items-center justify-around px-4 z-50">
+                <button onclick="switchTab('wallet')" class="nav-btn active flex flex-col items-center gap-1 text-orange-500" id="nav-wallet">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                    <span class="text-[9px] font-black uppercase tracking-tighter">Главная</span>
                 </button>
-                <button onclick="switchTab('referrals')" class="nav-item flex flex-col items-center gap-1.5 transition-colors text-neutral-500" id="nav-referrals">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="icon-ref"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                    <span class="text-[9px] font-black uppercase tracking-tighter">Рефералы</span>
+                <button onclick="switchTab('referrals')" class="nav-btn flex flex-col items-center gap-1 text-neutral-500" id="nav-referrals">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                    <span class="text-[9px] font-black uppercase tracking-tighter">Бонусы</span>
                 </button>
             </nav>
         </div>
 
-        <!-- МОДАЛКИ (SEND / RECEIVE) -->
-        <div id="modal-send" class="hidden absolute inset-0 z-[110] bg-black/80 backdrop-blur-2xl flex-col justify-end">
-            <div class="bg-[#080808] border-t border-white/10 rounded-t-[3.5rem] p-10 animate-slide-up">
-                <div class="w-12 h-1.5 bg-neutral-800 rounded-full mx-auto mb-10"></div>
-                <h2 class="text-3xl font-extrabold mb-8">Перевод Đ</h2>
-                <div class="space-y-5">
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-black text-neutral-600 uppercase tracking-widest ml-1">Получатель</label>
-                        <input type="email" id="send-to-email" placeholder="friend@dool.com" class="w-full bg-white/5 border border-white/10 rounded-2xl p-5 text-sm font-bold outline-none focus:border-orange-500/50 transition-all">
-                    </div>
-                    <div class="space-y-2">
-                        <label class="text-[10px] font-black text-neutral-600 uppercase tracking-widest ml-1">Количество</label>
-                        <input type="number" id="send-amount" placeholder="0.00" class="w-full bg-white/5 border border-white/10 rounded-2xl p-5 text-4xl font-extrabold outline-none focus:border-orange-500/50 transition-all">
-                    </div>
-                    <div class="flex gap-4 pt-8">
-                        <button onclick="closeModal('send')" class="flex-1 py-4 font-bold text-neutral-600 uppercase text-xs tracking-widest">Отмена</button>
-                        <button id="btn-do-send" class="flex-1 bg-white text-black py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl">Отправить</button>
+        <!-- МОДАЛКА: ПРОФИЛЬ (СМЕНА ФОТО) -->
+        <div id="modal-profile" class="hidden absolute inset-0 z-[120] bg-black/95 backdrop-blur-2xl flex-col items-center justify-center p-8">
+            <div class="w-full max-w-[320px] text-center">
+                <h2 class="text-2xl font-black mb-8">Ваш профиль</h2>
+                <div class="grid grid-cols-3 gap-4 mb-10" id="avatar-selection">
+                    <!-- Генерация аватаров -->
+                </div>
+                <button onclick="closeModal('profile')" class="w-full py-4 bg-white text-black rounded-2xl font-bold uppercase text-xs tracking-widest">Сохранить</button>
+            </div>
+        </div>
+
+        <!-- МОДАЛКА: ПЕРЕВОД -->
+        <div id="modal-send" class="hidden absolute inset-0 z-[120] bg-black/90 backdrop-blur-2xl flex-col justify-end">
+            <div class="bg-[#0a0a0a] border-t border-white/10 rounded-t-[3rem] p-10 animate-slide-up">
+                <h2 class="text-3xl font-black mb-8">Перевод</h2>
+                <div class="space-y-4">
+                    <input type="email" id="send-email" placeholder="Email получателя" class="w-full bg-white/5 border border-white/5 rounded-2xl p-5 text-sm font-bold outline-none focus:border-orange-500/50">
+                    <input type="number" id="send-amount" placeholder="0.00 Đ" class="w-full bg-white/5 border border-white/5 rounded-2xl p-5 text-4xl font-black outline-none focus:border-orange-500/50">
+                    <div class="flex gap-4 pt-6">
+                        <button onclick="closeModal('send')" class="flex-1 py-4 font-bold text-neutral-500 uppercase text-xs">Отмена</button>
+                        <button id="btn-submit-send" class="flex-1 bg-white text-black py-4 rounded-2xl font-black uppercase text-xs">Отправить</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div id="modal-receive" class="hidden absolute inset-0 z-[110] bg-black/80 backdrop-blur-2xl items-center justify-center p-8">
-            <div class="dool-card border border-white/10 rounded-[3rem] p-10 w-full text-center relative">
-                <button onclick="closeModal('receive')" class="absolute top-6 right-8 text-neutral-500 font-bold">✕</button>
-                <div class="w-20 h-20 bg-dool-gradient rounded-3xl mx-auto mb-6 flex items-center justify-center shadow-2xl">
-                    <span class="text-3xl font-bold">Đ</span>
-                </div>
-                <h2 class="text-2xl font-extrabold mb-2">Ваш адрес</h2>
-                <p class="text-neutral-500 text-xs mb-8">Для получения перевода просто отправьте свою почту:</p>
-                <div class="bg-white/5 border border-white/10 p-5 rounded-2xl font-bold text-[13px] text-orange-500 mb-6 truncate" id="my-email-display">...</div>
-                <button onclick="copyMyEmail()" class="w-full py-5 bg-white text-black rounded-2xl font-black uppercase tracking-widest text-[10px]">Копировать адрес</button>
+        <!-- МОДАЛКА: ПОЛУЧИТЬ -->
+        <div id="modal-receive" class="hidden absolute inset-0 z-[120] bg-black/90 backdrop-blur-2xl items-center justify-center p-8">
+            <div class="bg-[#0a0a0a] border border-white/10 rounded-[3rem] p-10 w-full text-center relative">
+                <button onclick="closeModal('receive')" class="absolute top-6 right-8 text-neutral-500">✕</button>
+                <div class="text-6xl font-black bg-dool-gradient bg-clip-text text-transparent mb-6 logo-glow">Đ</div>
+                <h2 class="text-2xl font-black mb-2">Получить Đ</h2>
+                <p class="text-neutral-500 text-xs mb-8">Поделитесь своим адресом почты</p>
+                <div id="my-email" class="bg-white/5 p-5 rounded-2xl font-bold text-sm text-orange-500 mb-6 truncate">...</div>
+                <button onclick="copyEmail()" class="w-full py-4 bg-white text-black rounded-2xl font-bold uppercase text-[10px] tracking-widest">Копировать адрес</button>
             </div>
         </div>
 
@@ -250,41 +219,56 @@
 
         let myData = null;
         let lastBalance = null;
-        let lastRefCount = null;
-        let initialLoad = true;
+        const AVATARS = [
+            '🦊', '👤', '👾', '💎', '🔥', '⭐️'
+        ];
 
-        // --- UI CORE ---
+        // --- УТИЛИТЫ ---
+        const showNotif = (title, body) => {
+            const n = document.getElementById('notification');
+            document.getElementById('notif-title').textContent = title;
+            document.getElementById('notif-body').textContent = body;
+            n.classList.add('active');
+            setTimeout(() => n.classList.remove('active'), 4000);
+        };
+
         window.switchTab = (tab) => {
-            const tabs = ['wallet', 'referrals'];
-            tabs.forEach(t => {
-                document.getElementById('tab-'+t).classList.remove('active');
-                document.getElementById('nav-'+t).classList.add('text-neutral-500');
-            });
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.replace('text-orange-500', 'text-neutral-500'));
             document.getElementById('tab-'+tab).classList.add('active');
-            document.getElementById('nav-'+tab).classList.remove('text-neutral-500');
-            document.getElementById('nav-'+tab).classList.add('text-orange-500');
+            document.getElementById('nav-'+tab).classList.replace('text-neutral-500', 'text-orange-500');
         };
 
         window.openModal = (n) => document.getElementById('modal-'+n).classList.replace('hidden', 'flex');
         window.closeModal = (n) => document.getElementById('modal-'+n).classList.replace('flex', 'hidden');
 
-        // СИСТЕМА УМНЫХ УВЕДОМЛЕНИЙ
-        function triggerNotification(title, body) {
-            const popup = document.getElementById('notification-popup');
-            document.getElementById('notif-title').textContent = title;
-            document.getElementById('notif-body').textContent = body;
-            
-            popup.classList.add('show');
-            // Вибрация, если поддерживается устройством
-            if (window.navigator && window.navigator.vibrate) window.navigator.vibrate([100, 50, 100]);
-            
-            setTimeout(() => popup.classList.remove('show'), 5000);
-        }
+        // --- ЛОГИКА АВАТАРОВ ---
+        const setupAvatars = () => {
+            const grid = document.getElementById('avatar-selection');
+            grid.innerHTML = '';
+            AVATARS.forEach(emoji => {
+                const btn = document.createElement('button');
+                btn.className = "w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center text-3xl hover:bg-white/10 transition-all";
+                btn.textContent = emoji;
+                btn.onclick = async () => {
+                    await updateDoc(doc(db, "users", auth.currentUser.uid), { avatar: emoji });
+                    closeModal('profile');
+                    showNotif('Профиль', 'Аватар обновлен');
+                };
+                grid.appendChild(btn);
+            });
+        };
 
-        // --- AUTH LOGIC ---
+        // --- АВТОРИЗАЦИЯ ---
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                setupSession(user);
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (!userDoc.exists()) {
+                    await setDoc(doc(db, "users", user.uid), {
+                        email: user.email, balance: 10.0, avatar: '👤', referralCount: 0, createdAt: Timestamp.now()
+                    });
+                }
+                initApp(user);
             } else {
                 document.getElementById('view-loading').classList.add('hidden');
                 document.getElementById('view-main').classList.add('hidden');
@@ -293,145 +277,126 @@
         });
 
         document.getElementById('btn-login').onclick = async () => {
-            const email = document.getElementById('auth-email').value.trim();
-            const pass = document.getElementById('auth-password').value.trim();
-            try { await signInWithEmailAndPassword(auth, email, pass); }
-            catch { triggerNotification('Ошибка', 'Неверный логин или пароль'); }
+            const e = document.getElementById('auth-email').value.trim();
+            const p = document.getElementById('auth-password').value.trim();
+            try { await signInWithEmailAndPassword(auth, e, p); } catch { showNotif('Ошибка', 'Неверный вход'); }
         };
 
         document.getElementById('btn-register').onclick = async () => {
-            const email = document.getElementById('auth-email').value.trim();
-            const pass = document.getElementById('auth-password').value.trim();
-            if (pass.length < 6) return triggerNotification('Ошибка', 'Пароль слишком короткий');
-            
+            const e = document.getElementById('auth-email').value.trim();
+            const p = document.getElementById('auth-password').value.trim();
+            if (p.length < 6) return showNotif('Пароль', 'Минимум 6 символов');
             try {
-                const cred = await createUserWithEmailAndPassword(auth, email, pass);
-                const user = cred.user;
+                const cred = await createUserWithEmailAndPassword(auth, e, p);
                 const ref = new URLSearchParams(window.location.search).get('ref');
-
-                await setDoc(doc(db, "users", user.uid), {
-                    email: user.email, balance: 10.0, referralCount: 0, referralEarnings: 0, createdAt: Timestamp.now()
-                });
-
-                if (ref && ref !== email) {
-                    const qRef = query(collection(db, "users"), where("email", "==", ref));
-                    const res = await getDocs(qRef);
-                    if (!res.empty) {
-                        await updateDoc(res.docs[0].ref, {
-                            balance: increment(10), referralCount: increment(1), referralEarnings: increment(10)
-                        });
+                if (ref && ref !== e) {
+                    const q = query(collection(db, "users"), where("email", "==", ref));
+                    const snap = await getDocs(q);
+                    if (!snap.empty) {
+                        await updateDoc(snap.docs[0].ref, { balance: increment(10), referralCount: increment(1) });
                     }
                 }
-            } catch { triggerNotification('Ошибка', 'Email уже зарегистрирован'); }
+            } catch { showNotif('Ошибка', 'Аккаунт уже существует'); }
         };
 
-        // --- DATABASE SYNC ---
-        function setupSession(user) {
+        // --- ОСНОВНАЯ РАБОТА ---
+        function initApp(user) {
             document.getElementById('user-display').textContent = user.email;
-            document.getElementById('my-email-display').textContent = user.email;
+            document.getElementById('my-email').textContent = user.email;
+            document.getElementById('ref-url').textContent = `${window.location.origin}${window.location.pathname}?ref=${user.email}`;
+            
+            setupAvatars();
 
             onSnapshot(doc(db, "users", user.uid), (snap) => {
                 myData = snap.data();
                 if (!myData) return;
-
-                // ЛОГИКА ОПОВЕЩЕНИЙ О БАЛАНСЕ
-                if (!initialLoad) {
-                    if (lastBalance !== null && myData.balance > lastBalance) {
-                        triggerNotification('Входящий платеж!', `Ваш баланс пополнен на ${(myData.balance - lastBalance).toFixed(2)} Đ`);
-                    }
-                    if (lastRefCount !== null && myData.referralCount > lastRefCount) {
-                        triggerNotification('Новый реферал!', `Друг зарегистрировался. Вам начислено 10.00 Đ`);
-                    }
-                }
-
-                document.getElementById('balance-amount').textContent = myData.balance.toFixed(2);
-                document.getElementById('ref-count').textContent = myData.referralCount || 0;
-                document.getElementById('ref-earned').textContent = (myData.referralEarnings || 0).toFixed(2);
-                document.getElementById('ref-link-url').textContent = `${window.location.origin}${window.location.pathname}?ref=${user.email}`;
                 
+                if (lastBalance !== null && myData.balance > lastBalance) {
+                    showNotif('Пополнение', `+${(myData.balance - lastBalance).toFixed(2)} Đ`);
+                }
+                
+                document.getElementById('balance-amount').textContent = myData.balance.toFixed(2);
+                document.getElementById('user-avatar').textContent = myData.avatar || '👤';
                 lastBalance = myData.balance;
-                lastRefCount = myData.referralCount;
-                initialLoad = false;
 
                 document.getElementById('view-auth').classList.add('hidden');
                 document.getElementById('view-loading').classList.add('hidden');
                 document.getElementById('view-main').classList.replace('hidden', 'flex');
             });
 
-            // История транзакций
-            const qTx = query(collection(db, "transactions"), where("parties", "array-contains", user.email), orderBy("date", "desc"), limit(15));
-            onSnapshot(qTx, (snap) => {
-                const list = document.getElementById('transactions-list');
+            // ИСТОРИЯ ОПЕРАЦИЙ
+            const q = query(collection(db, "transactions"), where("parties", "array-contains", user.email), orderBy("date", "desc"), limit(15));
+            onSnapshot(q, (snap) => {
+                const list = document.getElementById('tx-list');
                 list.innerHTML = '';
                 if (snap.empty) {
-                    list.innerHTML = '<div class="py-12 text-center text-neutral-800 text-[9px] font-black uppercase tracking-widest opacity-50">Транзакций не найдено</div>';
+                    list.innerHTML = '<p class="py-10 text-center text-neutral-700 text-[10px] font-bold uppercase tracking-widest">История пуста</p>';
                     return;
                 }
                 snap.forEach(d => {
                     const tx = d.data();
                     const isSent = tx.from === user.email;
                     const el = document.createElement('div');
-                    el.className = "flex items-center justify-between p-5 rounded-[2.2rem] dool-card";
+                    el.className = "p-5 rounded-[2rem] bg-white/[0.03] border border-white/[0.05] flex items-center justify-between";
                     el.innerHTML = `
                         <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 rounded-2xl flex items-center justify-center ${isSent ? 'bg-white/5 text-neutral-500' : 'bg-dool-gradient text-white shadow-lg'}">
+                            <div class="w-10 h-10 rounded-2xl flex items-center justify-center text-lg ${isSent ? 'bg-white/5' : 'bg-orange-500/20 text-orange-500'}">
                                 ${isSent ? '↑' : '↓'}
                             </div>
-                            <div class="overflow-hidden">
-                                <div class="text-[9px] font-black uppercase text-neutral-500 tracking-widest">${isSent ? 'Отправлено' : 'Получено'}</div>
-                                <div class="text-[11px] font-bold text-neutral-200 truncate w-32">${isSent ? tx.to : tx.from}</div>
+                            <div>
+                                <p class="text-[9px] font-black uppercase text-neutral-500 tracking-wider">${isSent ? 'Отправлено' : 'Получено'}</p>
+                                <p class="text-[11px] font-bold text-neutral-200 truncate w-32">${isSent ? tx.to : tx.from}</p>
                             </div>
                         </div>
                         <div class="text-right">
-                            <div class="text-sm font-black ${isSent ? 'text-white' : 'text-orange-500'}">${isSent ? '-' : '+'}${tx.amount.toFixed(2)} <span class="text-[10px]">Đ</span></div>
-                            <div class="text-[8px] text-neutral-700 font-bold">${tx.date.toDate().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
+                            <p class="text-sm font-black ${isSent ? 'text-white' : 'text-orange-500'}">${isSent ? '-' : '+'}${tx.amount.toFixed(2)}</p>
+                            <p class="text-[8px] text-neutral-700 font-bold">${tx.date.toDate().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</p>
                         </div>
                     `;
                     list.appendChild(el);
                 });
-            });
+            }, (err) => console.log(err));
         }
 
-        // --- ACTIONS ---
-        document.getElementById('btn-do-send').onclick = async () => {
-            const to = document.getElementById('send-to-email').value.trim().toLowerCase();
-            const val = parseFloat(document.getElementById('send-amount').value);
-            if (to === auth.currentUser.email) return triggerNotification('Ошибка', 'Нельзя отправить себе');
-            if (!val || val <= 0 || val > myData.balance) return triggerNotification('Ошибка', 'Проверьте сумму перевода');
+        // --- ТРАНЗАКЦИИ ---
+        document.getElementById('btn-submit-send').onclick = async () => {
+            const to = document.getElementById('send-email').value.trim().toLowerCase();
+            const amt = parseFloat(document.getElementById('send-amount').value);
+            
+            if (to === auth.currentUser.email) return showNotif('Ошибка', 'Нельзя отправить себе');
+            if (!amt || amt <= 0 || amt > myData.balance) return showNotif('Ошибка', 'Проверьте сумму');
 
-            const btn = document.getElementById('btn-do-send');
+            const btn = document.getElementById('btn-submit-send');
             btn.disabled = true; btn.textContent = '...';
 
             try {
                 await runTransaction(db, async (tx) => {
-                    const qRec = query(collection(db, "users"), where("email", "==", to));
-                    const resRec = await getDocs(qRec);
-                    if (resRec.empty) throw new Error("Пользователь не зарегистрирован");
-                    const recDoc = resRec.docs[0];
-                    tx.update(doc(db, "users", auth.currentUser.uid), { balance: increment(-val) });
-                    tx.update(recDoc.ref, { balance: increment(val) });
+                    const q = query(collection(db, "users"), where("email", "==", to));
+                    const res = await getDocs(q);
+                    if (res.empty) throw new Error("Получатель не найден");
+
+                    const recRef = res.docs[0].ref;
+                    tx.update(doc(db, "users", auth.currentUser.uid), { balance: increment(-amt) });
+                    tx.update(recRef, { balance: increment(amt) });
                     tx.set(doc(collection(db, "transactions")), {
-                        from: auth.currentUser.email, to: to, amount: val, date: Timestamp.now(), parties: [auth.currentUser.email, to]
+                        from: auth.currentUser.email, to: to, amount: amt, date: Timestamp.now(), parties: [auth.currentUser.email, to]
                     });
                 });
-                triggerNotification('Успех!', 'Перевод успешно отправлен');
+                showNotif('Успех', 'Перевод выполнен');
                 closeModal('send');
-            } catch (err) { triggerNotification('Ошибка транзакции', err.message); }
+            } catch (err) { showNotif('Ошибка', err.message); }
             finally { btn.disabled = false; btn.textContent = 'ОТПРАВИТЬ'; }
         };
 
-        window.copyRefLink = () => {
-            navigator.clipboard.writeText(document.getElementById('ref-link-url').textContent);
-            triggerNotification('Готово', 'Ссылка скопирована в буфер');
+        window.copyRef = () => {
+            navigator.clipboard.writeText(document.getElementById('ref-url').textContent);
+            showNotif('Копирование', 'Ссылка в буфере');
         };
-        window.copyMyEmail = () => {
+        window.copyEmail = () => {
             navigator.clipboard.writeText(auth.currentUser.email);
-            triggerNotification('Готово', 'Email скопирован');
+            showNotif('Копирование', 'Email в буфере');
         };
         document.getElementById('btn-logout').onclick = () => signOut(auth);
-
-        // Инициализация первой вкладки
-        switchTab('wallet');
 
     </script>
 </body>
