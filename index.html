@@ -7,13 +7,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* Блокировка выделения и контекстного меню */
         * {
-            -webkit-user-select: none; /* Safari/Chrome */
-            -moz-user-select: none; /* Firefox */
-            -ms-user-select: none; /* IE/Edge */
-            user-select: none; /* Standard */
-            -webkit-touch-callout: none; /* iOS Safari */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
         }
         
         input, textarea {
@@ -43,11 +42,9 @@
         .hide-scroll::-webkit-scrollbar { display: none; }
         .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
 
-        /* Chat Animations */
-        .chat-slide-enter { transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1); }
-        .chat-slide-enter-active { transform: translateX(0); }
-        .chat-slide-exit { transform: translateX(0); transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1); }
-        .chat-slide-exit-active { transform: translateX(100%); }
+        .chat-msg-bubble { max-width: 80%; padding: 10px 14px; border-radius: 18px; position: relative; font-size: 14px; line-height: 1.4; word-wrap: break-word; }
+        .msg-mine { background: #FF4D00; color: white; border-bottom-right-radius: 4px; margin-left: auto; }
+        .msg-other { background: #1a1a1a; color: #e5e5e5; border-bottom-left-radius: 4px; margin-right: auto; }
     </style>
 </head>
 <body class="overflow-hidden bg-black" oncontextmenu="return false;">
@@ -79,7 +76,7 @@
             </div>
         </div>
 
-        <!-- Авторизация -->
+        <!-- Экран Входа (Только первый вход) -->
         <div id="view-auth" class="hidden flex-col h-full p-8 justify-center relative">
             <div class="absolute top-0 left-0 w-full h-1/2 gradient-bg opacity-[0.03] blur-3xl pointer-events-none"></div>
             <div class="text-center mb-16 relative z-10">
@@ -97,7 +94,6 @@
                     <button id="btn-login" class="h-16 bg-white text-black rounded-2xl font-black text-sm uppercase tracking-wider hover:bg-neutral-200 transition-colors">Войти</button>
                     <button id="btn-register" class="h-16 glass-panel text-white rounded-2xl font-black text-sm uppercase tracking-wider hover:bg-white/10 transition-colors">Создать</button>
                 </div>
-                <p id="auth-switch-hint" class="text-center text-[10px] text-neutral-500 hidden mt-4">Вход в другой аккаунт</p>
             </div>
         </div>
 
@@ -109,9 +105,6 @@
                         <div class="p-[2px] gradient-bg rounded-full shadow-[0_0_20px_rgba(255,77,0,0.3)]">
                             <img id="main-avatar" src="" class="w-10 h-10 rounded-full object-cover bg-black border-2 border-black">
                         </div>
-                        <div class="absolute -bottom-1 -right-1 bg-black rounded-full p-0.5">
-                            <div class="w-3 h-3 bg-green-500 rounded-full border-2 border-black"></div>
-                        </div>
                     </div>
                     <div class="flex flex-col justify-center">
                         <p id="main-username" class="text-xs font-bold truncate max-w-[140px] leading-tight">...</p>
@@ -119,14 +112,13 @@
                     </div>
                 </div>
                 <button id="btn-add-chat" onclick="openNewChatModal()" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer hidden">
-                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/><path d="M12 7v10M7 12h10"/></svg>
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
                 </button>
             </header>
 
             <main class="flex-1 overflow-y-auto px-5 hide-scroll pb-32 z-10 relative">
                 <!-- Вкладка Кошелек -->
                 <div id="tab-wallet" class="tab-content active space-y-6">
-                    <!-- Карточка баланса -->
                     <div class="dool-card rounded-[2.5rem] p-8 relative overflow-hidden group">
                         <div class="absolute inset-0 gradient-bg opacity-[0.03] group-hover:opacity-[0.05] transition-opacity duration-500"></div>
                         <div class="absolute -right-12 -top-12 w-48 h-48 bg-[#FF4D00] rounded-full blur-[80px] opacity-20"></div>
@@ -145,14 +137,11 @@
                         </div>
                     </div>
 
-                    <!-- История транзакций -->
                     <div class="space-y-4">
                         <div class="flex items-center justify-between px-2">
                             <h3 class="text-[11px] font-black text-neutral-500 uppercase tracking-widest">История</h3>
                         </div>
-                        <div id="tx-history" class="space-y-2 pb-10">
-                            <!-- Заполняется JS -->
-                        </div>
+                        <div id="tx-history" class="space-y-2 pb-10"></div>
                     </div>
                 </div>
 
@@ -160,11 +149,7 @@
                 <div id="tab-chats" class="tab-content space-y-4">
                     <div class="px-2">
                         <h3 class="text-[11px] font-black text-neutral-500 uppercase tracking-widest mb-4">Сообщения</h3>
-                        <div id="chats-list" class="space-y-2 pb-20">
-                            <div class="text-center py-10 opacity-50">
-                                <p class="text-[10px] font-bold uppercase">Загрузка чатов...</p>
-                            </div>
-                        </div>
+                        <div id="chats-list" class="space-y-2 pb-20"></div>
                     </div>
                 </div>
 
@@ -174,7 +159,6 @@
                         <div class="absolute top-0 right-0 w-32 h-32 gradient-bg blur-[60px] opacity-20"></div>
                         <h3 class="text-2xl font-black mb-2 relative z-10">Пригласи друга</h3>
                         <p class="text-neutral-500 text-xs mb-8 leading-relaxed max-w-[80%] relative z-10">Получи <span class="text-white font-bold">10.00 Đ</span> за каждого друга.</p>
-                        
                         <div class="bg-black/40 border border-white/5 p-4 rounded-2xl space-y-3 relative z-10 backdrop-blur-sm">
                             <div class="flex items-center justify-between gap-4">
                                 <div class="flex-1 min-w-0">
@@ -187,19 +171,12 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Статистика рефералов -->
                     <div class="grid grid-cols-2 gap-3">
                         <div class="dool-card p-5 rounded-[2rem] flex flex-col items-center justify-center gap-1 aspect-square">
-                            <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center mb-2 text-neutral-400">
-                                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                            </div>
                             <p id="ref-count" class="text-2xl font-black">0</p>
                             <p class="text-[9px] font-bold text-neutral-600 uppercase tracking-wider">Друзей</p>
                         </div>
                         <div class="dool-card p-5 rounded-[2rem] flex flex-col items-center justify-center gap-1 aspect-square">
-                            <div class="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center mb-2 text-orange-500">
-                                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
-                            </div>
                             <p id="ref-earned" class="text-2xl font-black">0</p>
                             <p class="text-[9px] font-bold text-neutral-600 uppercase tracking-wider">Заработано</p>
                         </div>
@@ -210,53 +187,48 @@
             <!-- Навигация -->
             <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] h-16 bg-[#111]/90 backdrop-blur-xl border border-white/10 rounded-[2rem] flex items-center justify-around px-2 z-50 shadow-2xl">
                 <button onclick="switchTab('wallet')" id="nav-wallet" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-orange-500 cursor-pointer">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
                 </button>
                 <button onclick="switchTab('chats')" id="nav-chats" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                 </button>
                 <button onclick="switchTab('referrals')" id="nav-referrals" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
                 </button>
             </nav>
         </div>
 
-        <!-- Chat Room View (Slide in) -->
+        <!-- Chat Room -->
         <div id="view-chat-room" class="absolute inset-0 z-[60] bg-[#0a0a0a] flex flex-col transform translate-x-full transition-transform duration-300">
-            <!-- Header -->
             <header class="px-4 py-4 border-b border-white/5 bg-[#111]/90 backdrop-blur-md flex items-center gap-3">
-                <button onclick="closeChat()" class="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center">
+                <button onclick="closeChat()" class="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center cursor-pointer">
                     <svg width="24" height="24" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                 </button>
                 <div class="flex items-center gap-3 flex-1 min-w-0">
                     <img id="chat-header-avatar" src="" class="w-10 h-10 rounded-full bg-neutral-800 object-cover">
                     <div class="min-w-0">
                         <p id="chat-header-name" class="font-bold text-sm truncate">User</p>
-                        <p class="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">В сети</p>
+                        <p id="chat-header-status" class="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">Офлайн</p>
                     </div>
                 </div>
             </header>
             
-            <!-- Messages -->
-            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 hide-scroll">
-                <!-- Сообщения -->
-            </div>
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-2 hide-scroll"></div>
 
-            <!-- Input Area -->
             <div class="p-4 bg-[#111] border-t border-white/5 pb-8">
                 <div class="glass-panel rounded-3xl flex items-center p-2 gap-2">
-                    <button onclick="openModal('send', true)" class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 text-orange-500 flex items-center justify-center transition-colors flex-shrink-0">
+                    <button onclick="openModal('send', true)" class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 text-orange-500 flex items-center justify-center transition-colors flex-shrink-0 cursor-pointer">
                         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                     </button>
                     <input type="text" id="chat-input" placeholder="Сообщение..." class="flex-1 bg-transparent border-none outline-none text-sm font-medium h-10 text-white placeholder:text-neutral-600">
-                    <button onclick="sendMessage()" class="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 transition-transform flex-shrink-0">
+                    <button onclick="sendMessage()" class="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 transition-transform flex-shrink-0 cursor-pointer">
                         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Модалка: Профиль & Аккаунты -->
+        <!-- Модалка: Профиль -->
         <div id="modal-profile" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col items-center justify-center p-6 opacity-0 transition-opacity duration-300">
             <div class="w-full max-w-sm transform scale-90 transition-transform duration-300 bg-[#111] border border-white/10 rounded-[2.5rem] p-6 shadow-2xl max-h-[85vh] overflow-hidden flex flex-col" id="modal-profile-content">
                 <div class="overflow-y-auto hide-scroll">
@@ -278,19 +250,32 @@
                             <h3 class="text-[10px] font-black uppercase text-neutral-500 tracking-widest">Мои Аккаунты</h3>
                             <span id="acc-count" class="text-[10px] bg-neutral-800 px-2 py-0.5 rounded-full text-neutral-400 font-bold">1/15</span>
                         </div>
-                        <div id="accounts-list" class="space-y-2 mb-3">
-                            <!-- Список аккаунтов -->
-                        </div>
-                        <button onclick="addAccount()" class="w-full h-10 border border-dashed border-white/20 rounded-xl flex items-center justify-center text-xs font-bold text-neutral-400 hover:text-white hover:border-white/40 transition-colors gap-2">
+                        <div id="accounts-list" class="space-y-2 mb-3"></div>
+                        <button onclick="openModal('addaccount')" class="w-full h-10 border border-dashed border-white/20 rounded-xl flex items-center justify-center text-xs font-bold text-neutral-400 hover:text-white hover:border-white/40 transition-colors gap-2 cursor-pointer">
                             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
                             Добавить аккаунт
                         </button>
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
-                        <button onclick="signOut(auth)" class="h-12 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-xl font-bold text-xs uppercase tracking-wider transition-colors">Выйти</button>
-                        <button onclick="closeModal('profile')" class="h-12 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-colors">Закрыть</button>
+                        <button onclick="signOut(auth)" class="h-12 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer">Выйти</button>
+                        <button onclick="closeModal('profile')" class="h-12 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer">Закрыть</button>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модалка: Добавление аккаунта -->
+        <div id="modal-addaccount" class="hidden absolute inset-0 z-[130] bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center p-8 opacity-0 transition-opacity duration-300">
+            <div class="bg-[#111] w-full max-w-xs p-8 rounded-[2rem] border border-white/10 transform scale-95 transition-transform" id="modal-addaccount-content">
+                <h3 class="font-black text-xl mb-6 text-center">Новый вход</h3>
+                <div class="space-y-3 mb-6">
+                    <input id="add-acc-email" type="email" placeholder="Email" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-500/50 font-bold">
+                    <input id="add-acc-pass" type="password" placeholder="Пароль" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-500/50 font-bold">
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="closeModal('addaccount')" class="flex-1 py-3 bg-white/5 rounded-xl text-xs font-bold uppercase text-neutral-400 cursor-pointer">Отмена</button>
+                    <button id="btn-submit-add" class="flex-1 py-3 bg-white text-black rounded-xl text-xs font-bold uppercase hover:bg-neutral-200 cursor-pointer">Войти</button>
                 </div>
             </div>
         </div>
@@ -341,8 +326,8 @@
                 <h3 class="font-black text-lg mb-4">Новый чат</h3>
                 <input id="new-chat-email" type="email" placeholder="Email собеседника" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 mb-4 text-sm outline-none focus:border-orange-500/50">
                 <div class="flex gap-2">
-                    <button onclick="closeModal('newchat')" class="flex-1 py-3 bg-white/5 rounded-xl text-xs font-bold uppercase text-neutral-400">Отмена</button>
-                    <button onclick="startNewChat()" class="flex-1 py-3 bg-white text-black rounded-xl text-xs font-bold uppercase hover:bg-neutral-200">Начать</button>
+                    <button onclick="closeModal('newchat')" class="flex-1 py-3 bg-white/5 rounded-xl text-xs font-bold uppercase text-neutral-400 cursor-pointer">Отмена</button>
+                    <button onclick="startNewChat()" class="flex-1 py-3 bg-white text-black rounded-xl text-xs font-bold uppercase hover:bg-neutral-200 cursor-pointer">Начать</button>
                 </div>
             </div>
         </div>
@@ -351,7 +336,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, query, where, runTransaction, Timestamp, increment, getDocs, addDoc, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -367,64 +352,95 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         
-        // Expose auth to window for onclick handlers
+        // Expose
         window.auth = auth;
         window.signOut = signOut;
 
         let myData = null;
         let lastBal = null;
-        const userCache = {};
+        const userCache = {}; // { email: { avatar, lastActive } }
         let currentChatEmail = null;
         let chatUnsub = null;
+        let pendingLoginPass = null; // Temporary for first login
 
-        // --- Multi-Account Logic (LocalStorage) ---
-        const ACCOUNTS_KEY = 'dool_accounts';
+        // --- ACCOUNT MANAGER (LocalStorage Encrypted) ---
+        const ACCOUNTS_KEY = 'dool_v2_accs';
         
         function getStoredAccounts() {
             try { return JSON.parse(localStorage.getItem(ACCOUNTS_KEY) || '[]'); } 
             catch { return []; }
         }
 
-        function storeAccount(user, avatarUrl) {
+        // Simple obfuscation for demo purposes (In real app, use tokens/biometrics)
+        function storeAccount(email, password, avatar) {
             let accs = getStoredAccounts();
-            // Remove if exists
-            accs = accs.filter(a => a.email !== user.email);
-            // Add to top
-            accs.unshift({ email: user.email, uid: user.uid, avatar: avatarUrl, lastActive: Date.now() });
-            // Limit to 15
+            accs = accs.filter(a => a.email !== email);
+            
+            const encPass = btoa(password); // Base64 'encryption'
+            accs.unshift({ email, encPass, avatar, lastActive: Date.now() });
+            
             if (accs.length > 15) accs = accs.slice(0, 15);
             localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accs));
             renderAccountsList();
         }
 
-        window.addAccount = () => {
-            const accs = getStoredAccounts();
-            if (accs.length >= 15) return showT('Лимит', 'Максимум 15 аккаунтов', '', null, true);
-            signOut(auth).then(() => {
-                // Clear inputs
-                document.getElementById('auth-email').value = '';
-                document.getElementById('auth-password').value = '';
-                document.getElementById('auth-switch-hint').classList.add('hidden');
-            });
-        };
+        function removeAccount(email) {
+             let accs = getStoredAccounts().filter(a => a.email !== email);
+             localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accs));
+             renderAccountsList();
+        }
 
-        window.switchAccount = (email) => {
-            if (auth.currentUser && auth.currentUser.email === email) return; // Already here
+        async function quickSwitch(email) {
+            const acc = getStoredAccounts().find(a => a.email === email);
+            if (!acc) return showT('Ошибка', 'Данные входа устарели', '', null, true);
             
-            signOut(auth).then(() => {
-                // Prefill UI
-                setTimeout(() => {
-                    const emailInput = document.getElementById('auth-email');
-                    emailInput.value = email;
-                    document.getElementById('auth-password').focus();
-                    const hint = document.getElementById('auth-switch-hint');
-                    hint.textContent = `Вход как ${email}`;
-                    hint.classList.remove('hidden');
-                }, 100);
-            });
-        };
+            const btn = document.getElementById(`acc-btn-${email.replace(/[^a-zA-Z0-9]/g, '')}`);
+            if(btn) btn.classList.add('animate-pulse');
 
-        function renderAccountsList() {
+            try {
+                // Instant login
+                await signInWithEmailAndPassword(auth, email, atob(acc.encPass));
+                closeModal('profile');
+            } catch(e) {
+                console.log(e);
+                showT('Ошибка', 'Не удалось войти', '', null, true);
+                if(btn) btn.classList.remove('animate-pulse');
+            }
+        }
+
+        // --- AVATAR & USER CACHE SYSTEM ---
+        async function fetchUserData(email) {
+            if (userCache[email] && (Date.now() - userCache[email].ts < 60000)) return userCache[email]; // 1 min cache
+
+            try {
+                const q = query(collection(db, "users"), where("email", "==", email));
+                const res = await getDocs(q);
+                let avatar = `https://ui-avatars.com/api/?background=random&color=fff&name=${email.charAt(0)}`;
+                let lastSeen = 0;
+                
+                if (!res.empty) {
+                    const d = res.docs[0].data();
+                    if (d.avatar) avatar = d.avatar;
+                    if (d.lastSeen) lastSeen = d.lastSeen.toMillis();
+                }
+                
+                const data = { avatar, lastSeen, ts: Date.now() };
+                userCache[email] = data;
+                return data;
+            } catch {
+                return { avatar: `https://ui-avatars.com/api/?background=333&color=fff&name=?`, lastSeen: 0, ts: Date.now() };
+            }
+        }
+
+        // Async update of images by ID
+        async function updateAvatarElement(elementId, email) {
+            const el = document.getElementById(elementId);
+            if(!el) return;
+            const data = await fetchUserData(email);
+            if(el) el.src = data.avatar;
+        }
+
+        window.renderAccountsList = () => {
             const list = document.getElementById('accounts-list');
             const accs = getStoredAccounts();
             const currentEmail = auth.currentUser ? auth.currentUser.email : '';
@@ -438,36 +454,26 @@
             let html = '';
             accs.forEach(a => {
                 const isActive = a.email === currentEmail;
+                const safeId = a.email.replace(/[^a-zA-Z0-9]/g, '');
+                
                 html += `
-                <div onclick="${isActive ? '' : `switchAccount('${a.email}')`}" class="flex items-center gap-3 p-2 rounded-xl ${isActive ? 'bg-orange-500/10 border border-orange-500/20' : 'hover:bg-white/5 cursor-pointer border border-transparent'} transition-all">
+                <div id="acc-btn-${safeId}" onclick="${isActive ? '' : `quickSwitch('${a.email}')`}" class="flex items-center gap-3 p-2 rounded-xl ${isActive ? 'bg-orange-500/10 border border-orange-500/20' : 'hover:bg-white/5 cursor-pointer border border-transparent'} transition-all relative group">
                     <img src="${a.avatar || 'https://ui-avatars.com/api/?background=333&color=fff'}" class="w-8 h-8 rounded-full bg-neutral-800 object-cover">
                     <div class="flex-1 min-w-0">
                         <p class="text-xs font-bold truncate ${isActive ? 'text-orange-500' : 'text-white'}">${a.email}</p>
                     </div>
                     ${isActive ? '<div class="w-2 h-2 rounded-full bg-orange-500"></div>' : ''}
+                    ${!isActive ? `<button onclick="event.stopPropagation(); removeAccount('${a.email}')" class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-neutral-600 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>` : ''}
                 </div>`;
             });
             list.innerHTML = html;
-        }
+        };
+        
+        // Expose for HTML
+        window.quickSwitch = quickSwitch;
+        window.removeAccount = removeAccount;
 
-        // --- User Info Helper ---
-        async function getUserInfo(email) {
-            if (userCache[email]) return userCache[email];
-            const defaultAv = `https://ui-avatars.com/api/?background=random&color=fff&name=${email.charAt(0).toUpperCase()}&size=128`;
-            let info = { avatar: defaultAv, email: email };
-            try {
-                const q = query(collection(db, "users"), where("email", "==", email));
-                const res = await getDocs(q);
-                if (!res.empty) {
-                    const d = res.docs[0].data();
-                    if (d.avatar) info.avatar = d.avatar;
-                }
-            } catch (e) { console.log(e); }
-            userCache[email] = info;
-            return info;
-        }
-
-        // --- UI Animation Helpers ---
+        // --- UI ---
         window.openModal = (n, prefillChat = false) => {
             const m = document.getElementById('modal-'+n);
             const c = document.getElementById(`modal-${n}-content`);
@@ -480,7 +486,7 @@
                 if(prefillChat && currentChatEmail) {
                     document.getElementById('send-email').value = currentChatEmail;
                 }
-            } else if (n === 'newchat') {
+            } else if (n === 'newchat' || n === 'addaccount') {
                 c.classList.remove('scale-95');
                 c.classList.add('scale-100');
             } else {
@@ -496,7 +502,7 @@
             m.classList.add('opacity-0');
             
             if(n === 'send') c.classList.add('translate-y-full');
-            else if (n === 'newchat') c.classList.replace('scale-100', 'scale-95');
+            else if (n === 'newchat' || n === 'addaccount') c.classList.replace('scale-100', 'scale-95');
             else c.classList.add('scale-90');
 
             setTimeout(() => m.classList.add('hidden'), 300);
@@ -510,7 +516,7 @@
             closeModal('newchat');
             document.getElementById('new-chat-email').value = '';
             openChat(email);
-        }
+        };
 
         window.showT = async (title, msg, amountStr = '', senderEmail = null, isError = false) => {
             const t = document.getElementById('toast');
@@ -536,8 +542,8 @@
                 status.className = "absolute -bottom-1 -right-1 bg-green-500 w-4 h-4 rounded-full border-2 border-black flex items-center justify-center";
                 status.innerHTML = '<svg width="8" height="8" fill="none" stroke="black" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>';
                 if (senderEmail) {
-                    const u = await getUserInfo(senderEmail);
-                    img.src = u.avatar;
+                    const d = await fetchUserData(senderEmail);
+                    img.src = d.avatar;
                 } else {
                     img.src = `https://ui-avatars.com/api/?background=333&color=fff&name=S`;
                 }
@@ -565,23 +571,31 @@
             else btnChat.classList.add('hidden');
         };
 
-        // --- Logic ---
+        // --- AUTH & INIT ---
         onAuthStateChanged(auth, async (u) => {
             if (u) {
+                // Update Last Seen
                 const userRef = doc(db, "users", u.uid);
+                
+                // If we have a pending password from login form, save it
+                if (pendingLoginPass) {
+                    // Fetch avatar first to save correct one
+                    const snap = await getDoc(userRef);
+                    const av = snap.exists() ? snap.data().avatar : '';
+                    storeAccount(u.email, pendingLoginPass, av);
+                    pendingLoginPass = null;
+                }
+
                 const snap = await getDoc(userRef);
-                let currentAv = '';
                 if (!snap.exists()) {
-                    await setDoc(userRef, {
+                     await setDoc(userRef, {
                         email: u.email, balance: 10.0, avatar: '', refCount: 0, refEarned: 0, 
-                        createdAt: Timestamp.now(), lowercaseEmail: u.email.toLowerCase()
+                        createdAt: Timestamp.now(), lowercaseEmail: u.email.toLowerCase(), lastSeen: Timestamp.now()
                     });
                 } else {
-                    currentAv = snap.data().avatar;
+                    updateDoc(userRef, { lastSeen: Timestamp.now() });
                 }
                 
-                // Store account for switching
-                storeAccount(u, currentAv);
                 startApp(u);
             } else {
                 document.getElementById('view-loading').classList.add('hidden');
@@ -590,22 +604,43 @@
             }
         });
 
+        // Main Login
         document.getElementById('btn-login').onclick = async () => {
             const e = document.getElementById('auth-email').value;
             const p = document.getElementById('auth-password').value;
-            try { 
-                await signInWithEmailAndPassword(auth, e, p); 
-            } catch { 
-                showT('Ошибка', 'Неверный логин или пароль', '', null, true);
-            }
+            pendingLoginPass = p;
+            try { await signInWithEmailAndPassword(auth, e, p); } 
+            catch { pendingLoginPass = null; showT('Ошибка', 'Неверный логин или пароль', '', null, true); }
+        };
+
+        // Add Account Submit
+        document.getElementById('btn-submit-add').onclick = async () => {
+             const e = document.getElementById('add-acc-email').value;
+             const p = document.getElementById('add-acc-pass').value;
+             if(getStoredAccounts().length >= 15) return showT('Ошибка', 'Лимит аккаунтов', '', null, true);
+             
+             pendingLoginPass = p;
+             
+             try {
+                 await signInWithEmailAndPassword(auth, e, p);
+                 closeModal('addaccount');
+                 closeModal('profile');
+                 document.getElementById('add-acc-email').value = '';
+                 document.getElementById('add-acc-pass').value = '';
+             } catch(err) {
+                 pendingLoginPass = null;
+                 showT('Ошибка', 'Не удалось войти', '', null, true);
+             }
         };
 
         document.getElementById('btn-register').onclick = async () => {
             const e = document.getElementById('auth-email').value;
             const p = document.getElementById('auth-password').value;
             if (p.length < 6) return showT('Ошибка', 'Пароль слишком короткий', '', null, true);
+            pendingLoginPass = p;
             try {
                 await createUserWithEmailAndPassword(auth, e, p);
+                // Referral logic
                 const ref = new URLSearchParams(window.location.search).get('ref');
                 if (ref) {
                     const q = query(collection(db, "users"), where("email", "==", ref));
@@ -617,6 +652,7 @@
                     }
                 }
             } catch { 
+                pendingLoginPass = null;
                 showT('Ошибка', 'Не удалось создать аккаунт', '', null, true);
             }
         };
@@ -627,7 +663,6 @@
             document.getElementById('my-email-addr').textContent = u.email;
             document.getElementById('ref-link').textContent = `${window.location.origin}?ref=${u.email}`;
 
-            // 1. Profile Listener
             onSnapshot(doc(db, "users", u.uid), async (snap) => {
                 const d = snap.data();
                 if (!d) return;
@@ -648,16 +683,20 @@
                 document.getElementById('main-avatar').src = av;
                 document.getElementById('edit-avatar-img').src = av;
                 
-                // Update avatar in local storage
-                storeAccount(u, d.avatar);
+                // Update avatar in storage quietly
+                let accs = getStoredAccounts();
+                const me = accs.find(a => a.email === u.email);
+                if(me && me.avatar !== av) {
+                    storeAccount(u.email, atob(me.encPass), av);
+                }
 
                 document.getElementById('view-auth').classList.add('hidden');
                 document.getElementById('view-loading').classList.add('hidden');
                 document.getElementById('view-main').classList.replace('hidden', 'flex');
             });
 
-            // 2. Tx History
-            const qTx = query(collection(db, "transactions"), where("parties", "array-contains", u.email));
+            // History
+            const qTx = query(collection(db, "transactions"), where("parties", "array-contains", u.email), limit(50));
             onSnapshot(qTx, (snap) => {
                 const list = document.getElementById('tx-history');
                 if (snap.empty) {
@@ -666,18 +705,17 @@
                 }
                 const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date);
                 let html = '';
-                for (const tx of docs) {
+                
+                docs.forEach((tx, idx) => {
                     const isSent = tx.from === u.email;
                     const partner = isSent ? tx.to : tx.from;
                     const dateStr = tx.date ? new Date(tx.date.toMillis()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
-                    
-                    // Simple logic to get avatar later or use placeholder
-                    const av = `https://ui-avatars.com/api/?background=222&color=666&name=${partner.charAt(0)}`;
+                    const imgId = `tx-av-${idx}`;
                     
                     html += `
                     <div onclick="openChat('${partner}')" class="flex items-center justify-between p-4 rounded-[1.5rem] bg-white/[0.03] border border-white/5 cursor-pointer hover:bg-white/5 transition-colors">
                         <div class="flex items-center gap-3 overflow-hidden">
-                            <img src="${av}" class="w-10 h-10 rounded-full bg-neutral-800 object-cover border border-white/5 shrink-0">
+                            <img id="${imgId}" src="https://ui-avatars.com/api/?background=222&color=666&name=${partner.charAt(0)}" class="w-10 h-10 rounded-full bg-neutral-800 object-cover border border-white/5 shrink-0">
                             <div class="min-w-0">
                                 <p class="text-[9px] font-black uppercase ${isSent ? 'text-neutral-500' : 'text-[#FF4D00]'} tracking-widest mb-0.5">${isSent ? 'Кому:' : 'От:'}</p>
                                 <p class="text-[11px] font-bold text-white truncate w-32 leading-tight">${partner}</p>
@@ -688,21 +726,22 @@
                             <p class="text-[9px] text-neutral-600 font-bold uppercase">${dateStr}</p>
                         </div>
                     </div>`;
-                }
+                    
+                    // Trigger async image update
+                    updateAvatarElement(imgId, partner);
+                });
                 list.innerHTML = html;
             });
 
-            // 3. Chats List Listener
             loadChatsList(u.email);
         }
 
         async function handleIncomingTransfer(myEmail, amountDiff) {
             try {
-                const q = query(collection(db, "transactions"), where("to", "==", myEmail));
+                const q = query(collection(db, "transactions"), where("to", "==", myEmail), orderBy("date", "desc"), limit(1));
                 const snap = await getDocs(q);
                 if (!snap.empty) {
-                    const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date);
-                    const lastTx = docs[0];
+                    const lastTx = snap.docs[0].data();
                     if (Math.abs(lastTx.amount - amountDiff) < 0.01) {
                         showT('Входящий перевод', lastTx.from, `+${amountDiff.toFixed(2)} Đ`, lastTx.from);
                         return;
@@ -712,11 +751,7 @@
             } catch(e) {}
         }
 
-        // --- Chat System ---
-        
-        function getChatId(email1, email2) {
-            return [email1, email2].sort().join('_');
-        }
+        function getChatId(email1, email2) { return [email1, email2].sort().join('_'); }
 
         function loadChatsList(myEmail) {
             const q = query(collection(db, "chats"), where("participants", "array-contains", myEmail));
@@ -729,16 +764,17 @@
                 }
                 
                 const chats = snap.docs.map(d => ({id: d.id, ...d.data()})).sort((a, b) => b.lastUpdated - a.lastUpdated);
-                
                 let html = '';
-                chats.forEach(chat => {
+                
+                chats.forEach((chat, idx) => {
                     const partner = chat.participants.find(e => e !== myEmail);
                     const time = chat.lastUpdated ? new Date(chat.lastUpdated.toMillis()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+                    const imgId = `chat-list-av-${idx}`;
                     
                     html += `
                     <div onclick="openChat('${partner}')" class="flex items-center gap-3 p-3 rounded-2xl hover:bg-white/5 cursor-pointer transition-colors border border-transparent hover:border-white/5">
                         <div class="relative">
-                            <img src="https://ui-avatars.com/api/?background=random&color=fff&name=${partner.charAt(0)}" class="w-12 h-12 rounded-full bg-neutral-800 object-cover">
+                            <img id="${imgId}" src="https://ui-avatars.com/api/?background=random&color=fff&name=${partner.charAt(0)}" class="w-12 h-12 rounded-full bg-neutral-800 object-cover">
                         </div>
                         <div class="flex-1 min-w-0">
                             <div class="flex justify-between items-baseline mb-0.5">
@@ -748,6 +784,8 @@
                             <p class="text-xs text-neutral-400 truncate">${chat.lastMessage || '...'}</p>
                         </div>
                     </div>`;
+                    
+                    updateAvatarElement(imgId, partner);
                 });
                 list.innerHTML = html;
             });
@@ -758,20 +796,29 @@
             currentChatEmail = partnerEmail;
             const chatId = getChatId(myEmail, partnerEmail);
             
-            // UI
-            const view = document.getElementById('view-chat-room');
-            view.classList.remove('translate-x-full');
+            document.getElementById('view-chat-room').classList.remove('translate-x-full');
             
-            // Header
+            // Header Info
             document.getElementById('chat-header-name').textContent = partnerEmail;
-            const uInfo = await getUserInfo(partnerEmail);
-            document.getElementById('chat-header-avatar').src = uInfo.avatar;
+            
+            // Online status logic
+            const statusEl = document.getElementById('chat-header-status');
+            const data = await fetchUserData(partnerEmail);
+            document.getElementById('chat-header-avatar').src = data.avatar;
 
-            // Load Messages
+            const isOnline = (Date.now() - data.lastSeen) < 1000 * 60 * 5; // 5 mins
+            if(isOnline) {
+                statusEl.textContent = 'В сети';
+                statusEl.classList.replace('text-neutral-500', 'text-green-500');
+            } else {
+                 statusEl.textContent = 'Офлайн';
+                 statusEl.classList.replace('text-green-500', 'text-neutral-500');
+            }
+
             const msgsDiv = document.getElementById('chat-messages');
             msgsDiv.innerHTML = '<div class="flex justify-center py-4"><div class="w-6 h-6 border-2 border-white/10 border-t-orange-500 rounded-full animate-spin"></div></div>';
             
-            if (chatUnsub) chatUnsub(); // Unsub previous
+            if (chatUnsub) chatUnsub();
 
             const q = query(collection(db, "chats", chatId, "messages"), orderBy("timestamp", "asc"));
             chatUnsub = onSnapshot(q, (snap) => {
@@ -786,9 +833,9 @@
                     const time = m.timestamp ? new Date(m.timestamp.toMillis()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
                     
                     msgsDiv.innerHTML += `
-                        <div class="flex ${isMe ? 'justify-end' : 'justify-start'} mb-3">
-                            <div class="max-w-[80%] ${isMe ? 'bg-orange-500 text-white rounded-br-none' : 'bg-[#1a1a1a] text-neutral-200 rounded-bl-none'} rounded-2xl px-4 py-2 relative group">
-                                <p class="text-sm font-medium leading-relaxed">${m.text}</p>
+                        <div class="flex ${isMe ? 'justify-end' : 'justify-start'} mb-2">
+                            <div class="chat-msg-bubble ${isMe ? 'msg-mine' : 'msg-other'}">
+                                ${m.text}
                                 <p class="text-[9px] ${isMe ? 'text-white/60' : 'text-neutral-500'} text-right mt-1">${time}</p>
                             </div>
                         </div>
@@ -815,36 +862,21 @@
             const chatId = getChatId(myEmail, currentChatEmail);
             
             try {
-                // Ensure chat doc exists
                 const chatRef = doc(db, "chats", chatId);
                 const chatSnap = await getDoc(chatRef);
-                if (!chatSnap.exists()) {
-                    await setDoc(chatRef, {
-                        participants: [myEmail, currentChatEmail],
-                        lastMessage: text,
-                        lastUpdated: Timestamp.now()
-                    });
-                } else {
-                    await updateDoc(chatRef, {
-                        lastMessage: text,
-                        lastUpdated: Timestamp.now()
-                    });
-                }
+                const msgData = { lastMessage: text, lastUpdated: Timestamp.now(), participants: [myEmail, currentChatEmail] };
+                
+                if (!chatSnap.exists()) await setDoc(chatRef, msgData);
+                else await updateDoc(chatRef, { lastMessage: text, lastUpdated: Timestamp.now() });
 
-                // Add message
                 await addDoc(collection(db, "chats", chatId, "messages"), {
-                    sender: myEmail,
-                    text: text,
-                    timestamp: Timestamp.now()
+                    sender: myEmail, text: text, timestamp: Timestamp.now()
                 });
             } catch(e) {
-                console.error(e);
                 showT('Ошибка', 'Не удалось отправить', '', null, true);
             }
         };
 
-
-        // --- Actions ---
         document.getElementById('avatar-input').onchange = (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -866,7 +898,8 @@
             const myEmail = auth.currentUser.email;
 
             if (to === myEmail) return showT('Ошибка', 'Нельзя отправить себе', '', null, true);
-            if (!amt || amt <= 0 || amt > myData.balance) return showT('Ошибка', 'Некорректная сумма', '', null, true);
+            if (!amt || amt < 0.01) return showT('Ошибка', 'Минимум 0.01 Đ', '', null, true);
+            if (amt > myData.balance) return showT('Ошибка', 'Недостаточно средств', '', null, true);
 
             const btn = document.getElementById('btn-do-send');
             btn.disabled = true; btn.textContent = '...';
@@ -896,7 +929,6 @@
                 document.getElementById('send-email').value = '';
                 showT('Успешно', `Перевод для ${to}`, `-${amt.toFixed(2)} Đ`);
                 
-                // If inside a chat, send automated message about transfer
                 if (currentChatEmail === to) {
                      const chatId = getChatId(myEmail, to);
                      await addDoc(collection(db, "chats", chatId, "messages"), {
