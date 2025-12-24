@@ -139,6 +139,18 @@
         <!-- Авторизация -->
         <div id="view-auth" class="hidden flex-col h-full p-8 justify-center relative">
             <div class="absolute top-0 left-0 w-full h-1/2 gradient-bg opacity-[0.03] blur-3xl pointer-events-none"></div>
+            
+            <!-- Индикатор реферала -->
+            <div id="auth-ref-badge" class="hidden absolute top-8 left-1/2 -translate-x-1/2 w-full px-8 text-center z-20 animate-bounce">
+                <div class="inline-flex items-center gap-2 bg-orange-500/10 border border-orange-500/30 px-4 py-2 rounded-full backdrop-blur-md">
+                    <span class="text-lg">🎁</span>
+                    <div class="text-left">
+                        <p class="text-[8px] font-bold text-orange-500 uppercase tracking-widest leading-none">Вас пригласил</p>
+                        <p id="auth-ref-email" class="text-[10px] font-bold text-white truncate max-w-[150px]">...</p>
+                    </div>
+                </div>
+            </div>
+
             <div class="text-center mb-12 relative z-10">
                 <span class="text-8xl font-black gradient-text inline-block mb-4 transform hover:scale-105 transition-transform duration-500">Đ</span>
                 <h1 class="text-4xl font-extrabold tracking-tight">Doolcoin</h1>
@@ -245,11 +257,16 @@
                             <div class="flex items-center justify-between gap-4">
                                 <div class="flex-1 min-w-0">
                                     <p class="text-[9px] font-black text-neutral-600 uppercase tracking-widest mb-1">Ваша ссылка</p>
-                                    <p id="ref-link" class="text-[10px] font-mono text-neutral-400 truncate bg-transparent outline-none">...</p>
+                                    <input readonly id="ref-link" class="w-full text-[10px] font-mono text-neutral-400 bg-transparent outline-none truncate" value="...">
                                 </div>
-                                <button onclick="copyRef()" class="w-10 h-10 flex items-center justify-center bg-white text-black rounded-xl hover:scale-105 transition-transform cursor-pointer">
-                                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                                </button>
+                                <div class="flex gap-2">
+                                    <button onclick="shareRef()" class="w-10 h-10 flex items-center justify-center bg-white/10 text-white rounded-xl hover:bg-white/20 transition-transform cursor-pointer">
+                                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                                    </button>
+                                    <button onclick="copyRef()" class="w-10 h-10 flex items-center justify-center bg-white text-black rounded-xl hover:scale-105 transition-transform cursor-pointer">
+                                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -432,6 +449,38 @@
         let lastBal = null;
         const userCache = {};
         let html5QrCode = null; 
+
+        // --- REFERRAL INIT LOGIC (IMMEDIATE) ---
+        // Сразу проверяем URL и сохраняем реферала, чтобы он не потерялся при редиректах
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const refParam = urlParams.get('ref');
+            if (refParam) {
+                // Очищаем URL от параметров, чтобы было красиво
+                window.history.replaceState({}, document.title, window.location.pathname);
+                localStorage.setItem('dool_ref', refParam.toLowerCase());
+                
+                // Показываем плашку
+                const authBadge = document.getElementById('auth-ref-badge');
+                const authEmail = document.getElementById('auth-ref-email');
+                if(authBadge && authEmail) {
+                    authBadge.classList.remove('hidden');
+                    authEmail.textContent = refParam;
+                }
+            } else {
+                // Если нет параметра, но есть в памяти - показываем
+                const savedRef = localStorage.getItem('dool_ref');
+                if (savedRef) {
+                    const authBadge = document.getElementById('auth-ref-badge');
+                    const authEmail = document.getElementById('auth-ref-email');
+                    if(authBadge && authEmail) {
+                        authBadge.classList.remove('hidden');
+                        authEmail.textContent = savedRef;
+                    }
+                }
+            }
+        } catch(e) { console.log('Ref Init Err:', e); }
+
         
         // --- Helpers ---
         async function getUserInfo(email) {
@@ -517,7 +566,7 @@
             else { navW.classList.replace('text-orange-500', 'text-neutral-600'); navR.classList.replace('text-neutral-600', 'text-orange-500'); }
         };
 
-        // --- AUTH & REFERRAL SYSTEM FIXED ---
+        // --- AUTH & ROBUST REFERRAL SYSTEM ---
         
         onAuthStateChanged(auth, async (u) => {
             if (u) {
@@ -540,14 +589,13 @@
                         createdAt: Timestamp.now()
                     });
 
-                    // 2. Проверяем реферальную ссылку
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const refEmail = urlParams.get('ref');
+                    // 2. Достаем реферала из памяти (надежнее чем URL)
+                    const refEmail = localStorage.getItem('dool_ref');
 
-                    if (refEmail && refEmail.toLowerCase() !== emailLower) {
+                    if (refEmail && refEmail !== emailLower) {
                         try {
-                            // Ищем реферера (используем lowercase для надежности)
-                            const q = query(collection(db, "users"), where("lowercaseEmail", "==", refEmail.toLowerCase()));
+                            // Ищем реферера
+                            const q = query(collection(db, "users"), where("lowercaseEmail", "==", refEmail));
                             const refSnap = await getDocs(q);
                             
                             if (!refSnap.empty) {
@@ -560,13 +608,14 @@
                                     refEarned: increment(10)
                                 });
                                 
-                                // (Опционально) Можно уведомить нового пользователя, но showT может быть слишком рано
                                 console.log(`Реферал засчитан для: ${refEmail}`);
                             }
                         } catch (err) {
                             console.error("Ошибка реферальной системы:", err);
                         }
                     }
+                    // Очищаем реферала после использования
+                    localStorage.removeItem('dool_ref');
                 }
                 
                 startApp(u);
@@ -594,12 +643,11 @@
             catch { showT('Ошибка', 'Неверный логин или пароль', '', null, true); }
         };
 
-        // 3. Email Register (Cleaned up)
+        // 3. Email Register
         document.getElementById('btn-register').onclick = async () => {
             const p = document.getElementById('auth-password').value;
             if (p.length < 6) return showT('Ошибка', 'Пароль слишком короткий', '', null, true);
             try {
-                // Только создаем аккаунт, остальное сделает onAuthStateChanged
                 await createUserWithEmailAndPassword(auth, document.getElementById('auth-email').value, p);
             } catch { showT('Ошибка', 'Не удалось создать аккаунт', '', null, true); }
         };
@@ -620,7 +668,12 @@
             document.getElementById('main-username').textContent = u.email;
             document.getElementById('profile-email').textContent = u.email;
             document.getElementById('my-email-addr').textContent = u.email;
-            document.getElementById('ref-link').textContent = `${window.location.origin}?ref=${u.email}`;
+            
+            // --- FIXED LINK GENERATION ---
+            // Генерируем ссылку от корня текущего пути, а не origin, чтобы работало везде
+            const cleanUrl = window.location.href.split('?')[0];
+            const refLink = `${cleanUrl}?ref=${u.email}`;
+            document.getElementById('ref-link').value = refLink;
 
             onSnapshot(doc(db, "users", u.uid), async (snap) => {
                 const d = snap.data();
@@ -672,7 +725,6 @@
         async function handleIncomingTransfer(myEmail, amountDiff) {
             try {
                 // Если разница ровно 10 и это не транзакция, возможно это реферальный бонус
-                // Но мы не можем точно знать без ID транзакции, поэтому просто проверяем обычные переводы
                 const q = query(collection(db, "transactions"), where("to", "==", myEmail));
                 const snap = await getDocs(q);
                 if (!snap.empty) {
@@ -683,8 +735,6 @@
                         return; 
                     }
                 }
-                
-                // Если это не транзакция, то скорее всего реферальный бонус (или системный)
                 showT('Пополнение', 'Система / Бонус', `+${amountDiff.toFixed(2)} Đ`);
             } catch(e) {}
         }
@@ -799,8 +849,27 @@
             finally { btn.disabled = false; btn.textContent = 'Отправить'; }
         };
 
-        window.copyRef = () => { navigator.clipboard.writeText(document.getElementById('ref-link').textContent); showT('Успешно', 'Ссылка скопирована'); };
-        window.copyMyEmail = () => { navigator.clipboard.writeText(auth.currentUser.email); showT('Успешно', 'Email скопирован'); };
+        window.copyRef = () => { 
+            const link = document.getElementById('ref-link').value;
+            navigator.clipboard.writeText(link); 
+            showT('Успешно', 'Ссылка скопирована'); 
+        };
+        
+        window.shareRef = async () => {
+            const link = document.getElementById('ref-link').value;
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Doolcoin Wallet',
+                        text: 'Зарегистрируйся и получи бонус!',
+                        url: link
+                    });
+                } catch (err) { console.log('Share canceled'); }
+            } else {
+                copyRef();
+            }
+        };
+
         document.getElementById('btn-logout').onclick = () => signOut(auth);
 
     </script>
