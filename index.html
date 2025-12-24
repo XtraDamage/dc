@@ -35,7 +35,6 @@
         #modal-scan-content { position: relative; background: #000; }
         #reader { width: 100%; height: 100%; overflow: hidden; position: relative; }
         
-        /* FIX: Убираем любые рамки и границы у видео и внутренних элементов библиотеки */
         #reader video { 
             width: 100% !important; 
             height: 100% !important; 
@@ -137,7 +136,7 @@
             </div>
         </div>
 
-        <!-- Авторизация (Обновленная) -->
+        <!-- Авторизация -->
         <div id="view-auth" class="hidden flex-col h-full p-8 justify-center relative">
             <div class="absolute top-0 left-0 w-full h-1/2 gradient-bg opacity-[0.03] blur-3xl pointer-events-none"></div>
             <div class="text-center mb-12 relative z-10">
@@ -400,7 +399,7 @@
             <div class="w-full h-full relative" id="modal-scan-content">
                 <div id="reader"></div>
                 
-                <!-- Focus Overlay: Box Shadow Method -->
+                <!-- Focus Overlay -->
                 <div class="scan-focus-area">
                     <div class="scan-border-glow"></div>
                     <div class="scan-laser"></div>
@@ -412,7 +411,6 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-        // Импортируем провайдер Google и Popup метод
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, query, where, runTransaction, Timestamp, increment, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
@@ -428,16 +426,13 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-
-        // Инициализация провайдера Google
         const googleProvider = new GoogleAuthProvider();
 
         let myData = null;
         let lastBal = null;
         const userCache = {};
         let html5QrCode = null; 
-        let qrCodeObj = null;
-
+        
         // --- Helpers ---
         async function getUserInfo(email) {
             if (userCache[email]) return userCache[email];
@@ -461,10 +456,8 @@
             m.classList.remove('hidden');
             void m.offsetWidth;
             m.classList.remove('opacity-0');
-            
             if(n === 'send' || n === 'receive') c.classList.remove('translate-y-full');
             else if(n !== 'scan') c.classList.remove('scale-90');
-
             if(n === 'receive') updateQR();
             if(n === 'scan') startScannerV2();
         };
@@ -473,13 +466,10 @@
             const m = document.getElementById('modal-'+n);
             const c = document.getElementById(`modal-${n}-content`);
             m.classList.add('opacity-0');
-            
             if(n === 'send' || n === 'receive') c.classList.add('translate-y-full');
             else if(n !== 'scan') c.classList.add('scale-90');
-
             if(n === 'scan') stopScannerV2();
             if(n === 'send') clearSendForm();
-
             setTimeout(() => m.classList.add('hidden'), 300);
         };
 
@@ -527,24 +517,58 @@
             else { navW.classList.replace('text-orange-500', 'text-neutral-600'); navR.classList.replace('text-neutral-600', 'text-orange-500'); }
         };
 
-        // --- Auth Logic Updated ---
+        // --- AUTH & REFERRAL SYSTEM FIXED ---
         
         onAuthStateChanged(auth, async (u) => {
             if (u) {
                 const userRef = doc(db, "users", u.uid);
                 const snap = await getDoc(userRef);
+                
+                // === ЛОГИКА СОЗДАНИЯ НОВОГО ПОЛЬЗОВАТЕЛЯ И РЕФЕРАЛОВ ===
                 if (!snap.exists()) {
-                    // Создаем пользователя, берем фото из Google если есть
+                    const email = u.email;
+                    const emailLower = u.email.toLowerCase();
+
+                    // 1. Создаем пользователя
                     await setDoc(userRef, {
-                        email: u.email, 
+                        email: email, 
+                        lowercaseEmail: emailLower,
                         balance: 10.0, 
                         avatar: u.photoURL || '', 
                         refCount: 0, 
                         refEarned: 0, 
-                        createdAt: Timestamp.now(), 
-                        lowercaseEmail: u.email.toLowerCase()
+                        createdAt: Timestamp.now()
                     });
+
+                    // 2. Проверяем реферальную ссылку
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const refEmail = urlParams.get('ref');
+
+                    if (refEmail && refEmail.toLowerCase() !== emailLower) {
+                        try {
+                            // Ищем реферера (используем lowercase для надежности)
+                            const q = query(collection(db, "users"), where("lowercaseEmail", "==", refEmail.toLowerCase()));
+                            const refSnap = await getDocs(q);
+                            
+                            if (!refSnap.empty) {
+                                const referrerDoc = refSnap.docs[0];
+                                
+                                // Начисляем бонус рефереру
+                                await updateDoc(referrerDoc.ref, {
+                                    balance: increment(10),
+                                    refCount: increment(1),
+                                    refEarned: increment(10)
+                                });
+                                
+                                // (Опционально) Можно уведомить нового пользователя, но showT может быть слишком рано
+                                console.log(`Реферал засчитан для: ${refEmail}`);
+                            }
+                        } catch (err) {
+                            console.error("Ошибка реферальной системы:", err);
+                        }
+                    }
                 }
+                
                 startApp(u);
             } else {
                 document.getElementById('view-loading').classList.add('hidden');
@@ -556,54 +580,40 @@
         // 1. Google Login Handler
         document.getElementById('btn-google').onclick = async () => {
             try {
-                // Это откроет всплывающее окно Google
                 await signInWithPopup(auth, googleProvider);
-                // onAuthStateChanged сделает остальное
             } catch (error) {
-                console.error(error);
-                if (error.code === 'auth/popup-closed-by-user') {
-                    showT('Отмена', 'Вход отменен пользователем', '', null, true);
-                } else {
+                if (error.code !== 'auth/popup-closed-by-user') {
                     showT('Ошибка Google', error.message, '', null, true);
                 }
             }
         };
 
+        // 2. Email Login
         document.getElementById('btn-login').onclick = async () => {
             try { await signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-password').value); } 
             catch { showT('Ошибка', 'Неверный логин или пароль', '', null, true); }
         };
 
+        // 3. Email Register (Cleaned up)
         document.getElementById('btn-register').onclick = async () => {
             const p = document.getElementById('auth-password').value;
             if (p.length < 6) return showT('Ошибка', 'Пароль слишком короткий', '', null, true);
             try {
+                // Только создаем аккаунт, остальное сделает onAuthStateChanged
                 await createUserWithEmailAndPassword(auth, document.getElementById('auth-email').value, p);
-                const ref = new URLSearchParams(window.location.search).get('ref');
-                if (ref) {
-                    const q = query(collection(db, "users"), where("email", "==", ref));
-                    const r = await getDocs(q);
-                    if (!r.empty) updateDoc(r.docs[0].ref, { balance: increment(10), refCount: increment(1), refEarned: increment(10) });
-                }
             } catch { showT('Ошибка', 'Не удалось создать аккаунт', '', null, true); }
         };
 
-        // --- Adaptive Balance Font Size ---
+        // --- App Logic ---
+
         function adjustBalanceSize(amountStr) {
             const el = document.getElementById('balance-val');
             const len = amountStr.length;
-            
             el.classList.remove('text-5xl', 'text-4xl', 'text-3xl', 'text-2xl', 'text-xl');
-            
-            if (len > 12) {
-                el.classList.add('text-2xl');
-            } else if (len > 9) {
-                el.classList.add('text-3xl');
-            } else if (len > 7) {
-                el.classList.add('text-4xl');
-            } else {
-                el.classList.add('text-5xl');
-            }
+            if (len > 12) el.classList.add('text-2xl');
+            else if (len > 9) el.classList.add('text-3xl');
+            else if (len > 7) el.classList.add('text-4xl');
+            else el.classList.add('text-5xl');
         }
 
         function startApp(u) {
@@ -621,7 +631,6 @@
                 }
                 myData = d; lastBal = d.balance;
                 
-                // Update Balance with adaptive sizing
                 const balStr = d.balance.toFixed(2);
                 const balEl = document.getElementById('balance-val');
                 balEl.textContent = balStr;
@@ -662,13 +671,21 @@
 
         async function handleIncomingTransfer(myEmail, amountDiff) {
             try {
+                // Если разница ровно 10 и это не транзакция, возможно это реферальный бонус
+                // Но мы не можем точно знать без ID транзакции, поэтому просто проверяем обычные переводы
                 const q = query(collection(db, "transactions"), where("to", "==", myEmail));
                 const snap = await getDocs(q);
                 if (!snap.empty) {
                     const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date);
-                    if (Math.abs(docs[0].amount - amountDiff) < 0.01) { showT('Входящий перевод', docs[0].from, `+${amountDiff.toFixed(2)} Đ`, docs[0].from); return; }
+                    // Если сумма совпадает с последним переводом (с допуском) и он был недавно
+                    if (Math.abs(docs[0].amount - amountDiff) < 0.01) { 
+                        showT('Входящий перевод', docs[0].from, `+${amountDiff.toFixed(2)} Đ`, docs[0].from); 
+                        return; 
+                    }
                 }
-                showT('Пополнение', 'Система', `+${amountDiff.toFixed(2)} Đ`);
+                
+                // Если это не транзакция, то скорее всего реферальный бонус (или системный)
+                showT('Пополнение', 'Система / Бонус', `+${amountDiff.toFixed(2)} Đ`);
             } catch(e) {}
         }
 
@@ -690,46 +707,20 @@
             let amt = parseFloat(document.getElementById('receive-amt-req').value);
             const errOverlay = document.getElementById('qr-error');
             const container = document.getElementById('qrcode-container');
-            
             if(isNaN(amt)) amt = 0;
-
-            if (amt > 0 && amt < 0.01) {
-                errOverlay.classList.add('active');
-                return; 
-            } else {
-                errOverlay.classList.remove('active');
-            }
-
+            if (amt > 0 && amt < 0.01) { errOverlay.classList.add('active'); return; } else { errOverlay.classList.remove('active'); }
             const data = JSON.stringify({ t: "req", e: email, a: amt });
-            
-            // Clear previous QR
             container.innerHTML = '';
-            
-            new QRCode(container, {
-                text: data,
-                width: 200,
-                height: 200,
-                colorDark : "#FF4D00",
-                colorLight : "#0a0a0a",
-                correctLevel : QRCode.CorrectLevel.M
-            });
+            new QRCode(container, { text: data, width: 200, height: 200, colorDark : "#FF4D00", colorLight : "#0a0a0a", correctLevel : QRCode.CorrectLevel.M });
         };
         
         document.getElementById('receive-amt-req').oninput = updateQR;
 
         window.startScannerV2 = () => {
              if (html5QrCode) return; 
-
              html5QrCode = new Html5Qrcode("reader");
-
              const config = { fps: 15, aspectRatio: window.innerHeight / window.innerWidth };
-             
-             html5QrCode.start(
-                 { facingMode: "environment" }, 
-                 config, 
-                 onScanSuccess, 
-                 onScanError
-             ).catch(err => {
+             html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, onScanError).catch(err => {
                  console.error("Camera start failed", err);
                  showT('Ошибка камеры', 'Разрешите доступ к камере', '', null, true);
                  closeModal('scan');
@@ -740,31 +731,18 @@
              closeModal('scan');
              try {
                  const data = JSON.parse(decodedText);
-                 if(data.t === 'req' && data.e) {
-                     openProposalModal(data);
-                 } else {
-                     showT('Ошибка', 'Неверный формат QR', '', null, true);
-                 }
+                 if(data.t === 'req' && data.e) { openProposalModal(data); } 
+                 else { showT('Ошибка', 'Неверный формат QR', '', null, true); }
              } catch (e) {
-                 if(decodedText.includes('@')) {
-                     openProposalModal({e: decodedText, a: 0});
-                 } else {
-                    showT('Ошибка', 'Не удалось распознать', '', null, true);
-                 }
+                 if(decodedText.includes('@')) { openProposalModal({e: decodedText, a: 0}); } 
+                 else { showT('Ошибка', 'Не удалось распознать', '', null, true); }
              }
         };
 
-        const onScanError = (errorMessage) => {
-            // ignore scan errors
-        };
+        const onScanError = (errorMessage) => {};
 
         window.stopScannerV2 = () => {
-            if (html5QrCode) {
-                html5QrCode.stop().then(() => {
-                    html5QrCode.clear();
-                    html5QrCode = null;
-                }).catch(err => console.log(err));
-            }
+            if (html5QrCode) { html5QrCode.stop().then(() => { html5QrCode.clear(); html5QrCode = null; }).catch(err => console.log(err)); }
         };
 
         function openProposalModal(data) {
@@ -785,12 +763,9 @@
             const amt = parseFloat(amtStr);
             const myEmail = auth.currentUser.email;
 
-            // --- VALIDATION FOR DECIMALS ---
             if (amtStr.includes('.')) {
                 const decimalPart = amtStr.split('.')[1];
-                if (decimalPart && decimalPart.length > 2) {
-                    return showT('Ошибка', 'Максимум 2 знака после запятой', '', null, true);
-                }
+                if (decimalPart && decimalPart.length > 2) return showT('Ошибка', 'Максимум 2 знака после запятой', '', null, true);
             }
 
             if (to === myEmail) return showT('Ошибка', 'Нельзя отправить себе', '', null, true);
@@ -815,16 +790,12 @@
                     t.update(receiverRef, { balance: increment(amt) });
                     
                     const txRef = doc(collection(db, "transactions"));
-                    t.set(txRef, {
-                        from: myEmail, to: to, amount: amt, date: Timestamp.now(), parties: [myEmail, to]
-                    });
+                    t.set(txRef, { from: myEmail, to: to, amount: amt, date: Timestamp.now(), parties: [myEmail, to] });
                 });
                 
                 closeModal('send');
                 showT('Успешно', `Перевод для ${to}`, `-${amt.toFixed(2)} Đ`);
-            } catch (e) { 
-                showT('Ошибка', e.message, '', null, true); 
-            }
+            } catch (e) { showT('Ошибка', e.message, '', null, true); }
             finally { btn.disabled = false; btn.textContent = 'Отправить'; }
         };
 
