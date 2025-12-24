@@ -3,32 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Doolcoin Wallet</title>
+    <title>Doolcoin Wallet Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Библиотека для QR кодов -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Библиотека для сканирования QR (используем простую реализацию через input для мобилок или камеру) -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        /* Блокировка выделения и контекстного меню */
         * {
-            -webkit-user-select: none; /* Safari/Chrome */
-            -moz-user-select: none; /* Firefox */
-            -ms-user-select: none; /* IE/Edge */
-            user-select: none; /* Standard */
-            -webkit-touch-callout: none; /* iOS Safari - убирает меню при долгом нажатии */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
         }
         
-        /* Разрешаем ввод текста в инпутах */
         input {
             -webkit-user-select: text !important;
-            -moz-user-select: text !important;
-            -ms-user-select: text !important;
             user-select: text !important;
         }
 
-        /* Запрет перетаскивания картинок */
         img {
             -webkit-user-drag: none;
             user-drag: none;
-            pointer-events: none; /* Игнорирует клики по самой картинке (клики ловят родители) */
+            pointer-events: none;
         }
 
         body { background-color: #000; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -37,25 +36,29 @@
         .gradient-bg { background: linear-gradient(135deg, #FF4D00, #FF005C); }
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+        
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* Toast Animation */
         #toast { transform: translateY(-150%) scale(0.9); transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); opacity: 0; }
         #toast.active { transform: translateY(0) scale(1); opacity: 1; }
         
         .hide-scroll::-webkit-scrollbar { display: none; }
         .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        
+        .qr-container canvas, .qr-container img { margin: 0 auto; border-radius: 1rem; border: 8px solid white; }
+        
+        /* Account switcher styles */
+        .account-item.active { border-color: #FF4D00; background: rgba(255, 77, 0, 0.05); }
     </style>
 </head>
-<body class="overflow-hidden bg-black" oncontextmenu="return false;"> <!-- Блокировка правой кнопки мыши -->
+<body class="overflow-hidden bg-black" oncontextmenu="return false;">
 
     <div id="app" class="max-w-[480px] mx-auto h-[100dvh] flex flex-col relative bg-black shadow-2xl overflow-hidden">
         
         <!-- Уведомления (Toast) -->
-        <div id="toast" class="fixed top-4 left-4 right-4 z-[200] glass-panel p-3 rounded-[2rem] flex items-center gap-3 shadow-2xl pointer-events-none border border-white/10">
+        <div id="toast" class="fixed top-4 left-4 right-4 z-[300] glass-panel p-3 rounded-[2rem] flex items-center gap-3 shadow-2xl pointer-events-none border border-white/10">
             <div class="relative shrink-0">
                 <img id="toast-avatar" src="" class="w-12 h-12 rounded-full object-cover bg-neutral-800 border-2 border-white/10" onerror="this.src='https://ui-avatars.com/api/?background=333&color=fff&size=128'">
-                <!-- Индикатор статуса (зеленый) -->
                 <div id="toast-status" class="absolute -bottom-1 -right-1 bg-green-500 w-4 h-4 rounded-full border-2 border-black flex items-center justify-center">
                     <svg width="8" height="8" fill="none" stroke="black" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
                 </div>
@@ -101,18 +104,23 @@
         <!-- Главный экран -->
         <div id="view-main" class="hidden flex flex-col h-full">
             <header class="px-6 pt-14 pb-4 flex justify-between items-center z-20">
-                <div class="flex items-center gap-3 active:opacity-70 transition-opacity cursor-pointer" onclick="openModal('profile')">
+                <div class="flex items-center gap-3 active:opacity-70 transition-opacity cursor-pointer" onclick="openModal('accounts')">
                     <div class="p-[2px] gradient-bg rounded-full shadow-[0_0_20px_rgba(255,77,0,0.3)]">
                         <img id="main-avatar" src="" class="w-10 h-10 rounded-full object-cover bg-black border-2 border-black">
                     </div>
                     <div class="flex flex-col justify-center">
                         <p id="main-username" class="text-xs font-bold truncate max-w-[140px] leading-tight">...</p>
-                        <p class="text-[9px] font-black text-neutral-500 uppercase tracking-widest leading-tight">Профиль</p>
+                        <p class="text-[9px] font-black text-neutral-500 uppercase tracking-widest leading-tight">Сменить аккаунт</p>
                     </div>
                 </div>
-                <button id="btn-logout" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer">
-                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-                </button>
+                <div class="flex gap-2">
+                    <button onclick="openModal('scan')" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-neutral-400 hover:text-white transition-all cursor-pointer">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2m10 0h2a2 2 0 0 1 2 2v2m0 10v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/></svg>
+                    </button>
+                    <button id="btn-logout" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                    </button>
+                </div>
             </header>
 
             <main class="flex-1 overflow-y-auto px-5 hide-scroll pb-32 z-10">
@@ -133,131 +141,148 @@
 
                         <div class="grid grid-cols-2 gap-3 mt-6 relative z-10">
                             <button onclick="openModal('send')" class="h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 active:scale-95 transition-all shadow-lg shadow-white/5 cursor-pointer">Отправить</button>
-                            <button onclick="openModal('receive')" class="h-14 glass-panel text-white border border-white/10 rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-white/10 active:scale-95 transition-all cursor-pointer">Получить</button>
+                            <button onclick="openModal('receive_qr')" class="h-14 glass-panel text-white border border-white/10 rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-white/10 active:scale-95 transition-all cursor-pointer">Запросить</button>
                         </div>
                     </div>
 
-                    <!-- История транзакций -->
+                    <!-- История -->
                     <div class="space-y-4">
                         <div class="flex items-center justify-between px-2">
                             <h3 class="text-[11px] font-black text-neutral-500 uppercase tracking-widest">История операций</h3>
                         </div>
-                        <div id="tx-history" class="space-y-2 pb-10">
-                            <div class="text-center py-10">
-                                <div class="w-8 h-8 border-2 border-white/10 border-t-orange-500 rounded-full animate-spin mx-auto mb-4"></div>
-                                <p class="text-[10px] font-bold text-neutral-600 uppercase tracking-widest">Загрузка...</p>
-                            </div>
-                        </div>
+                        <div id="tx-history" class="space-y-2 pb-10"></div>
                     </div>
                 </div>
 
                 <!-- Вкладка Рефералы -->
                 <div id="tab-referrals" class="tab-content space-y-6">
                     <div class="dool-card rounded-[2.5rem] p-8 relative overflow-hidden">
-                        <div class="absolute top-0 right-0 w-32 h-32 gradient-bg blur-[60px] opacity-20"></div>
-                        <h3 class="text-2xl font-black mb-2 relative z-10">Пригласи друга</h3>
-                        <p class="text-neutral-500 text-xs mb-8 leading-relaxed max-w-[80%] relative z-10">Получи <span class="text-white font-bold">10.00 Đ</span> за каждого друга.</p>
-                        
-                        <div class="bg-black/40 border border-white/5 p-4 rounded-2xl space-y-3 relative z-10 backdrop-blur-sm">
-                            <div class="flex items-center justify-between gap-4">
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-[9px] font-black text-neutral-600 uppercase tracking-widest mb-1">Ваша ссылка</p>
-                                    <p id="ref-link" class="text-[10px] font-mono text-neutral-400 truncate bg-transparent outline-none">...</p>
-                                </div>
-                                <button onclick="copyRef()" class="w-10 h-10 flex items-center justify-center bg-white text-black rounded-xl hover:scale-105 transition-transform cursor-pointer">
-                                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                                </button>
-                            </div>
+                        <h3 class="text-2xl font-black mb-2 relative z-10">Рефералы</h3>
+                        <p class="text-neutral-500 text-xs mb-8 max-w-[80%] relative z-10">Зарабатывайте 10.00 Đ за друга.</p>
+                        <div class="bg-black/40 border border-white/5 p-4 rounded-2xl flex items-center justify-between">
+                            <p id="ref-link" class="text-[10px] font-mono text-neutral-400 truncate">...</p>
+                            <button onclick="copyRef()" class="p-2 bg-white text-black rounded-lg">Copy</button>
                         </div>
                     </div>
-
                     <div class="grid grid-cols-2 gap-3">
-                        <div class="dool-card p-5 rounded-[2rem] flex flex-col items-center justify-center gap-1 aspect-square">
-                            <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center mb-2 text-neutral-400">
-                                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                            </div>
+                        <div class="dool-card p-5 rounded-[2rem] text-center">
                             <p id="ref-count" class="text-2xl font-black">0</p>
-                            <p class="text-[9px] font-bold text-neutral-600 uppercase tracking-wider">Друзей</p>
+                            <p class="text-[9px] font-bold text-neutral-600 uppercase">Друзей</p>
                         </div>
-                        <div class="dool-card p-5 rounded-[2rem] flex flex-col items-center justify-center gap-1 aspect-square">
-                            <div class="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center mb-2 text-orange-500">
-                                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
-                            </div>
+                        <div class="dool-card p-5 rounded-[2rem] text-center">
                             <p id="ref-earned" class="text-2xl font-black">0</p>
-                            <p class="text-[9px] font-bold text-neutral-600 uppercase tracking-wider">Заработано</p>
+                            <p class="text-[9px] font-bold text-neutral-600 uppercase">Đ Получено</p>
                         </div>
                     </div>
                 </div>
             </main>
 
-            <!-- Навигация -->
-            <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] h-16 bg-[#111]/90 backdrop-blur-xl border border-white/10 rounded-[2rem] flex items-center justify-around px-2 z-50 shadow-2xl">
-                <button onclick="switchTab('wallet')" id="nav-wallet" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-orange-500 cursor-pointer">
+            <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] h-16 bg-[#111]/90 backdrop-blur-xl border border-white/10 rounded-[2rem] flex items-center justify-around px-2 z-50">
+                <button onclick="switchTab('wallet')" id="nav-wallet" class="flex-1 flex flex-col items-center justify-center text-orange-500">
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
                 </button>
-                <button onclick="switchTab('referrals')" id="nav-referrals" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
+                <button onclick="switchTab('referrals')" id="nav-referrals" class="flex-1 flex flex-col items-center justify-center text-neutral-600">
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
                 </button>
             </nav>
         </div>
 
-        <!-- Модалка: Профиль -->
-        <div id="modal-profile" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col items-center justify-center p-8 opacity-0 transition-opacity duration-300">
-            <div class="w-full max-w-xs transform scale-90 transition-transform duration-300" id="modal-profile-content">
-                <div class="bg-[#111] border border-white/10 p-8 rounded-[2.5rem] text-center shadow-2xl">
-                    <h2 class="text-xl font-black mb-6">Ваш Профиль</h2>
-                    <div class="relative inline-block mb-6 group">
-                        <div class="p-1 gradient-bg rounded-full">
-                            <img id="edit-avatar-img" src="" class="w-24 h-24 rounded-full object-cover border-4 border-[#111] bg-neutral-900">
-                        </div>
-                        <label class="absolute bottom-0 right-0 bg-white text-black w-8 h-8 flex items-center justify-center rounded-full cursor-pointer hover:scale-110 transition-transform shadow-lg">
-                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
-                            <input type="file" id="avatar-input" class="hidden" accept="image/*">
-                        </label>
-                    </div>
-                    <p id="profile-email" class="text-xs text-neutral-500 font-bold mb-6 truncate px-2">...</p>
-                    <button onclick="closeModal('profile')" class="w-full h-12 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer">Закрыть</button>
+        <!-- МОДАЛКИ -->
+
+        <!-- Модалка: Аккаунты (Менеджер 15 аккаунтов) -->
+        <div id="modal-accounts" class="hidden absolute inset-0 z-[150] bg-black/80 backdrop-blur-xl flex flex-col opacity-0 transition-opacity duration-300">
+            <div class="flex-1 p-8 overflow-y-auto hide-scroll pt-20">
+                <div class="flex items-center justify-between mb-8">
+                    <h2 class="text-3xl font-black">Аккаунты</h2>
+                    <span id="account-limit" class="text-xs font-bold text-neutral-500">0/15</span>
                 </div>
+                
+                <div id="accounts-list" class="space-y-3 mb-8">
+                    <!-- Аккаунты будут тут -->
+                </div>
+
+                <button id="btn-add-account" onclick="showAddAccountForm()" class="w-full h-16 border-2 border-dashed border-white/10 rounded-2xl flex items-center justify-center gap-2 text-neutral-500 hover:border-white/30 hover:text-white transition-all">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14m-7-7h14"/></svg>
+                    <span class="font-bold text-sm">Добавить аккаунт</span>
+                </button>
+            </div>
+            <div class="p-8">
+                <button onclick="closeModal('accounts')" class="w-full h-14 glass-panel rounded-2xl font-bold uppercase text-xs tracking-widest">Назад</button>
             </div>
         </div>
 
-        <!-- Модалка: Отправить -->
-        <div id="modal-send" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
+        <!-- Модалка: Создать QR запрос -->
+        <div id="modal-receive_qr" class="hidden absolute inset-0 z-[150] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
+            <div class="bg-[#0f0f0f] border-t border-white/10 rounded-t-[2.5rem] p-8 transform translate-y-full transition-transform duration-300" id="modal-receive_qr-content">
+                <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-8"></div>
+                <h2 class="text-2xl font-black mb-4">Запрос на перевод</h2>
+                <p class="text-neutral-500 text-xs mb-6 leading-relaxed">Введите сумму, которую хотите получить. Сгенерированный код можно отправить другу или показать для сканирования.</p>
+                
+                <div id="qr-input-zone" class="space-y-4">
+                    <div class="bg-white/5 rounded-2xl p-4 border border-white/5">
+                        <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Сумма запроса</p>
+                        <div class="flex items-center gap-2">
+                            <input type="number" id="qr-amt" placeholder="0.00" class="w-full bg-transparent outline-none font-black text-3xl">
+                            <span class="text-xl font-black text-orange-500">Đ</span>
+                        </div>
+                    </div>
+                    <button onclick="generateQRRequest()" class="w-full h-16 bg-white text-black rounded-2xl font-black text-sm uppercase tracking-wider">Создать QR-код</button>
+                </div>
+
+                <div id="qr-result-zone" class="hidden flex flex-col items-center py-6">
+                    <div id="qrcode" class="qr-container mb-6"></div>
+                    <p id="qr-desc" class="text-sm font-bold text-center mb-6">Запрос на <span class="text-orange-500">10.00 Đ</span></p>
+                    <button onclick="resetQRZone()" class="w-full h-14 glass-panel rounded-2xl font-bold text-xs uppercase">Новый запрос</button>
+                </div>
+                
+                <button onclick="closeModal('receive_qr')" class="w-full mt-4 h-12 text-neutral-500 font-bold uppercase text-[10px]">Закрыть</button>
+            </div>
+        </div>
+
+        <!-- Модалка: Сканер (и симуляция) -->
+        <div id="modal-scan" class="hidden absolute inset-0 z-[200] bg-black flex flex-col items-center justify-center p-8 opacity-0 transition-opacity duration-300">
+            <div class="text-center mb-10">
+                <h2 class="text-2xl font-black mb-2">Сканирование</h2>
+                <p class="text-neutral-500 text-xs">Наведите камеру на QR-код Doolcoin</p>
+            </div>
+            
+            <div id="reader" class="w-full max-w-sm aspect-square bg-neutral-900 rounded-3xl overflow-hidden border-2 border-white/10 relative">
+                <div class="absolute inset-0 border-[40px] border-black/40 pointer-events-none"></div>
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 border-2 border-orange-500/50 rounded-2xl animate-pulse"></div>
+            </div>
+
+            <div class="mt-10 w-full space-y-3">
+                <p class="text-[9px] font-black text-neutral-600 uppercase tracking-widest text-center">Или введите код вручную</p>
+                <div class="flex gap-2">
+                    <input type="text" id="manual-qr-data" placeholder="doolcoin:transfer..." class="flex-1 bg-white/5 rounded-xl px-4 py-3 text-xs font-mono outline-none border border-white/10">
+                    <button onclick="processQRData(document.getElementById('manual-qr-data').value)" class="bg-white text-black px-6 rounded-xl font-bold text-xs">ОК</button>
+                </div>
+                <button onclick="closeModal('scan')" class="w-full h-14 glass-panel rounded-2xl font-bold text-xs uppercase tracking-widest">Отмена</button>
+            </div>
+        </div>
+
+        <!-- Модалка: Отправить (Стандарт) -->
+        <div id="modal-send" class="hidden absolute inset-0 z-[150] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
             <div class="bg-[#0f0f0f] border-t border-white/10 rounded-t-[2.5rem] p-8 pb-10 transform translate-y-full transition-transform duration-300" id="modal-send-content">
                 <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-8"></div>
                 <h2 class="text-2xl font-black mb-6 px-2">Перевод</h2>
                 <div class="space-y-3">
-                    <div class="bg-white/5 rounded-2xl p-4 border border-white/5 focus-within:border-orange-500/50 transition-colors">
+                    <div class="bg-white/5 rounded-2xl p-4 border border-white/5">
                         <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Получатель</p>
-                        <input type="email" id="send-email" placeholder="email@example.com" class="w-full bg-transparent outline-none font-bold text-sm placeholder:text-neutral-700">
+                        <input type="email" id="send-email" placeholder="email@example.com" class="w-full bg-transparent outline-none font-bold text-sm">
                     </div>
-                    <div class="bg-white/5 rounded-2xl p-4 border border-white/5 focus-within:border-orange-500/50 transition-colors">
+                    <div class="bg-white/5 rounded-2xl p-4 border border-white/5">
                          <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Сумма</p>
                          <div class="flex items-center gap-2">
-                             <input type="number" id="send-amt" placeholder="0.00" class="w-full bg-transparent outline-none font-black text-3xl placeholder:text-neutral-700">
+                             <input type="number" id="send-amt" placeholder="0.00" class="w-full bg-transparent outline-none font-black text-3xl">
                              <span class="text-xl font-black text-orange-500">Đ</span>
                          </div>
                     </div>
                     <div class="flex gap-3 pt-4">
-                        <button onclick="closeModal('send')" class="flex-1 h-14 bg-white/5 text-neutral-400 rounded-2xl font-bold text-xs uppercase tracking-wider cursor-pointer">Отмена</button>
-                        <button id="btn-do-send" class="flex-[2] h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer">Отправить</button>
+                        <button onclick="closeModal('send')" class="flex-1 h-14 bg-white/5 text-neutral-400 rounded-2xl font-bold text-xs uppercase">Отмена</button>
+                        <button id="btn-do-send" class="flex-[2] h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider">Отправить</button>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Модалка: Получить -->
-        <div id="modal-receive" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl items-center justify-center p-8 opacity-0 transition-opacity duration-300">
-            <div class="bg-[#111] border border-white/10 rounded-[3rem] p-10 w-full text-center transform scale-90 transition-transform duration-300 shadow-2xl" id="modal-receive-content">
-                <div class="w-20 h-20 gradient-bg rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(255,77,0,0.4)]">
-                    <span class="text-4xl font-black text-white">Đ</span>
-                </div>
-                <h2 class="text-xl font-black mb-2">Ваш адрес</h2>
-                <p class="text-neutral-500 text-xs mb-8">Используйте этот email для получения переводов</p>
-                <div onclick="copyMyEmail()" class="bg-white/5 p-4 rounded-2xl font-mono text-orange-500 mb-6 truncate text-sm border border-white/5 cursor-pointer hover:bg-white/10 transition-colors active:scale-95">
-                    <span id="my-email-addr">...</span>
-                </div>
-                <button onclick="closeModal('receive')" class="text-neutral-500 font-bold uppercase text-[10px] hover:text-white transition-colors cursor-pointer">Закрыть</button>
             </div>
         </div>
 
@@ -283,90 +308,159 @@
 
         let myData = null;
         let lastBal = null;
-        const userCache = {}; 
+        const userCache = {};
+        
+        // --- Account Management Logic ---
+        const ACCOUNTS_KEY = 'doolcoin_accounts_v2';
+        let savedAccounts = JSON.parse(localStorage.getItem(ACCOUNTS_KEY) || '[]');
 
-        // --- User Info Helper ---
-        async function getUserInfo(email) {
-            if (userCache[email]) return userCache[email];
+        window.updateAccountsUI = () => {
+            const list = document.getElementById('accounts-list');
+            const limit = document.getElementById('account-limit');
+            limit.textContent = `${savedAccounts.length}/15`;
             
-            // Заглушка
-            const defaultAv = `https://ui-avatars.com/api/?background=random&color=fff&name=${email.charAt(0).toUpperCase()}&size=128`;
-            let info = { avatar: defaultAv, email: email };
+            list.innerHTML = savedAccounts.map((acc, idx) => `
+                <div class="account-item glass-panel p-4 rounded-2xl flex items-center justify-between border border-white/5 ${auth.currentUser?.email === acc.email ? 'active' : ''}">
+                    <div class="flex items-center gap-3 overflow-hidden" onclick="switchAccount(${idx})">
+                        <img src="https://ui-avatars.com/api/?background=random&color=fff&name=${acc.email.charAt(0)}&size=100" class="w-10 h-10 rounded-full bg-neutral-800">
+                        <div class="truncate">
+                            <p class="text-sm font-bold text-white truncate">${acc.email}</p>
+                            <p class="text-[9px] font-black text-neutral-500 uppercase tracking-widest">${auth.currentUser?.email === acc.email ? 'Текущий' : 'Нажмите для входа'}</p>
+                        </div>
+                    </div>
+                    <button onclick="removeAccount(${idx})" class="p-2 text-neutral-600 hover:text-red-500 transition-colors">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                    </button>
+                </div>
+            `).join('');
 
+            document.getElementById('btn-add-account').style.display = savedAccounts.length >= 15 ? 'none' : 'flex';
+        };
+
+        window.showAddAccountForm = () => {
+            closeModal('accounts');
+            signOut(auth);
+            document.getElementById('view-auth').classList.replace('hidden', 'flex');
+        };
+
+        window.switchAccount = async (idx) => {
+            const acc = savedAccounts[idx];
+            if (auth.currentUser?.email === acc.email) return;
+            
+            document.getElementById('view-loading').classList.remove('hidden');
             try {
-                const q = query(collection(db, "users"), where("email", "==", email));
-                const res = await getDocs(q);
-                if (!res.empty) {
-                    const d = res.docs[0].data();
-                    if (d.avatar) info.avatar = d.avatar;
+                await signInWithEmailAndPassword(auth, acc.email, acc.pass);
+                closeModal('accounts');
+            } catch (e) {
+                showT('Ошибка входа', 'Проверьте данные или удалите аккаунт', '', null, true);
+                document.getElementById('view-loading').classList.add('hidden');
+            }
+        };
+
+        window.removeAccount = (idx) => {
+            savedAccounts.splice(idx, 1);
+            localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(savedAccounts));
+            updateAccountsUI();
+        };
+
+        const saveCurrentAccount = (email, pass) => {
+            if (!savedAccounts.find(a => a.email === email)) {
+                if (savedAccounts.length < 15) {
+                    savedAccounts.push({ email, pass });
+                    localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(savedAccounts));
                 }
-            } catch (e) { console.log('Не удалось загрузить аватар:', e); }
+            }
+        };
 
-            userCache[email] = info;
-            return info;
-        }
+        // --- QR Request Logic ---
+        let qrCodeInstance = null;
+        window.generateQRRequest = () => {
+            const amt = parseFloat(document.getElementById('qr-amt').value);
+            if (!amt || amt <= 0) return showT('Ошибка', 'Введите сумму', '', null, true);
 
-        // --- UI Animation Helpers ---
+            const qrData = `doolcoin:transfer?to=${auth.currentUser.email}&amount=${amt}`;
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = '';
+            
+            qrCodeInstance = new QRCode(qrContainer, {
+                text: qrData,
+                width: 200,
+                height: 200,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+
+            document.getElementById('qr-desc').innerHTML = `Запрос на <span class="text-orange-500 font-black">${amt.toFixed(2)} Đ</span>`;
+            document.getElementById('qr-input-zone').classList.add('hidden');
+            document.getElementById('qr-result-zone').classList.remove('hidden');
+        };
+
+        window.resetQRZone = () => {
+            document.getElementById('qr-input-zone').classList.remove('hidden');
+            document.getElementById('qr-result-zone').classList.add('hidden');
+            document.getElementById('qr-amt').value = '';
+        };
+
+        window.processQRData = (data) => {
+            if (!data.startsWith('doolcoin:transfer?')) return showT('Ошибка', 'Некорректный QR-код', '', null, true);
+            
+            const params = new URLSearchParams(data.split('?')[1]);
+            const to = params.get('to');
+            const amount = params.get('amount');
+
+            if (to && amount) {
+                closeModal('scan');
+                openModal('send');
+                document.getElementById('send-email').value = to;
+                document.getElementById('send-amt').value = amount;
+                showT('QR Сканирован', `Запрос от ${to.split('@')[0]}`, `${amount} Đ`);
+            }
+        };
+
+        // --- Core UI & Navigation ---
         window.openModal = (n) => {
             const m = document.getElementById('modal-'+n);
             const c = document.getElementById(`modal-${n}-content`);
             m.classList.remove('hidden');
-            // Force reflow
             void m.offsetWidth;
             m.classList.remove('opacity-0');
-            
-            if(n === 'send') c.classList.remove('translate-y-full');
-            else c.classList.remove('scale-90');
+            if(c) c.classList.remove('translate-y-full', 'scale-90');
+            if(n === 'accounts') updateAccountsUI();
         };
 
         window.closeModal = (n) => {
             const m = document.getElementById('modal-'+n);
             const c = document.getElementById(`modal-${n}-content`);
             m.classList.add('opacity-0');
-            
-            if(n === 'send') c.classList.add('translate-y-full');
-            else c.classList.add('scale-90');
-
+            if(c) {
+                if(n === 'send' || n === 'receive_qr') c.classList.add('translate-y-full');
+                else c.classList.add('scale-90');
+            }
             setTimeout(() => m.classList.add('hidden'), 300);
         };
 
-        // Обновленная функция уведомлений (Toast)
-        // Если isError = true, показываем красную точку и стандартную иконку, иначе зеленую и аватар
         window.showT = async (title, msg, amountStr = '', senderEmail = null, isError = false) => {
             const t = document.getElementById('toast');
             const status = document.getElementById('toast-status');
             const amtEl = document.getElementById('toast-amount');
-            
             document.getElementById('toast-title').textContent = title;
             document.getElementById('toast-msg').textContent = msg;
             
             if (amountStr) {
                 amtEl.textContent = amountStr;
                 amtEl.classList.remove('hidden');
-            } else {
-                amtEl.classList.add('hidden');
-            }
+            } else amtEl.classList.add('hidden');
             
             const img = document.getElementById('toast-avatar');
-            
             if (isError) {
-                // Стиль ошибки
-                status.classList.remove('bg-green-500');
-                status.classList.add('bg-red-500');
-                status.innerHTML = '<svg width="8" height="8" fill="none" stroke="black" stroke-width="3" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>';
+                status.className = "absolute -bottom-1 -right-1 bg-red-500 w-4 h-4 rounded-full border-2 border-black flex items-center justify-center";
+                status.innerHTML = '×';
                 img.src = `https://ui-avatars.com/api/?background=333&color=fff&name=!`;
             } else {
-                // Стиль успеха/инфо
-                status.classList.remove('bg-red-500');
-                status.classList.add('bg-green-500');
-                status.innerHTML = '<svg width="8" height="8" fill="none" stroke="black" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>';
-                
-                if (senderEmail) {
-                    const u = await getUserInfo(senderEmail);
-                    img.src = u.avatar;
-                } else {
-                    img.src = `https://ui-avatars.com/api/?background=333&color=fff&name=S`;
-                }
+                status.className = "absolute -bottom-1 -right-1 bg-green-500 w-4 h-4 rounded-full border-2 border-black flex items-center justify-center";
+                status.innerHTML = '✓';
+                img.src = senderEmail ? `https://ui-avatars.com/api/?background=random&name=${senderEmail.charAt(0)}` : `https://ui-avatars.com/api/?background=333&name=S`;
             }
             
             t.classList.add('active');
@@ -376,20 +470,13 @@
         window.switchTab = (tab) => {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.getElementById('tab-'+tab).classList.add('active');
-            
-            const navW = document.getElementById('nav-wallet');
-            const navR = document.getElementById('nav-referrals');
-            
-            if(tab === 'wallet') {
-                navW.classList.replace('text-neutral-600', 'text-orange-500');
-                navR.classList.replace('text-orange-500', 'text-neutral-600');
-            } else {
-                navW.classList.replace('text-orange-500', 'text-neutral-600');
-                navR.classList.replace('text-neutral-600', 'text-orange-500');
-            }
+            document.getElementById('nav-wallet').classList.toggle('text-orange-500', tab === 'wallet');
+            document.getElementById('nav-wallet').classList.toggle('text-neutral-600', tab !== 'wallet');
+            document.getElementById('nav-referrals').classList.toggle('text-orange-500', tab === 'referrals');
+            document.getElementById('nav-referrals').classList.toggle('text-neutral-600', tab !== 'referrals');
         };
 
-        // --- Logic ---
+        // --- Logic Hooks ---
         onAuthStateChanged(auth, async (u) => {
             if (u) {
                 const userRef = doc(db, "users", u.uid);
@@ -413,194 +500,89 @@
             const p = document.getElementById('auth-password').value;
             try { 
                 await signInWithEmailAndPassword(auth, e, p); 
-            } catch { 
-                showT('Ошибка', 'Неверный логин или пароль', '', null, true);
-            }
+                saveCurrentAccount(e, p);
+            } catch { showT('Ошибка', 'Неверные данные', '', null, true); }
         };
 
         document.getElementById('btn-register').onclick = async () => {
             const e = document.getElementById('auth-email').value;
             const p = document.getElementById('auth-password').value;
-            if (p.length < 6) return showT('Ошибка', 'Пароль слишком короткий', '', null, true);
             try {
                 await createUserWithEmailAndPassword(auth, e, p);
-                const ref = new URLSearchParams(window.location.search).get('ref');
-                if (ref) {
-                    const q = query(collection(db, "users"), where("email", "==", ref));
-                    const r = await getDocs(q);
-                    if (!r.empty) {
-                        updateDoc(r.docs[0].ref, { 
-                            balance: increment(10), refCount: increment(1), refEarned: increment(10) 
-                        });
-                    }
-                }
-            } catch { 
-                showT('Ошибка', 'Не удалось создать аккаунт', '', null, true);
-            }
+                saveCurrentAccount(e, p);
+            } catch { showT('Ошибка', 'Регистрация не удалась', '', null, true); }
         };
 
         function startApp(u) {
             document.getElementById('main-username').textContent = u.email;
-            document.getElementById('profile-email').textContent = u.email;
-            document.getElementById('my-email-addr').textContent = u.email;
             document.getElementById('ref-link').textContent = `${window.location.origin}?ref=${u.email}`;
 
-            // 1. Слушаем профиль
-            onSnapshot(doc(db, "users", u.uid), async (snap) => {
+            onSnapshot(doc(db, "users", u.uid), (snap) => {
                 const d = snap.data();
                 if (!d) return;
-
                 if (lastBal !== null && d.balance > lastBal) {
-                    const diff = d.balance - lastBal;
-                    handleIncomingTransfer(u.email, diff);
+                    showT('Входящий перевод', 'Проверьте историю', `+${(d.balance - lastBal).toFixed(2)} Đ`);
                 }
-
-                myData = d;
-                lastBal = d.balance;
-
+                myData = d; lastBal = d.balance;
                 document.getElementById('balance-val').textContent = d.balance.toFixed(2);
                 document.getElementById('ref-count').textContent = d.refCount || 0;
                 document.getElementById('ref-earned').textContent = (d.refEarned || 0).toFixed(2);
+                document.getElementById('main-avatar').src = d.avatar || `https://ui-avatars.com/api/?background=random&name=${u.email.charAt(0)}`;
                 
-                const av = d.avatar || `https://ui-avatars.com/api/?background=random&color=fff&name=${u.email.charAt(0)}`;
-                document.getElementById('main-avatar').src = av;
-                document.getElementById('edit-avatar-img').src = av;
-
                 document.getElementById('view-auth').classList.add('hidden');
                 document.getElementById('view-loading').classList.add('hidden');
                 document.getElementById('view-main').classList.replace('hidden', 'flex');
             });
 
-            // 2. История
             const qTx = query(collection(db, "transactions"), where("parties", "array-contains", u.email));
-            
-            onSnapshot(qTx, async (snap) => {
+            onSnapshot(qTx, (snap) => {
                 const list = document.getElementById('tx-history');
-                if (snap.empty) {
-                    list.innerHTML = '<p class="text-center text-neutral-800 text-[10px] uppercase font-bold py-4">История пуста</p>';
-                    return;
-                }
-
                 const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date);
-                
-                let html = '';
-                for (const tx of docs) {
+                list.innerHTML = docs.map(tx => {
                     const isSent = tx.from === u.email;
-                    const partner = isSent ? tx.to : tx.from;
-                    let av = `https://ui-avatars.com/api/?background=222&color=666&name=${partner.charAt(0)}`;
-                    if (userCache[partner]) av = userCache[partner].avatar;
-                    else {
-                         getUserInfo(partner).then(inf => {
-                             const el = document.getElementById(`av-${tx.date.toMillis()}`);
-                             if(el) el.src = inf.avatar;
-                         });
-                    }
-
-                    const dateStr = tx.date ? new Date(tx.date.toMillis()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
-
-                    html += `
-                    <div class="flex items-center justify-between p-4 rounded-[1.5rem] bg-white/[0.03] border border-white/5">
-                        <div class="flex items-center gap-3 overflow-hidden">
-                            <img id="av-${tx.date ? tx.date.toMillis() : ''}" src="${av}" class="w-10 h-10 rounded-full bg-neutral-800 object-cover border border-white/5 shrink-0">
-                            <div class="min-w-0">
-                                <p class="text-[9px] font-black uppercase ${isSent ? 'text-neutral-500' : 'text-[#FF4D00]'} tracking-widest mb-0.5">${isSent ? 'Кому:' : 'От:'}</p>
-                                <p class="text-[11px] font-bold text-white truncate w-32 leading-tight">${partner}</p>
+                    return `
+                    <div class="flex items-center justify-between p-4 rounded-2xl bg-white/[0.03] border border-white/5">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center font-bold text-xs uppercase">${(isSent ? tx.to : tx.from).charAt(0)}</div>
+                            <div class="truncate w-32">
+                                <p class="text-[9px] font-black uppercase tracking-widest ${isSent ? 'text-neutral-500' : 'text-orange-500'}">${isSent ? 'Кому' : 'От'}</p>
+                                <p class="text-[11px] font-bold truncate">${isSent ? tx.to : tx.from}</p>
                             </div>
                         </div>
-                        <div class="text-right">
-                            <p class="text-sm font-black ${isSent ? 'text-white' : 'text-[#FF4D00]'}">${isSent ? '-' : '+'}${tx.amount.toFixed(2)}</p>
-                            <p class="text-[9px] text-neutral-600 font-bold uppercase">${dateStr}</p>
-                        </div>
+                        <p class="text-sm font-black ${isSent ? 'text-white' : 'text-orange-500'}">${isSent ? '-' : '+'}${tx.amount.toFixed(2)}</p>
                     </div>`;
-                }
-                list.innerHTML = html;
+                }).join('');
             });
         }
-
-        async function handleIncomingTransfer(myEmail, amountDiff) {
-            try {
-                const q = query(collection(db, "transactions"), where("to", "==", myEmail));
-                const snap = await getDocs(q);
-                
-                if (!snap.empty) {
-                    const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date);
-                    const lastTx = docs[0];
-                    
-                    if (Math.abs(lastTx.amount - amountDiff) < 0.01) {
-                        showT('Входящий перевод', lastTx.from, `+${amountDiff.toFixed(2)} Đ`, lastTx.from);
-                        return;
-                    }
-                }
-                showT('Пополнение', 'Система', `+${amountDiff.toFixed(2)} Đ`);
-            } catch(e) { console.log(e); }
-        }
-
-        // --- Actions ---
-        document.getElementById('avatar-input').onchange = (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = async (ev) => {
-                try {
-                    await updateDoc(doc(db, "users", auth.currentUser.uid), { avatar: ev.target.result });
-                    showT('Профиль', 'Аватар обновлен');
-                } catch { 
-                    showT('Ошибка', 'Не удалось загрузить фото', '', null, true);
-                }
-            };
-            reader.readAsDataURL(file);
-        };
 
         document.getElementById('btn-do-send').onclick = async () => {
             const to = document.getElementById('send-email').value.trim().toLowerCase();
             const amt = parseFloat(document.getElementById('send-amt').value);
-            const myEmail = auth.currentUser.email;
-
-            if (to === myEmail) return showT('Ошибка', 'Нельзя отправить себе', '', null, true);
             if (!amt || amt <= 0 || amt > myData.balance) return showT('Ошибка', 'Некорректная сумма', '', null, true);
-
-            const btn = document.getElementById('btn-do-send');
-            btn.disabled = true; btn.textContent = '...';
 
             try {
                 const q = query(collection(db, "users"), where("email", "==", to));
                 const res = await getDocs(q);
                 if (res.empty) throw new Error("Пользователь не найден");
-                const receiverRef = res.docs[0].ref;
-
+                
                 await runTransaction(db, async (t) => {
                     const senderRef = doc(db, "users", auth.currentUser.uid);
-                    const sDoc = await t.get(senderRef);
-                    if (sDoc.data().balance < amt) throw new Error("Недостаточно средств");
-
                     t.update(senderRef, { balance: increment(-amt) });
-                    t.update(receiverRef, { balance: increment(amt) });
-                    
-                    const txRef = doc(collection(db, "transactions"));
-                    t.set(txRef, {
-                        from: myEmail, to: to, amount: amt, date: Timestamp.now(), parties: [myEmail, to]
+                    t.update(res.docs[0].ref, { balance: increment(amt) });
+                    t.set(doc(collection(db, "transactions")), {
+                        from: auth.currentUser.email, to, amount: amt, date: Timestamp.now(), parties: [auth.currentUser.email, to]
                     });
                 });
-                
                 closeModal('send');
-                document.getElementById('send-amt').value = '';
-                document.getElementById('send-email').value = '';
-                showT('Успешно', `Перевод для ${to}`, `-${amt.toFixed(2)} Đ`);
-
-            } catch (e) { 
-                showT('Ошибка', e.message, '', null, true); 
-            }
-            finally { btn.disabled = false; btn.textContent = 'Отправить'; }
+                showT('Успешно', 'Перевод выполнен', `-${amt.toFixed(2)} Đ`);
+            } catch (e) { showT('Ошибка', e.message, '', null, true); }
         };
 
         window.copyRef = () => { 
             navigator.clipboard.writeText(document.getElementById('ref-link').textContent); 
             showT('Успешно', 'Ссылка скопирована');
         };
-        window.copyMyEmail = () => { 
-            navigator.clipboard.writeText(auth.currentUser.email); 
-            showT('Успешно', 'Email скопирован');
-        };
+
         document.getElementById('btn-logout').onclick = () => signOut(auth);
 
     </script>
