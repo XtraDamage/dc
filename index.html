@@ -13,22 +13,20 @@
             -moz-user-select: none; /* Firefox */
             -ms-user-select: none; /* IE/Edge */
             user-select: none; /* Standard */
-            -webkit-touch-callout: none; /* iOS Safari - убирает меню при долгом нажатии */
+            -webkit-touch-callout: none; /* iOS Safari */
         }
         
-        /* Разрешаем ввод текста в инпутах */
-        input {
+        input, textarea {
             -webkit-user-select: text !important;
             -moz-user-select: text !important;
             -ms-user-select: text !important;
             user-select: text !important;
         }
 
-        /* Запрет перетаскивания картинок */
         img {
             -webkit-user-drag: none;
             user-drag: none;
-            pointer-events: none; /* Игнорирует клики по самой картинке (клики ловят родители) */
+            pointer-events: none;
         }
 
         body { background-color: #000; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -39,15 +37,20 @@
         .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* Toast Animation */
         #toast { transform: translateY(-150%) scale(0.9); transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); opacity: 0; }
         #toast.active { transform: translateY(0) scale(1); opacity: 1; }
         
         .hide-scroll::-webkit-scrollbar { display: none; }
         .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
+
+        /* Chat Animations */
+        .chat-slide-enter { transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1); }
+        .chat-slide-enter-active { transform: translateX(0); }
+        .chat-slide-exit { transform: translateX(0); transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1); }
+        .chat-slide-exit-active { transform: translateX(100%); }
     </style>
 </head>
-<body class="overflow-hidden bg-black" oncontextmenu="return false;"> <!-- Блокировка правой кнопки мыши -->
+<body class="overflow-hidden bg-black" oncontextmenu="return false;">
 
     <div id="app" class="max-w-[480px] mx-auto h-[100dvh] flex flex-col relative bg-black shadow-2xl overflow-hidden">
         
@@ -55,7 +58,6 @@
         <div id="toast" class="fixed top-4 left-4 right-4 z-[200] glass-panel p-3 rounded-[2rem] flex items-center gap-3 shadow-2xl pointer-events-none border border-white/10">
             <div class="relative shrink-0">
                 <img id="toast-avatar" src="" class="w-12 h-12 rounded-full object-cover bg-neutral-800 border-2 border-white/10" onerror="this.src='https://ui-avatars.com/api/?background=333&color=fff&size=128'">
-                <!-- Индикатор статуса (зеленый) -->
                 <div id="toast-status" class="absolute -bottom-1 -right-1 bg-green-500 w-4 h-4 rounded-full border-2 border-black flex items-center justify-center">
                     <svg width="8" height="8" fill="none" stroke="black" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
                 </div>
@@ -95,6 +97,7 @@
                     <button id="btn-login" class="h-16 bg-white text-black rounded-2xl font-black text-sm uppercase tracking-wider hover:bg-neutral-200 transition-colors">Войти</button>
                     <button id="btn-register" class="h-16 glass-panel text-white rounded-2xl font-black text-sm uppercase tracking-wider hover:bg-white/10 transition-colors">Создать</button>
                 </div>
+                <p id="auth-switch-hint" class="text-center text-[10px] text-neutral-500 hidden mt-4">Вход в другой аккаунт</p>
             </div>
         </div>
 
@@ -102,20 +105,25 @@
         <div id="view-main" class="hidden flex flex-col h-full">
             <header class="px-6 pt-14 pb-4 flex justify-between items-center z-20">
                 <div class="flex items-center gap-3 active:opacity-70 transition-opacity cursor-pointer" onclick="openModal('profile')">
-                    <div class="p-[2px] gradient-bg rounded-full shadow-[0_0_20px_rgba(255,77,0,0.3)]">
-                        <img id="main-avatar" src="" class="w-10 h-10 rounded-full object-cover bg-black border-2 border-black">
+                    <div class="relative">
+                        <div class="p-[2px] gradient-bg rounded-full shadow-[0_0_20px_rgba(255,77,0,0.3)]">
+                            <img id="main-avatar" src="" class="w-10 h-10 rounded-full object-cover bg-black border-2 border-black">
+                        </div>
+                        <div class="absolute -bottom-1 -right-1 bg-black rounded-full p-0.5">
+                            <div class="w-3 h-3 bg-green-500 rounded-full border-2 border-black"></div>
+                        </div>
                     </div>
                     <div class="flex flex-col justify-center">
                         <p id="main-username" class="text-xs font-bold truncate max-w-[140px] leading-tight">...</p>
                         <p class="text-[9px] font-black text-neutral-500 uppercase tracking-widest leading-tight">Профиль</p>
                     </div>
                 </div>
-                <button id="btn-logout" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer">
-                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                <button id="btn-add-chat" onclick="openNewChatModal()" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer hidden">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/><path d="M12 7v10M7 12h10"/></svg>
                 </button>
             </header>
 
-            <main class="flex-1 overflow-y-auto px-5 hide-scroll pb-32 z-10">
+            <main class="flex-1 overflow-y-auto px-5 hide-scroll pb-32 z-10 relative">
                 <!-- Вкладка Кошелек -->
                 <div id="tab-wallet" class="tab-content active space-y-6">
                     <!-- Карточка баланса -->
@@ -140,12 +148,21 @@
                     <!-- История транзакций -->
                     <div class="space-y-4">
                         <div class="flex items-center justify-between px-2">
-                            <h3 class="text-[11px] font-black text-neutral-500 uppercase tracking-widest">История операций</h3>
+                            <h3 class="text-[11px] font-black text-neutral-500 uppercase tracking-widest">История</h3>
                         </div>
                         <div id="tx-history" class="space-y-2 pb-10">
-                            <div class="text-center py-10">
-                                <div class="w-8 h-8 border-2 border-white/10 border-t-orange-500 rounded-full animate-spin mx-auto mb-4"></div>
-                                <p class="text-[10px] font-bold text-neutral-600 uppercase tracking-widest">Загрузка...</p>
+                            <!-- Заполняется JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Вкладка Чаты -->
+                <div id="tab-chats" class="tab-content space-y-4">
+                    <div class="px-2">
+                        <h3 class="text-[11px] font-black text-neutral-500 uppercase tracking-widest mb-4">Сообщения</h3>
+                        <div id="chats-list" class="space-y-2 pb-20">
+                            <div class="text-center py-10 opacity-50">
+                                <p class="text-[10px] font-bold uppercase">Загрузка чатов...</p>
                             </div>
                         </div>
                     </div>
@@ -170,7 +187,7 @@
                             </div>
                         </div>
                     </div>
-
+                    <!-- Статистика рефералов -->
                     <div class="grid grid-cols-2 gap-3">
                         <div class="dool-card p-5 rounded-[2rem] flex flex-col items-center justify-center gap-1 aspect-square">
                             <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center mb-2 text-neutral-400">
@@ -195,28 +212,85 @@
                 <button onclick="switchTab('wallet')" id="nav-wallet" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-orange-500 cursor-pointer">
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
                 </button>
+                <button onclick="switchTab('chats')" id="nav-chats" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                </button>
                 <button onclick="switchTab('referrals')" id="nav-referrals" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
                 </button>
             </nav>
         </div>
 
-        <!-- Модалка: Профиль -->
-        <div id="modal-profile" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col items-center justify-center p-8 opacity-0 transition-opacity duration-300">
-            <div class="w-full max-w-xs transform scale-90 transition-transform duration-300" id="modal-profile-content">
-                <div class="bg-[#111] border border-white/10 p-8 rounded-[2.5rem] text-center shadow-2xl">
-                    <h2 class="text-xl font-black mb-6">Ваш Профиль</h2>
-                    <div class="relative inline-block mb-6 group">
-                        <div class="p-1 gradient-bg rounded-full">
-                            <img id="edit-avatar-img" src="" class="w-24 h-24 rounded-full object-cover border-4 border-[#111] bg-neutral-900">
-                        </div>
-                        <label class="absolute bottom-0 right-0 bg-white text-black w-8 h-8 flex items-center justify-center rounded-full cursor-pointer hover:scale-110 transition-transform shadow-lg">
-                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
-                            <input type="file" id="avatar-input" class="hidden" accept="image/*">
-                        </label>
+        <!-- Chat Room View (Slide in) -->
+        <div id="view-chat-room" class="absolute inset-0 z-[60] bg-[#0a0a0a] flex flex-col transform translate-x-full transition-transform duration-300">
+            <!-- Header -->
+            <header class="px-4 py-4 border-b border-white/5 bg-[#111]/90 backdrop-blur-md flex items-center gap-3">
+                <button onclick="closeChat()" class="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center">
+                    <svg width="24" height="24" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                </button>
+                <div class="flex items-center gap-3 flex-1 min-w-0">
+                    <img id="chat-header-avatar" src="" class="w-10 h-10 rounded-full bg-neutral-800 object-cover">
+                    <div class="min-w-0">
+                        <p id="chat-header-name" class="font-bold text-sm truncate">User</p>
+                        <p class="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">В сети</p>
                     </div>
-                    <p id="profile-email" class="text-xs text-neutral-500 font-bold mb-6 truncate px-2">...</p>
-                    <button onclick="closeModal('profile')" class="w-full h-12 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer">Закрыть</button>
+                </div>
+            </header>
+            
+            <!-- Messages -->
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 hide-scroll">
+                <!-- Сообщения -->
+            </div>
+
+            <!-- Input Area -->
+            <div class="p-4 bg-[#111] border-t border-white/5 pb-8">
+                <div class="glass-panel rounded-3xl flex items-center p-2 gap-2">
+                    <button onclick="openModal('send', true)" class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 text-orange-500 flex items-center justify-center transition-colors flex-shrink-0">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    </button>
+                    <input type="text" id="chat-input" placeholder="Сообщение..." class="flex-1 bg-transparent border-none outline-none text-sm font-medium h-10 text-white placeholder:text-neutral-600">
+                    <button onclick="sendMessage()" class="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 transition-transform flex-shrink-0">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модалка: Профиль & Аккаунты -->
+        <div id="modal-profile" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col items-center justify-center p-6 opacity-0 transition-opacity duration-300">
+            <div class="w-full max-w-sm transform scale-90 transition-transform duration-300 bg-[#111] border border-white/10 rounded-[2.5rem] p-6 shadow-2xl max-h-[85vh] overflow-hidden flex flex-col" id="modal-profile-content">
+                <div class="overflow-y-auto hide-scroll">
+                    <div class="text-center mb-6 relative">
+                         <div class="relative inline-block mb-4 group">
+                            <div class="p-1 gradient-bg rounded-full">
+                                <img id="edit-avatar-img" src="" class="w-20 h-20 rounded-full object-cover border-4 border-[#111] bg-neutral-900">
+                            </div>
+                            <label class="absolute bottom-0 right-0 bg-white text-black w-8 h-8 flex items-center justify-center rounded-full cursor-pointer hover:scale-110 transition-transform shadow-lg">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+                                <input type="file" id="avatar-input" class="hidden" accept="image/*">
+                            </label>
+                        </div>
+                        <p id="profile-email" class="text-sm font-bold truncate px-2">...</p>
+                    </div>
+
+                    <div class="bg-white/5 rounded-2xl p-4 mb-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-[10px] font-black uppercase text-neutral-500 tracking-widest">Мои Аккаунты</h3>
+                            <span id="acc-count" class="text-[10px] bg-neutral-800 px-2 py-0.5 rounded-full text-neutral-400 font-bold">1/15</span>
+                        </div>
+                        <div id="accounts-list" class="space-y-2 mb-3">
+                            <!-- Список аккаунтов -->
+                        </div>
+                        <button onclick="addAccount()" class="w-full h-10 border border-dashed border-white/20 rounded-xl flex items-center justify-center text-xs font-bold text-neutral-400 hover:text-white hover:border-white/40 transition-colors gap-2">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                            Добавить аккаунт
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="signOut(auth)" class="h-12 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-xl font-bold text-xs uppercase tracking-wider transition-colors">Выйти</button>
+                        <button onclick="closeModal('profile')" class="h-12 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-colors">Закрыть</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -260,13 +334,25 @@
                 <button onclick="closeModal('receive')" class="text-neutral-500 font-bold uppercase text-[10px] hover:text-white transition-colors cursor-pointer">Закрыть</button>
             </div>
         </div>
+        
+        <!-- Модалка: Новый Чат -->
+        <div id="modal-newchat" class="hidden absolute inset-0 z-[130] bg-black/90 backdrop-blur-xl items-center justify-center p-8 opacity-0 transition-opacity duration-300">
+            <div class="bg-[#111] w-full max-w-xs p-6 rounded-[2rem] border border-white/10 transform scale-95 transition-transform" id="modal-newchat-content">
+                <h3 class="font-black text-lg mb-4">Новый чат</h3>
+                <input id="new-chat-email" type="email" placeholder="Email собеседника" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 mb-4 text-sm outline-none focus:border-orange-500/50">
+                <div class="flex gap-2">
+                    <button onclick="closeModal('newchat')" class="flex-1 py-3 bg-white/5 rounded-xl text-xs font-bold uppercase text-neutral-400">Отмена</button>
+                    <button onclick="startNewChat()" class="flex-1 py-3 bg-white text-black rounded-xl text-xs font-bold uppercase hover:bg-neutral-200">Начать</button>
+                </div>
+            </div>
+        </div>
 
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, query, where, runTransaction, Timestamp, increment, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, query, where, runTransaction, Timestamp, increment, getDocs, addDoc, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyBoFuGY-SSmcGHPGzuWZbdGFeI9_aaAKs8",
@@ -280,19 +366,95 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        
+        // Expose auth to window for onclick handlers
+        window.auth = auth;
+        window.signOut = signOut;
 
         let myData = null;
         let lastBal = null;
-        const userCache = {}; 
+        const userCache = {};
+        let currentChatEmail = null;
+        let chatUnsub = null;
+
+        // --- Multi-Account Logic (LocalStorage) ---
+        const ACCOUNTS_KEY = 'dool_accounts';
+        
+        function getStoredAccounts() {
+            try { return JSON.parse(localStorage.getItem(ACCOUNTS_KEY) || '[]'); } 
+            catch { return []; }
+        }
+
+        function storeAccount(user, avatarUrl) {
+            let accs = getStoredAccounts();
+            // Remove if exists
+            accs = accs.filter(a => a.email !== user.email);
+            // Add to top
+            accs.unshift({ email: user.email, uid: user.uid, avatar: avatarUrl, lastActive: Date.now() });
+            // Limit to 15
+            if (accs.length > 15) accs = accs.slice(0, 15);
+            localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accs));
+            renderAccountsList();
+        }
+
+        window.addAccount = () => {
+            const accs = getStoredAccounts();
+            if (accs.length >= 15) return showT('Лимит', 'Максимум 15 аккаунтов', '', null, true);
+            signOut(auth).then(() => {
+                // Clear inputs
+                document.getElementById('auth-email').value = '';
+                document.getElementById('auth-password').value = '';
+                document.getElementById('auth-switch-hint').classList.add('hidden');
+            });
+        };
+
+        window.switchAccount = (email) => {
+            if (auth.currentUser && auth.currentUser.email === email) return; // Already here
+            
+            signOut(auth).then(() => {
+                // Prefill UI
+                setTimeout(() => {
+                    const emailInput = document.getElementById('auth-email');
+                    emailInput.value = email;
+                    document.getElementById('auth-password').focus();
+                    const hint = document.getElementById('auth-switch-hint');
+                    hint.textContent = `Вход как ${email}`;
+                    hint.classList.remove('hidden');
+                }, 100);
+            });
+        };
+
+        function renderAccountsList() {
+            const list = document.getElementById('accounts-list');
+            const accs = getStoredAccounts();
+            const currentEmail = auth.currentUser ? auth.currentUser.email : '';
+            document.getElementById('acc-count').textContent = `${accs.length}/15`;
+
+            if (accs.length === 0) {
+                list.innerHTML = '<p class="text-center text-[10px] text-neutral-600">Нет сохраненных аккаунтов</p>';
+                return;
+            }
+
+            let html = '';
+            accs.forEach(a => {
+                const isActive = a.email === currentEmail;
+                html += `
+                <div onclick="${isActive ? '' : `switchAccount('${a.email}')`}" class="flex items-center gap-3 p-2 rounded-xl ${isActive ? 'bg-orange-500/10 border border-orange-500/20' : 'hover:bg-white/5 cursor-pointer border border-transparent'} transition-all">
+                    <img src="${a.avatar || 'https://ui-avatars.com/api/?background=333&color=fff'}" class="w-8 h-8 rounded-full bg-neutral-800 object-cover">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-bold truncate ${isActive ? 'text-orange-500' : 'text-white'}">${a.email}</p>
+                    </div>
+                    ${isActive ? '<div class="w-2 h-2 rounded-full bg-orange-500"></div>' : ''}
+                </div>`;
+            });
+            list.innerHTML = html;
+        }
 
         // --- User Info Helper ---
         async function getUserInfo(email) {
             if (userCache[email]) return userCache[email];
-            
-            // Заглушка
             const defaultAv = `https://ui-avatars.com/api/?background=random&color=fff&name=${email.charAt(0).toUpperCase()}&size=128`;
             let info = { avatar: defaultAv, email: email };
-
             try {
                 const q = query(collection(db, "users"), where("email", "==", email));
                 const res = await getDocs(q);
@@ -300,23 +462,32 @@
                     const d = res.docs[0].data();
                     if (d.avatar) info.avatar = d.avatar;
                 }
-            } catch (e) { console.log('Не удалось загрузить аватар:', e); }
-
+            } catch (e) { console.log(e); }
             userCache[email] = info;
             return info;
         }
 
         // --- UI Animation Helpers ---
-        window.openModal = (n) => {
+        window.openModal = (n, prefillChat = false) => {
             const m = document.getElementById('modal-'+n);
             const c = document.getElementById(`modal-${n}-content`);
             m.classList.remove('hidden');
-            // Force reflow
             void m.offsetWidth;
             m.classList.remove('opacity-0');
             
-            if(n === 'send') c.classList.remove('translate-y-full');
-            else c.classList.remove('scale-90');
+            if(n === 'send') {
+                c.classList.remove('translate-y-full');
+                if(prefillChat && currentChatEmail) {
+                    document.getElementById('send-email').value = currentChatEmail;
+                }
+            } else if (n === 'newchat') {
+                c.classList.remove('scale-95');
+                c.classList.add('scale-100');
+            } else {
+                c.classList.remove('scale-90');
+            }
+
+            if(n === 'profile') renderAccountsList();
         };
 
         window.closeModal = (n) => {
@@ -325,13 +496,22 @@
             m.classList.add('opacity-0');
             
             if(n === 'send') c.classList.add('translate-y-full');
+            else if (n === 'newchat') c.classList.replace('scale-100', 'scale-95');
             else c.classList.add('scale-90');
 
             setTimeout(() => m.classList.add('hidden'), 300);
         };
 
-        // Обновленная функция уведомлений (Toast)
-        // Если isError = true, показываем красную точку и стандартную иконку, иначе зеленую и аватар
+        window.openNewChatModal = () => openModal('newchat');
+        window.startNewChat = () => {
+            const email = document.getElementById('new-chat-email').value.trim().toLowerCase();
+            if(!email) return;
+            if(email === auth.currentUser.email) return showT('Ошибка', 'Нельзя писать себе', '', null, true);
+            closeModal('newchat');
+            document.getElementById('new-chat-email').value = '';
+            openChat(email);
+        }
+
         window.showT = async (title, msg, amountStr = '', senderEmail = null, isError = false) => {
             const t = document.getElementById('toast');
             const status = document.getElementById('toast-status');
@@ -348,19 +528,13 @@
             }
             
             const img = document.getElementById('toast-avatar');
-            
             if (isError) {
-                // Стиль ошибки
-                status.classList.remove('bg-green-500');
-                status.classList.add('bg-red-500');
+                status.className = "absolute -bottom-1 -right-1 bg-red-500 w-4 h-4 rounded-full border-2 border-black flex items-center justify-center";
                 status.innerHTML = '<svg width="8" height="8" fill="none" stroke="black" stroke-width="3" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>';
                 img.src = `https://ui-avatars.com/api/?background=333&color=fff&name=!`;
             } else {
-                // Стиль успеха/инфо
-                status.classList.remove('bg-red-500');
-                status.classList.add('bg-green-500');
+                status.className = "absolute -bottom-1 -right-1 bg-green-500 w-4 h-4 rounded-full border-2 border-black flex items-center justify-center";
                 status.innerHTML = '<svg width="8" height="8" fill="none" stroke="black" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>';
-                
                 if (senderEmail) {
                     const u = await getUserInfo(senderEmail);
                     img.src = u.avatar;
@@ -368,7 +542,6 @@
                     img.src = `https://ui-avatars.com/api/?background=333&color=fff&name=S`;
                 }
             }
-            
             t.classList.add('active');
             setTimeout(() => t.classList.remove('active'), 4000);
         };
@@ -377,16 +550,19 @@
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.getElementById('tab-'+tab).classList.add('active');
             
-            const navW = document.getElementById('nav-wallet');
-            const navR = document.getElementById('nav-referrals');
-            
-            if(tab === 'wallet') {
-                navW.classList.replace('text-neutral-600', 'text-orange-500');
-                navR.classList.replace('text-orange-500', 'text-neutral-600');
-            } else {
-                navW.classList.replace('text-orange-500', 'text-neutral-600');
-                navR.classList.replace('text-neutral-600', 'text-orange-500');
-            }
+            const navs = ['wallet', 'chats', 'referrals'];
+            navs.forEach(n => {
+                const el = document.getElementById('nav-'+n);
+                if(n === tab) {
+                    el.classList.replace('text-neutral-600', 'text-orange-500');
+                } else {
+                    el.classList.replace('text-orange-500', 'text-neutral-600');
+                }
+            });
+
+            const btnChat = document.getElementById('btn-add-chat');
+            if (tab === 'chats') btnChat.classList.remove('hidden');
+            else btnChat.classList.add('hidden');
         };
 
         // --- Logic ---
@@ -394,12 +570,18 @@
             if (u) {
                 const userRef = doc(db, "users", u.uid);
                 const snap = await getDoc(userRef);
+                let currentAv = '';
                 if (!snap.exists()) {
                     await setDoc(userRef, {
                         email: u.email, balance: 10.0, avatar: '', refCount: 0, refEarned: 0, 
                         createdAt: Timestamp.now(), lowercaseEmail: u.email.toLowerCase()
                     });
+                } else {
+                    currentAv = snap.data().avatar;
                 }
+                
+                // Store account for switching
+                storeAccount(u, currentAv);
                 startApp(u);
             } else {
                 document.getElementById('view-loading').classList.add('hidden');
@@ -445,7 +627,7 @@
             document.getElementById('my-email-addr').textContent = u.email;
             document.getElementById('ref-link').textContent = `${window.location.origin}?ref=${u.email}`;
 
-            // 1. Слушаем профиль
+            // 1. Profile Listener
             onSnapshot(doc(db, "users", u.uid), async (snap) => {
                 const d = snap.data();
                 if (!d) return;
@@ -465,43 +647,37 @@
                 const av = d.avatar || `https://ui-avatars.com/api/?background=random&color=fff&name=${u.email.charAt(0)}`;
                 document.getElementById('main-avatar').src = av;
                 document.getElementById('edit-avatar-img').src = av;
+                
+                // Update avatar in local storage
+                storeAccount(u, d.avatar);
 
                 document.getElementById('view-auth').classList.add('hidden');
                 document.getElementById('view-loading').classList.add('hidden');
                 document.getElementById('view-main').classList.replace('hidden', 'flex');
             });
 
-            // 2. История
+            // 2. Tx History
             const qTx = query(collection(db, "transactions"), where("parties", "array-contains", u.email));
-            
-            onSnapshot(qTx, async (snap) => {
+            onSnapshot(qTx, (snap) => {
                 const list = document.getElementById('tx-history');
                 if (snap.empty) {
                     list.innerHTML = '<p class="text-center text-neutral-800 text-[10px] uppercase font-bold py-4">История пуста</p>';
                     return;
                 }
-
                 const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date);
-                
                 let html = '';
                 for (const tx of docs) {
                     const isSent = tx.from === u.email;
                     const partner = isSent ? tx.to : tx.from;
-                    let av = `https://ui-avatars.com/api/?background=222&color=666&name=${partner.charAt(0)}`;
-                    if (userCache[partner]) av = userCache[partner].avatar;
-                    else {
-                         getUserInfo(partner).then(inf => {
-                             const el = document.getElementById(`av-${tx.date.toMillis()}`);
-                             if(el) el.src = inf.avatar;
-                         });
-                    }
-
                     const dateStr = tx.date ? new Date(tx.date.toMillis()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
-
+                    
+                    // Simple logic to get avatar later or use placeholder
+                    const av = `https://ui-avatars.com/api/?background=222&color=666&name=${partner.charAt(0)}`;
+                    
                     html += `
-                    <div class="flex items-center justify-between p-4 rounded-[1.5rem] bg-white/[0.03] border border-white/5">
+                    <div onclick="openChat('${partner}')" class="flex items-center justify-between p-4 rounded-[1.5rem] bg-white/[0.03] border border-white/5 cursor-pointer hover:bg-white/5 transition-colors">
                         <div class="flex items-center gap-3 overflow-hidden">
-                            <img id="av-${tx.date ? tx.date.toMillis() : ''}" src="${av}" class="w-10 h-10 rounded-full bg-neutral-800 object-cover border border-white/5 shrink-0">
+                            <img src="${av}" class="w-10 h-10 rounded-full bg-neutral-800 object-cover border border-white/5 shrink-0">
                             <div class="min-w-0">
                                 <p class="text-[9px] font-black uppercase ${isSent ? 'text-neutral-500' : 'text-[#FF4D00]'} tracking-widest mb-0.5">${isSent ? 'Кому:' : 'От:'}</p>
                                 <p class="text-[11px] font-bold text-white truncate w-32 leading-tight">${partner}</p>
@@ -515,25 +691,158 @@
                 }
                 list.innerHTML = html;
             });
+
+            // 3. Chats List Listener
+            loadChatsList(u.email);
         }
 
         async function handleIncomingTransfer(myEmail, amountDiff) {
             try {
                 const q = query(collection(db, "transactions"), where("to", "==", myEmail));
                 const snap = await getDocs(q);
-                
                 if (!snap.empty) {
                     const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date);
                     const lastTx = docs[0];
-                    
                     if (Math.abs(lastTx.amount - amountDiff) < 0.01) {
                         showT('Входящий перевод', lastTx.from, `+${amountDiff.toFixed(2)} Đ`, lastTx.from);
                         return;
                     }
                 }
                 showT('Пополнение', 'Система', `+${amountDiff.toFixed(2)} Đ`);
-            } catch(e) { console.log(e); }
+            } catch(e) {}
         }
+
+        // --- Chat System ---
+        
+        function getChatId(email1, email2) {
+            return [email1, email2].sort().join('_');
+        }
+
+        function loadChatsList(myEmail) {
+            const q = query(collection(db, "chats"), where("participants", "array-contains", myEmail));
+            
+            onSnapshot(q, (snap) => {
+                const list = document.getElementById('chats-list');
+                if (snap.empty) {
+                    list.innerHTML = '<div class="text-center py-10"><p class="text-[10px] text-neutral-600 uppercase font-bold">Нет сообщений</p><button onclick="openNewChatModal()" class="mt-2 text-orange-500 text-xs font-bold hover:underline">Написать сообщение</button></div>';
+                    return;
+                }
+                
+                const chats = snap.docs.map(d => ({id: d.id, ...d.data()})).sort((a, b) => b.lastUpdated - a.lastUpdated);
+                
+                let html = '';
+                chats.forEach(chat => {
+                    const partner = chat.participants.find(e => e !== myEmail);
+                    const time = chat.lastUpdated ? new Date(chat.lastUpdated.toMillis()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+                    
+                    html += `
+                    <div onclick="openChat('${partner}')" class="flex items-center gap-3 p-3 rounded-2xl hover:bg-white/5 cursor-pointer transition-colors border border-transparent hover:border-white/5">
+                        <div class="relative">
+                            <img src="https://ui-avatars.com/api/?background=random&color=fff&name=${partner.charAt(0)}" class="w-12 h-12 rounded-full bg-neutral-800 object-cover">
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-baseline mb-0.5">
+                                <p class="text-sm font-bold truncate pr-2">${partner}</p>
+                                <p class="text-[10px] text-neutral-500 font-medium">${time}</p>
+                            </div>
+                            <p class="text-xs text-neutral-400 truncate">${chat.lastMessage || '...'}</p>
+                        </div>
+                    </div>`;
+                });
+                list.innerHTML = html;
+            });
+        }
+
+        window.openChat = async (partnerEmail) => {
+            const myEmail = auth.currentUser.email;
+            currentChatEmail = partnerEmail;
+            const chatId = getChatId(myEmail, partnerEmail);
+            
+            // UI
+            const view = document.getElementById('view-chat-room');
+            view.classList.remove('translate-x-full');
+            
+            // Header
+            document.getElementById('chat-header-name').textContent = partnerEmail;
+            const uInfo = await getUserInfo(partnerEmail);
+            document.getElementById('chat-header-avatar').src = uInfo.avatar;
+
+            // Load Messages
+            const msgsDiv = document.getElementById('chat-messages');
+            msgsDiv.innerHTML = '<div class="flex justify-center py-4"><div class="w-6 h-6 border-2 border-white/10 border-t-orange-500 rounded-full animate-spin"></div></div>';
+            
+            if (chatUnsub) chatUnsub(); // Unsub previous
+
+            const q = query(collection(db, "chats", chatId, "messages"), orderBy("timestamp", "asc"));
+            chatUnsub = onSnapshot(q, (snap) => {
+                msgsDiv.innerHTML = '';
+                if(snap.empty) {
+                    msgsDiv.innerHTML = '<p class="text-center text-[10px] text-neutral-600 mt-10">Напишите первое сообщение...</p>';
+                }
+                
+                snap.forEach(doc => {
+                    const m = doc.data();
+                    const isMe = m.sender === myEmail;
+                    const time = m.timestamp ? new Date(m.timestamp.toMillis()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+                    
+                    msgsDiv.innerHTML += `
+                        <div class="flex ${isMe ? 'justify-end' : 'justify-start'} mb-3">
+                            <div class="max-w-[80%] ${isMe ? 'bg-orange-500 text-white rounded-br-none' : 'bg-[#1a1a1a] text-neutral-200 rounded-bl-none'} rounded-2xl px-4 py-2 relative group">
+                                <p class="text-sm font-medium leading-relaxed">${m.text}</p>
+                                <p class="text-[9px] ${isMe ? 'text-white/60' : 'text-neutral-500'} text-right mt-1">${time}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+                msgsDiv.scrollTop = msgsDiv.scrollHeight;
+            });
+        };
+
+        window.closeChat = () => {
+            document.getElementById('view-chat-room').classList.add('translate-x-full');
+            currentChatEmail = null;
+            if (chatUnsub) chatUnsub();
+        };
+
+        window.sendMessage = async () => {
+            if (!currentChatEmail) return;
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+            
+            input.value = '';
+            const myEmail = auth.currentUser.email;
+            const chatId = getChatId(myEmail, currentChatEmail);
+            
+            try {
+                // Ensure chat doc exists
+                const chatRef = doc(db, "chats", chatId);
+                const chatSnap = await getDoc(chatRef);
+                if (!chatSnap.exists()) {
+                    await setDoc(chatRef, {
+                        participants: [myEmail, currentChatEmail],
+                        lastMessage: text,
+                        lastUpdated: Timestamp.now()
+                    });
+                } else {
+                    await updateDoc(chatRef, {
+                        lastMessage: text,
+                        lastUpdated: Timestamp.now()
+                    });
+                }
+
+                // Add message
+                await addDoc(collection(db, "chats", chatId, "messages"), {
+                    sender: myEmail,
+                    text: text,
+                    timestamp: Timestamp.now()
+                });
+            } catch(e) {
+                console.error(e);
+                showT('Ошибка', 'Не удалось отправить', '', null, true);
+            }
+        };
+
 
         // --- Actions ---
         document.getElementById('avatar-input').onchange = (e) => {
@@ -586,6 +895,17 @@
                 document.getElementById('send-amt').value = '';
                 document.getElementById('send-email').value = '';
                 showT('Успешно', `Перевод для ${to}`, `-${amt.toFixed(2)} Đ`);
+                
+                // If inside a chat, send automated message about transfer
+                if (currentChatEmail === to) {
+                     const chatId = getChatId(myEmail, to);
+                     await addDoc(collection(db, "chats", chatId, "messages"), {
+                        sender: myEmail,
+                        text: `💸 Перевод: ${amt.toFixed(2)} Đ`,
+                        timestamp: Timestamp.now()
+                    });
+                    updateDoc(doc(db, "chats", chatId), { lastMessage: `💸 Перевод: ${amt.toFixed(2)} Đ`, lastUpdated: Timestamp.now() });
+                }
 
             } catch (e) { 
                 showT('Ошибка', e.message, '', null, true); 
@@ -601,7 +921,6 @@
             navigator.clipboard.writeText(auth.currentUser.email); 
             showT('Успешно', 'Email скопирован');
         };
-        document.getElementById('btn-logout').onclick = () => signOut(auth);
 
     </script>
 </body>
