@@ -5,33 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Doolcoin Wallet</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- QR Code Scanner Library -->
+    <!-- QR Code Scanner Library (Core) -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* Блокировка выделения и контекстного меню */
-        * {
-            -webkit-user-select: none; /* Safari/Chrome */
-            -moz-user-select: none; /* Firefox */
-            -ms-user-select: none; /* IE/Edge */
-            user-select: none; /* Standard */
-            -webkit-touch-callout: none; /* iOS Safari */
-        }
-        
-        input {
-            -webkit-user-select: text !important;
-            -moz-user-select: text !important;
-            -ms-user-select: text !important;
-            user-select: text !important;
-        }
-
-        img {
-            -webkit-user-drag: none;
-            user-drag: none;
-            pointer-events: none; 
-        }
-
+        /* Блокировка и базовые стили */
+        * { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-touch-callout: none; }
+        input { -webkit-user-select: text !important; -moz-user-select: text !important; -ms-user-select: text !important; user-select: text !important; }
+        img { -webkit-user-drag: none; user-drag: none; pointer-events: none; }
         body { background-color: #000; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        /* UI Components */
         .dool-card { background: #0a0a0a; border: 1px solid rgba(255,255,255,0.05); }
         .gradient-text { background: linear-gradient(135deg, #FF4D00, #FF005C); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .gradient-bg { background: linear-gradient(135deg, #FF4D00, #FF005C); }
@@ -45,16 +29,51 @@
         .hide-scroll::-webkit-scrollbar { display: none; }
         .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
 
-        /* Scanner Styles */
-        #reader { width: 100%; border-radius: 1.5rem; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
-        #reader video { object-fit: cover; border-radius: 1.5rem; }
+        /* Custom Scanner Overlay */
+        #reader { width: 100%; height: 100%; border-radius: 1.5rem; overflow: hidden; position: relative; background: black; }
+        #reader video { object-fit: cover; width: 100%; height: 100%; border-radius: 1.5rem; }
+        
+        .scan-overlay {
+            position: absolute; inset: 0; z-index: 10; pointer-events: none;
+            border: 2px solid rgba(255, 77, 0, 0.3); border-radius: 1.5rem;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+        }
+        .scan-line {
+            position: absolute; width: 100%; height: 2px; background: #FF4D00;
+            box-shadow: 0 0 10px #FF4D00, 0 0 20px #FF4D00;
+            top: 50%; animation: scanAnim 2s infinite ease-in-out; opacity: 0.8;
+        }
+        @keyframes scanAnim { 0% { transform: translateY(-120px); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateY(120px); opacity: 0; } }
+        
+        /* Orange Glass QR Style */
+        .qr-glass-container {
+            background: #000;
+            padding: 10px;
+            border-radius: 20px;
+            box-shadow: 0 0 20px rgba(255, 77, 0, 0.15), inset 0 0 20px rgba(255, 77, 0, 0.05);
+            border: 1px solid rgba(255, 77, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        .qr-glass-img {
+            filter: drop-shadow(0 0 4px rgba(255, 77, 0, 0.5));
+            mix-blend-mode: screen; /* Смешивание для эффекта свечения */
+        }
+        .qr-error-overlay {
+            position: absolute; inset: 0; background: rgba(0,0,0,0.9);
+            display: flex; flex-col; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+            z-index: 20;
+        }
+        .qr-error-overlay.active { opacity: 1; pointer-events: auto; }
+
     </style>
 </head>
 <body class="overflow-hidden bg-black" oncontextmenu="return false;">
 
     <div id="app" class="max-w-[480px] mx-auto h-[100dvh] flex flex-col relative bg-black shadow-2xl overflow-hidden">
         
-        <!-- Уведомления (Toast) -->
+        <!-- Toast -->
         <div id="toast" class="fixed top-4 left-4 right-4 z-[200] glass-panel p-3 rounded-[2rem] flex items-center gap-3 shadow-2xl pointer-events-none border border-white/10">
             <div class="relative shrink-0">
                 <img id="toast-avatar" src="" class="w-12 h-12 rounded-full object-cover bg-neutral-800 border-2 border-white/10" onerror="this.src='https://ui-avatars.com/api/?background=333&color=fff&size=128'">
@@ -118,9 +137,7 @@
             </header>
 
             <main class="flex-1 overflow-y-auto px-5 hide-scroll pb-32 z-10">
-                <!-- Вкладка Кошелек -->
                 <div id="tab-wallet" class="tab-content active space-y-6">
-                    <!-- Карточка баланса -->
                     <div class="dool-card rounded-[2.5rem] p-8 relative overflow-hidden group">
                         <div class="absolute inset-0 gradient-bg opacity-[0.03] group-hover:opacity-[0.05] transition-opacity duration-500"></div>
                         <div class="absolute -right-12 -top-12 w-48 h-48 bg-[#FF4D00] rounded-full blur-[80px] opacity-20"></div>
@@ -133,13 +150,12 @@
                             </div>
                         </div>
 
-                        <!-- Кнопки действий -->
                         <div class="flex gap-3 mt-6 relative z-10">
                             <button onclick="openModal('send')" class="flex-1 h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 active:scale-95 transition-all shadow-lg shadow-white/5 cursor-pointer flex flex-col items-center justify-center">
                                 <span>Отправить</span>
                             </button>
-                            <!-- Кнопка Сканирования (Маленькая по центру) -->
-                            <button onclick="openModal('scan')" class="w-14 h-14 glass-panel text-white rounded-2xl flex items-center justify-center hover:bg-white/10 active:scale-95 transition-all cursor-pointer">
+                            <!-- Кнопка Сканирования -->
+                            <button onclick="openModal('scan')" class="w-14 h-14 glass-panel text-white rounded-2xl flex items-center justify-center hover:bg-white/10 active:scale-95 transition-all cursor-pointer border border-white/10 group-hover:border-orange-500/50">
                                 <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
                             </button>
                             <button onclick="openModal('receive')" class="flex-1 h-14 glass-panel text-white border border-white/10 rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-white/10 active:scale-95 transition-all cursor-pointer flex flex-col items-center justify-center">
@@ -148,7 +164,6 @@
                         </div>
                     </div>
 
-                    <!-- История транзакций -->
                     <div class="space-y-4">
                         <div class="flex items-center justify-between px-2">
                             <h3 class="text-[11px] font-black text-neutral-500 uppercase tracking-widest">История операций</h3>
@@ -162,7 +177,6 @@
                     </div>
                 </div>
 
-                <!-- Вкладка Рефералы -->
                 <div id="tab-referrals" class="tab-content space-y-6">
                     <div class="dool-card rounded-[2.5rem] p-8 relative overflow-hidden">
                         <div class="absolute top-0 right-0 w-32 h-32 gradient-bg blur-[60px] opacity-20"></div>
@@ -201,7 +215,6 @@
                 </div>
             </main>
 
-            <!-- Навигация -->
             <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] h-16 bg-[#111]/90 backdrop-blur-xl border border-white/10 rounded-[2rem] flex items-center justify-around px-2 z-50 shadow-2xl">
                 <button onclick="switchTab('wallet')" id="nav-wallet" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-orange-500 cursor-pointer">
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
@@ -238,7 +251,6 @@
                 <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-8"></div>
                 <h2 class="text-2xl font-black mb-6 px-2">Перевод</h2>
                 
-                <!-- Блок уведомления о предложении -->
                 <div id="proposal-notice" class="hidden mb-4 bg-orange-500/10 border border-orange-500/20 p-3 rounded-2xl flex items-center gap-3">
                     <div class="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-black">
                         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
@@ -269,7 +281,7 @@
             </div>
         </div>
 
-        <!-- Модалка: Получить (с генерацией предложения) -->
+        <!-- Модалка: Получить (с Orange Glass QR) -->
         <div id="modal-receive" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
             <div class="bg-[#111] border border-white/10 rounded-t-[2.5rem] p-8 pb-10 w-full transform translate-y-full transition-transform duration-300 shadow-2xl" id="modal-receive-content">
                 <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-6"></div>
@@ -281,12 +293,16 @@
 
                 <!-- QR Code Container -->
                 <div class="flex justify-center mb-6">
-                    <div class="p-3 bg-white rounded-3xl shadow-xl">
-                        <img id="qr-image" src="" class="w-48 h-48 object-contain">
+                    <div class="qr-glass-container">
+                        <img id="qr-image" src="" class="w-48 h-48 object-contain qr-glass-img">
+                        <!-- Слой ошибки, если сумма маленькая -->
+                        <div id="qr-error" class="qr-error-overlay rounded-2xl">
+                             <span class="text-3xl mb-2">⚠️</span>
+                             <p class="text-[10px] font-bold text-orange-500 uppercase tracking-widest text-center">Минимум<br>0.01 Đ</p>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Настройки предложения -->
                 <div class="space-y-4">
                     <div class="bg-white/5 p-4 rounded-2xl border border-white/5 flex items-center justify-between">
                         <div class="flex-1">
@@ -309,18 +325,27 @@
             </div>
         </div>
 
-        <!-- Модалка: Сканер -->
-        <div id="modal-scan" class="hidden absolute inset-0 z-[120] bg-black/95 backdrop-blur-xl flex flex-col p-6 opacity-0 transition-opacity duration-300">
-            <div class="flex justify-between items-center mb-6 pt-4" id="modal-scan-content">
-                <h2 class="text-xl font-black text-white">Сканирование</h2>
-                <button onclick="closeModal('scan')" class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center text-white cursor-pointer">
+        <!-- Модалка: Сканер V2 -->
+        <div id="modal-scan" class="hidden absolute inset-0 z-[120] bg-black/95 backdrop-blur-xl flex flex-col opacity-0 transition-opacity duration-300">
+            <!-- Header сканера -->
+            <div class="absolute top-0 left-0 w-full p-6 z-20 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent">
+                 <h2 class="text-xl font-black text-white drop-shadow-md">Сканирование</h2>
+                 <button onclick="closeModal('scan')" class="w-10 h-10 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center text-white cursor-pointer hover:bg-white/20 transition-all">
                     <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
                 </button>
             </div>
             
-            <div class="flex-1 flex flex-col justify-center items-center gap-4">
+            <!-- Область камеры -->
+            <div class="w-full h-full relative" id="modal-scan-content">
                 <div id="reader"></div>
-                <p class="text-xs text-neutral-500 text-center max-w-[200px] mt-4">Наведите камеру на QR-код для автоматического перевода</p>
+                <!-- Наложения для красоты -->
+                <div class="scan-overlay m-4 top-20 bottom-20">
+                     <div class="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-orange-500 rounded-tl-xl"></div>
+                     <div class="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-orange-500 rounded-tr-xl"></div>
+                     <div class="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-orange-500 rounded-bl-xl"></div>
+                     <div class="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-orange-500 rounded-br-xl"></div>
+                     <div class="scan-line"></div>
+                </div>
             </div>
         </div>
 
@@ -347,9 +372,11 @@
         let myData = null;
         let lastBal = null;
         const userCache = {};
-        let html5QrcodeScanner = null;
+        
+        // Используем Core API вместо виджета для полного контроля
+        let html5QrCode = null; 
 
-        // --- User Info Helper ---
+        // --- Helpers ---
         async function getUserInfo(email) {
             if (userCache[email]) return userCache[email];
             const defaultAv = `https://ui-avatars.com/api/?background=random&color=fff&name=${email.charAt(0).toUpperCase()}&size=128`;
@@ -361,24 +388,23 @@
                     const d = res.docs[0].data();
                     if (d.avatar) info.avatar = d.avatar;
                 }
-            } catch (e) { console.log('Не удалось загрузить аватар:', e); }
+            } catch (e) { console.log('Err avatar', e); }
             userCache[email] = info;
             return info;
         }
 
-        // --- UI Animation Helpers ---
         window.openModal = (n) => {
             const m = document.getElementById('modal-'+n);
             const c = document.getElementById(`modal-${n}-content`);
             m.classList.remove('hidden');
-            void m.offsetWidth; // Force reflow
+            void m.offsetWidth;
             m.classList.remove('opacity-0');
             
             if(n === 'send' || n === 'receive') c.classList.remove('translate-y-full');
             else if(n !== 'scan') c.classList.remove('scale-90');
 
             if(n === 'receive') updateQR();
-            if(n === 'scan') startScanner();
+            if(n === 'scan') startScannerV2();
         };
 
         window.closeModal = (n) => {
@@ -389,15 +415,13 @@
             if(n === 'send' || n === 'receive') c.classList.add('translate-y-full');
             else if(n !== 'scan') c.classList.add('scale-90');
 
-            if(n === 'scan') stopScanner();
+            if(n === 'scan') stopScannerV2();
             if(n === 'send') clearSendForm();
 
             setTimeout(() => m.classList.add('hidden'), 300);
         };
 
-        // Сброс формы отправки
         function clearSendForm() {
-             // Ждем окончания анимации закрытия перед очисткой
              setTimeout(() => {
                  document.getElementById('send-amt').value = '';
                  document.getElementById('send-email').value = '';
@@ -412,37 +436,22 @@
             const t = document.getElementById('toast');
             const status = document.getElementById('toast-status');
             const amtEl = document.getElementById('toast-amount');
-            
             document.getElementById('toast-title').textContent = title;
             document.getElementById('toast-msg').textContent = msg;
-            
-            if (amountStr) {
-                amtEl.textContent = amountStr;
-                amtEl.classList.remove('hidden');
-            } else {
-                amtEl.classList.add('hidden');
-            }
+            if (amountStr) { amtEl.textContent = amountStr; amtEl.classList.remove('hidden'); } 
+            else { amtEl.classList.add('hidden'); }
             
             const img = document.getElementById('toast-avatar');
-            
             if (isError) {
-                status.classList.remove('bg-green-500');
-                status.classList.add('bg-red-500');
+                status.classList.replace('bg-green-500', 'bg-red-500');
                 status.innerHTML = '<svg width="8" height="8" fill="none" stroke="black" stroke-width="3" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>';
                 img.src = `https://ui-avatars.com/api/?background=333&color=fff&name=!`;
             } else {
-                status.classList.remove('bg-red-500');
-                status.classList.add('bg-green-500');
+                status.classList.replace('bg-red-500', 'bg-green-500');
                 status.innerHTML = '<svg width="8" height="8" fill="none" stroke="black" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>';
-                
-                if (senderEmail) {
-                    const u = await getUserInfo(senderEmail);
-                    img.src = u.avatar;
-                } else {
-                    img.src = `https://ui-avatars.com/api/?background=333&color=fff&name=S`;
-                }
+                if (senderEmail) { const u = await getUserInfo(senderEmail); img.src = u.avatar; } 
+                else { img.src = `https://ui-avatars.com/api/?background=333&color=fff&name=S`; }
             }
-            
             t.classList.add('active');
             setTimeout(() => t.classList.remove('active'), 4000);
         };
@@ -450,17 +459,10 @@
         window.switchTab = (tab) => {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.getElementById('tab-'+tab).classList.add('active');
-            
             const navW = document.getElementById('nav-wallet');
             const navR = document.getElementById('nav-referrals');
-            
-            if(tab === 'wallet') {
-                navW.classList.replace('text-neutral-600', 'text-orange-500');
-                navR.classList.replace('text-orange-500', 'text-neutral-600');
-            } else {
-                navW.classList.replace('text-orange-500', 'text-neutral-600');
-                navR.classList.replace('text-neutral-600', 'text-orange-500');
-            }
+            if(tab === 'wallet') { navW.classList.replace('text-neutral-600', 'text-orange-500'); navR.classList.replace('text-orange-500', 'text-neutral-600'); } 
+            else { navW.classList.replace('text-orange-500', 'text-neutral-600'); navR.classList.replace('text-neutral-600', 'text-orange-500'); }
         };
 
         // --- Logic ---
@@ -483,34 +485,22 @@
         });
 
         document.getElementById('btn-login').onclick = async () => {
-            const e = document.getElementById('auth-email').value;
-            const p = document.getElementById('auth-password').value;
-            try { 
-                await signInWithEmailAndPassword(auth, e, p); 
-            } catch { 
-                showT('Ошибка', 'Неверный логин или пароль', '', null, true);
-            }
+            try { await signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-password').value); } 
+            catch { showT('Ошибка', 'Неверный логин или пароль', '', null, true); }
         };
 
         document.getElementById('btn-register').onclick = async () => {
-            const e = document.getElementById('auth-email').value;
             const p = document.getElementById('auth-password').value;
             if (p.length < 6) return showT('Ошибка', 'Пароль слишком короткий', '', null, true);
             try {
-                await createUserWithEmailAndPassword(auth, e, p);
+                await createUserWithEmailAndPassword(auth, document.getElementById('auth-email').value, p);
                 const ref = new URLSearchParams(window.location.search).get('ref');
                 if (ref) {
                     const q = query(collection(db, "users"), where("email", "==", ref));
                     const r = await getDocs(q);
-                    if (!r.empty) {
-                        updateDoc(r.docs[0].ref, { 
-                            balance: increment(10), refCount: increment(1), refEarned: increment(10) 
-                        });
-                    }
+                    if (!r.empty) updateDoc(r.docs[0].ref, { balance: increment(10), refCount: increment(1), refEarned: increment(10) });
                 }
-            } catch { 
-                showT('Ошибка', 'Не удалось создать аккаунт', '', null, true);
-            }
+            } catch { showT('Ошибка', 'Не удалось создать аккаунт', '', null, true); }
         };
 
         function startApp(u) {
@@ -522,68 +512,40 @@
             onSnapshot(doc(db, "users", u.uid), async (snap) => {
                 const d = snap.data();
                 if (!d) return;
-
                 if (lastBal !== null && d.balance > lastBal) {
                     const diff = d.balance - lastBal;
                     handleIncomingTransfer(u.email, diff);
                 }
-
-                myData = d;
-                lastBal = d.balance;
-
+                myData = d; lastBal = d.balance;
                 document.getElementById('balance-val').textContent = d.balance.toFixed(2);
                 document.getElementById('ref-count').textContent = d.refCount || 0;
                 document.getElementById('ref-earned').textContent = (d.refEarned || 0).toFixed(2);
-                
                 const av = d.avatar || `https://ui-avatars.com/api/?background=random&color=fff&name=${u.email.charAt(0)}`;
                 document.getElementById('main-avatar').src = av;
                 document.getElementById('edit-avatar-img').src = av;
-
                 document.getElementById('view-auth').classList.add('hidden');
                 document.getElementById('view-loading').classList.add('hidden');
                 document.getElementById('view-main').classList.replace('hidden', 'flex');
             });
 
             const qTx = query(collection(db, "transactions"), where("parties", "array-contains", u.email));
-            
             onSnapshot(qTx, async (snap) => {
                 const list = document.getElementById('tx-history');
-                if (snap.empty) {
-                    list.innerHTML = '<p class="text-center text-neutral-800 text-[10px] uppercase font-bold py-4">История пуста</p>';
-                    return;
-                }
-
+                if (snap.empty) { list.innerHTML = '<p class="text-center text-neutral-800 text-[10px] uppercase font-bold py-4">История пуста</p>'; return; }
                 const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date);
-                
                 let html = '';
                 for (const tx of docs) {
                     const isSent = tx.from === u.email;
                     const partner = isSent ? tx.to : tx.from;
-                    let av = `https://ui-avatars.com/api/?background=222&color=666&name=${partner.charAt(0)}`;
-                    if (userCache[partner]) av = userCache[partner].avatar;
-                    else {
-                         getUserInfo(partner).then(inf => {
-                             const el = document.getElementById(`av-${tx.date.toMillis()}`);
-                             if(el) el.src = inf.avatar;
-                         });
-                    }
-
                     const dateStr = tx.date ? new Date(tx.date.toMillis()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
-
-                    html += `
-                    <div class="flex items-center justify-between p-4 rounded-[1.5rem] bg-white/[0.03] border border-white/5">
+                    html += `<div class="flex items-center justify-between p-4 rounded-[1.5rem] bg-white/[0.03] border border-white/5">
                         <div class="flex items-center gap-3 overflow-hidden">
-                            <img id="av-${tx.date ? tx.date.toMillis() : ''}" src="${av}" class="w-10 h-10 rounded-full bg-neutral-800 object-cover border border-white/5 shrink-0">
-                            <div class="min-w-0">
-                                <p class="text-[9px] font-black uppercase ${isSent ? 'text-neutral-500' : 'text-[#FF4D00]'} tracking-widest mb-0.5">${isSent ? 'Кому:' : 'От:'}</p>
-                                <p class="text-[11px] font-bold text-white truncate w-32 leading-tight">${partner}</p>
-                            </div>
+                            <img id="av-${tx.date ? tx.date.toMillis() : ''}" src="https://ui-avatars.com/api/?background=222&color=666&name=${partner.charAt(0)}" class="w-10 h-10 rounded-full bg-neutral-800 object-cover border border-white/5 shrink-0">
+                            <div class="min-w-0"><p class="text-[9px] font-black uppercase ${isSent ? 'text-neutral-500' : 'text-[#FF4D00]'} tracking-widest mb-0.5">${isSent ? 'Кому:' : 'От:'}</p><p class="text-[11px] font-bold text-white truncate w-32 leading-tight">${partner}</p></div>
                         </div>
-                        <div class="text-right">
-                            <p class="text-sm font-black ${isSent ? 'text-white' : 'text-[#FF4D00]'}">${isSent ? '-' : '+'}${tx.amount.toFixed(2)}</p>
-                            <p class="text-[9px] text-neutral-600 font-bold uppercase">${dateStr}</p>
-                        </div>
+                        <div class="text-right"><p class="text-sm font-black ${isSent ? 'text-white' : 'text-[#FF4D00]'}">${isSent ? '-' : '+'}${tx.amount.toFixed(2)}</p><p class="text-[9px] text-neutral-600 font-bold uppercase">${dateStr}</p></div>
                     </div>`;
+                    getUserInfo(partner).then(inf => { const el = document.getElementById(`av-${tx.date.toMillis()}`); if(el) el.src = inf.avatar; });
                 }
                 list.innerHTML = html;
             });
@@ -595,14 +557,10 @@
                 const snap = await getDocs(q);
                 if (!snap.empty) {
                     const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date);
-                    const lastTx = docs[0];
-                    if (Math.abs(lastTx.amount - amountDiff) < 0.01) {
-                        showT('Входящий перевод', lastTx.from, `+${amountDiff.toFixed(2)} Đ`, lastTx.from);
-                        return;
-                    }
+                    if (Math.abs(docs[0].amount - amountDiff) < 0.01) { showT('Входящий перевод', docs[0].from, `+${amountDiff.toFixed(2)} Đ`, docs[0].from); return; }
                 }
                 showT('Пополнение', 'Система', `+${amountDiff.toFixed(2)} Đ`);
-            } catch(e) { console.log(e); }
+            } catch(e) {}
         }
 
         document.getElementById('avatar-input').onchange = (e) => {
@@ -610,85 +568,102 @@
             if (!file) return;
             const reader = new FileReader();
             reader.onload = async (ev) => {
-                try {
-                    await updateDoc(doc(db, "users", auth.currentUser.uid), { avatar: ev.target.result });
-                    showT('Профиль', 'Аватар обновлен');
-                } catch { 
-                    showT('Ошибка', 'Не удалось загрузить фото', '', null, true);
-                }
+                try { await updateDoc(doc(db, "users", auth.currentUser.uid), { avatar: ev.target.result }); showT('Профиль', 'Аватар обновлен'); } 
+                catch { showT('Ошибка', 'Не удалось загрузить фото', '', null, true); }
             };
             reader.readAsDataURL(file);
         };
 
-        // --- QR Logic ---
+        // --- Logic V2.1: Advanced QR & Scanner ---
         
-        // Обновление QR кода в модалке "Получить"
+        // 1. Orange Glass QR
         window.updateQR = () => {
             const email = auth.currentUser.email;
-            const amt = document.getElementById('receive-amt-req').value;
+            let amt = parseFloat(document.getElementById('receive-amt-req').value);
+            const errOverlay = document.getElementById('qr-error');
             
-            // Протокол: JSON для надежности
-            const data = JSON.stringify({
-                t: "req", // type: request
-                e: email, // email
-                a: amt || 0 // amount
-            });
+            // Если поле пустое, считаем как 0 (просто email)
+            if(isNaN(amt)) amt = 0;
+
+            // Валидация: Если введено число, но оно меньше 0.01 и больше 0 - это ошибка
+            if (amt > 0 && amt < 0.01) {
+                errOverlay.classList.add('active');
+                return; // Не обновляем картинку
+            } else {
+                errOverlay.classList.remove('active');
+            }
+
+            const data = JSON.stringify({ t: "req", e: email, a: amt });
             
-            // API для генерации QR
-            const url = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&color=000&bgcolor=fff&data=${encodeURIComponent(data)}`;
+            // Orange pixels (FF4D00) on Black background (000000) for "Glass" contrast
+            // Используем api.qrserver.com с правильными цветами
+            const url = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&color=FF4D00&bgcolor=000000&margin=10&data=${encodeURIComponent(data)}`;
             document.getElementById('qr-image').src = url;
         };
         
-        // Слушаем ввод суммы в модалке получения
         document.getElementById('receive-amt-req').oninput = updateQR;
 
-        // Запуск сканера
-        window.startScanner = () => {
-             if (html5QrcodeScanner) return; // Уже запущен
+        // 2. Scanner Logic (Core API, Auto-start, Back Camera Only)
+        window.startScannerV2 = () => {
+             if (html5QrCode) return; // already active
 
-             const readerEl = document.getElementById('reader');
-             readerEl.innerHTML = '';
+             // Инициализация на контейнер
+             html5QrCode = new Html5Qrcode("reader");
+
+             const config = { fps: 10, qrbox: { width: 250, height: 250 } };
              
-             html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: 250 });
-             
-             html5QrcodeScanner.render((decodedText, decodedResult) => {
-                 // Успешное сканирование
-                 try {
-                     const data = JSON.parse(decodedText);
-                     if(data.t === 'req' && data.e) {
-                         closeModal('scan');
-                         openProposalModal(data);
-                     } else {
-                         showT('Ошибка', 'Неверный QR код', '', null, true);
-                     }
-                 } catch (e) {
-                     // Поддержка старого формата или просто email
-                     if(decodedText.includes('@')) {
-                         closeModal('scan');
-                         openProposalModal({e: decodedText, a: 0});
-                     } else {
-                        showT('Ошибка', 'Не удалось распознать QR', '', null, true);
-                     }
-                 }
-             }, (error) => {
-                 // console.warn(error);
+             // Запуск напрямую с environment (задняя камера)
+             // Это убирает диалог выбора камеры и автозапускает её
+             html5QrCode.start(
+                 { facingMode: "environment" }, 
+                 config, 
+                 onScanSuccess, 
+                 onScanError
+             ).catch(err => {
+                 console.error("Camera start failed", err);
+                 showT('Ошибка камеры', 'Разрешите доступ к камере', '', null, true);
+                 closeModal('scan');
              });
         };
 
-        window.stopScanner = () => {
-            if (html5QrcodeScanner) {
-                html5QrcodeScanner.clear().catch(error => console.error(error));
-                html5QrcodeScanner = null;
+        const onScanSuccess = (decodedText, decodedResult) => {
+             // Останавливаем сканер при успехе
+             closeModal('scan');
+             
+             try {
+                 const data = JSON.parse(decodedText);
+                 if(data.t === 'req' && data.e) {
+                     openProposalModal(data);
+                 } else {
+                     showT('Ошибка', 'Неверный формат QR', '', null, true);
+                 }
+             } catch (e) {
+                 if(decodedText.includes('@')) {
+                     openProposalModal({e: decodedText, a: 0});
+                 } else {
+                    showT('Ошибка', 'Не удалось распознать', '', null, true);
+                 }
+             }
+        };
+
+        const onScanError = (errorMessage) => {
+            // ignore scan errors (running continuously)
+        };
+
+        window.stopScannerV2 = () => {
+            if (html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    html5QrCode.clear();
+                    html5QrCode = null;
+                }).catch(err => console.log(err));
             }
         };
 
-        // Открытие модалки отправки с предзаполненными данными
         function openProposalModal(data) {
             openModal('send');
             document.getElementById('send-email').value = data.e;
             if (data.a > 0) {
                 document.getElementById('send-amt').value = data.a;
-                // Блокируем поля для "строгого" предложения
                 document.getElementById('send-amt').readOnly = true;
                 document.getElementById('send-email').readOnly = true;
                 document.getElementById('proposal-notice').classList.remove('hidden');
@@ -702,7 +677,6 @@
             const myEmail = auth.currentUser.email;
 
             if (to === myEmail) return showT('Ошибка', 'Нельзя отправить себе', '', null, true);
-            // Updated Minimum Amount Check (Min 0.01)
             if (!amt || amt < 0.01) return showT('Ошибка', 'Минимум 0.01 Đ', '', null, true);
             if (amt > myData.balance) return showT('Ошибка', 'Недостаточно средств', '', null, true);
 
@@ -731,21 +705,14 @@
                 
                 closeModal('send');
                 showT('Успешно', `Перевод для ${to}`, `-${amt.toFixed(2)} Đ`);
-
             } catch (e) { 
                 showT('Ошибка', e.message, '', null, true); 
             }
             finally { btn.disabled = false; btn.textContent = 'Отправить'; }
         };
 
-        window.copyRef = () => { 
-            navigator.clipboard.writeText(document.getElementById('ref-link').textContent); 
-            showT('Успешно', 'Ссылка скопирована');
-        };
-        window.copyMyEmail = () => { 
-            navigator.clipboard.writeText(auth.currentUser.email); 
-            showT('Успешно', 'Email скопирован');
-        };
+        window.copyRef = () => { navigator.clipboard.writeText(document.getElementById('ref-link').textContent); showT('Успешно', 'Ссылка скопирована'); };
+        window.copyMyEmail = () => { navigator.clipboard.writeText(auth.currentUser.email); showT('Успешно', 'Email скопирован'); };
         document.getElementById('btn-logout').onclick = () => signOut(auth);
 
     </script>
