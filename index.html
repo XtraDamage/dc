@@ -7,205 +7,258 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
-        input { -webkit-user-select: text !important; user-select: text !important; }
-        body { background-color: #000; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        /* Блокировка выделения и контекстного меню */
+        * {
+            -webkit-user-select: none; /* Safari/Chrome */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* IE/Edge */
+            user-select: none; /* Standard */
+            -webkit-touch-callout: none; /* iOS Safari - убирает меню при долгом нажатии */
+        }
+        
+        /* Разрешаем ввод текста в инпутах */
+        input {
+            -webkit-user-select: text !important;
+            -moz-user-select: text !important;
+            -ms-user-select: text !important;
+            user-select: text !important;
+        }
+
+        /* Запрет перетаскивания картинок */
+        img {
+            -webkit-user-drag: none;
+            user-drag: none;
+            pointer-events: none; /* Игнорирует клики по самой картинке (клики ловят родители) */
+        }
+
+        body { background-color: #000; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .dool-card { background: #0a0a0a; border: 1px solid rgba(255,255,255,0.05); }
         .gradient-text { background: linear-gradient(135deg, #FF4D00, #FF005C); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .gradient-bg { background: linear-gradient(135deg, #FF4D00, #FF005C); }
         .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.2s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .hide-scroll::-webkit-scrollbar { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        #toast { transform: translateY(-150%); transition: all 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
-        #toast.active { transform: translateY(0); }
-
-        .chat-bubble { max-width: 80%; padding: 10px 14px; border-radius: 18px; font-size: 14px; }
-        .msg-me { background: #FF4D00; color: #fff; margin-left: auto; border-bottom-right-radius: 4px; }
-        .msg-them { background: #1a1a1a; color: #ccc; margin-right: auto; border-bottom-left-radius: 4px; }
+        /* Toast Animation */
+        #toast { transform: translateY(-150%) scale(0.9); transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); opacity: 0; }
+        #toast.active { transform: translateY(0) scale(1); opacity: 1; }
+        
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
     </style>
 </head>
-<body class="bg-black overflow-hidden">
+<body class="overflow-hidden bg-black" oncontextmenu="return false;"> <!-- Блокировка правой кнопки мыши -->
 
-    <div id="app" class="max-w-[480px] mx-auto h-[100dvh] flex flex-col relative bg-black shadow-2xl">
+    <div id="app" class="max-w-[480px] mx-auto h-[100dvh] flex flex-col relative bg-black shadow-2xl overflow-hidden">
         
-        <!-- Toast -->
-        <div id="toast" class="fixed top-4 left-4 right-4 z-[200] glass p-4 rounded-3xl flex items-center gap-3 border border-white/10 shadow-2xl">
-            <div id="toast-icon" class="w-10 h-10 rounded-full flex items-center justify-center bg-white/5"></div>
-            <div>
-                <p id="toast-title" class="text-[10px] font-black uppercase text-neutral-500 tracking-widest">Система</p>
-                <p id="toast-msg" class="text-xs font-bold text-white"></p>
-            </div>
-        </div>
-
-        <!-- View: Loading -->
-        <div id="view-loading" class="absolute inset-0 z-[100] bg-black flex items-center justify-center">
-            <div class="text-6xl font-black gradient-text animate-pulse font-mono">Đ</div>
-        </div>
-
-        <!-- View: Auth -->
-        <div id="view-auth" class="hidden flex-col h-full p-8 justify-center items-center text-center">
-            <div class="mb-12">
-                <span class="text-7xl font-black gradient-text">Đ</span>
-                <h1 class="text-3xl font-extrabold mt-4">Doolcoin</h1>
-            </div>
-            <div class="w-full space-y-3">
-                <div class="glass rounded-3xl p-2">
-                    <input type="email" id="auth-email" placeholder="Email" class="w-full bg-transparent p-4 outline-none font-bold">
-                    <input type="password" id="auth-password" placeholder="Пароль" class="w-full bg-transparent p-4 outline-none font-bold">
+        <!-- Уведомления (Toast) -->
+        <div id="toast" class="fixed top-4 left-4 right-4 z-[200] glass-panel p-3 rounded-[2rem] flex items-center gap-3 shadow-2xl pointer-events-none border border-white/10">
+            <div class="relative shrink-0">
+                <img id="toast-avatar" src="" class="w-12 h-12 rounded-full object-cover bg-neutral-800 border-2 border-white/10" onerror="this.src='https://ui-avatars.com/api/?background=333&color=fff&size=128'">
+                <!-- Индикатор статуса (зеленый) -->
+                <div id="toast-status" class="absolute -bottom-1 -right-1 bg-green-500 w-4 h-4 rounded-full border-2 border-black flex items-center justify-center">
+                    <svg width="8" height="8" fill="none" stroke="black" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
                 </div>
-                <button id="btn-login" class="w-full h-14 bg-white text-black rounded-2xl font-black uppercase tracking-widest">Войти</button>
-                <button id="btn-reg" class="w-full h-14 glass text-white rounded-2xl font-black uppercase tracking-widest">Создать</button>
+            </div>
+            <div class="flex-1 min-w-0 pr-2">
+                <p id="toast-title" class="text-[10px] font-black uppercase text-neutral-400 tracking-widest mb-0.5">Система</p>
+                <div class="flex items-center justify-between">
+                    <p id="toast-msg" class="text-xs font-bold text-white truncate mr-2">Сообщение</p>
+                    <p id="toast-amount" class="text-sm font-black text-[#FF4D00] whitespace-nowrap hidden"></p>
+                </div>
             </div>
         </div>
 
-        <!-- View: Main -->
+        <!-- Загрузка -->
+        <div id="view-loading" class="absolute inset-0 z-[100] bg-black flex items-center justify-center">
+            <div class="relative">
+                <div class="w-24 h-24 gradient-bg rounded-full blur-3xl opacity-20 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+                <span class="text-8xl font-black gradient-text relative z-10 animate-pulse">Đ</span>
+            </div>
+        </div>
+
+        <!-- Авторизация -->
+        <div id="view-auth" class="hidden flex-col h-full p-8 justify-center relative">
+            <div class="absolute top-0 left-0 w-full h-1/2 gradient-bg opacity-[0.03] blur-3xl pointer-events-none"></div>
+            <div class="text-center mb-16 relative z-10">
+                <span class="text-8xl font-black gradient-text inline-block mb-4 transform hover:scale-105 transition-transform duration-500">Đ</span>
+                <h1 class="text-4xl font-extrabold tracking-tight">Doolcoin</h1>
+                <p class="text-neutral-500 mt-2 text-sm font-medium">Кошелек будущего</p>
+            </div>
+            <div class="space-y-4 relative z-10">
+                <div class="glass-panel rounded-3xl p-1.5 space-y-1.5">
+                    <input type="email" id="auth-email" placeholder="Email" class="w-full bg-transparent text-white px-5 py-4 outline-none placeholder:text-neutral-600 font-bold">
+                    <div class="h-[1px] bg-white/5 mx-5"></div>
+                    <input type="password" id="auth-password" placeholder="Пароль" class="w-full bg-transparent text-white px-5 py-4 outline-none placeholder:text-neutral-600 font-bold">
+                </div>
+                <div class="grid grid-cols-2 gap-3 pt-2">
+                    <button id="btn-login" class="h-16 bg-white text-black rounded-2xl font-black text-sm uppercase tracking-wider hover:bg-neutral-200 transition-colors">Войти</button>
+                    <button id="btn-register" class="h-16 glass-panel text-white rounded-2xl font-black text-sm uppercase tracking-wider hover:bg-white/10 transition-colors">Создать</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Главный экран -->
         <div id="view-main" class="hidden flex flex-col h-full">
-            <header class="p-6 pt-12 flex justify-between items-center">
-                <div onclick="openModal('profile')" class="flex items-center gap-3 cursor-pointer active:scale-95 transition-transform">
-                    <img id="my-avatar" class="w-10 h-10 rounded-full object-cover bg-neutral-800 border border-white/10">
-                    <div>
-                        <p id="my-name" class="text-xs font-black truncate max-w-[120px]">...</p>
-                        <p class="text-[9px] font-black text-neutral-600 uppercase tracking-widest">Кошелек</p>
+            <header class="px-6 pt-14 pb-4 flex justify-between items-center z-20">
+                <div class="flex items-center gap-3 active:opacity-70 transition-opacity cursor-pointer" onclick="openModal('profile')">
+                    <div class="p-[2px] gradient-bg rounded-full shadow-[0_0_20px_rgba(255,77,0,0.3)]">
+                        <img id="main-avatar" src="" class="w-10 h-10 rounded-full object-cover bg-black border-2 border-black">
+                    </div>
+                    <div class="flex flex-col justify-center">
+                        <p id="main-username" class="text-xs font-bold truncate max-w-[140px] leading-tight">...</p>
+                        <p class="text-[9px] font-black text-neutral-500 uppercase tracking-widest leading-tight">Профиль</p>
                     </div>
                 </div>
-                <button onclick="openModal('add-chat')" id="btn-add-chat" class="w-10 h-10 glass rounded-full flex items-center justify-center text-neutral-500 hidden">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                <button id="btn-logout" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
                 </button>
             </header>
 
-            <main class="flex-1 overflow-y-auto px-6 hide-scroll pb-24">
-                <!-- Tab: Wallet -->
+            <main class="flex-1 overflow-y-auto px-5 hide-scroll pb-32 z-10">
+                <!-- Вкладка Кошелек -->
                 <div id="tab-wallet" class="tab-content active space-y-6">
-                    <div class="glass rounded-[2.5rem] p-8 text-center relative overflow-hidden">
-                        <div class="absolute -top-10 -right-10 w-32 h-32 gradient-bg blur-[60px] opacity-20"></div>
-                        <p class="text-[10px] font-black text-neutral-500 uppercase tracking-widest mb-2">Ваш баланс</p>
-                        <div class="flex items-baseline justify-center gap-1">
-                            <span id="bal-val" class="text-5xl font-black tracking-tighter">0.00</span>
-                            <span class="text-3xl font-black gradient-text">Đ</span>
+                    <!-- Карточка баланса -->
+                    <div class="dool-card rounded-[2.5rem] p-8 relative overflow-hidden group">
+                        <div class="absolute inset-0 gradient-bg opacity-[0.03] group-hover:opacity-[0.05] transition-opacity duration-500"></div>
+                        <div class="absolute -right-12 -top-12 w-48 h-48 bg-[#FF4D00] rounded-full blur-[80px] opacity-20"></div>
+                        
+                        <div class="relative z-10 flex flex-col items-center justify-center py-4">
+                            <span class="text-[10px] font-bold text-neutral-500 uppercase tracking-[0.2em] mb-2">Общий баланс</span>
+                            <div class="flex items-end gap-1 mb-2">
+                                <h2 id="balance-val" class="text-5xl font-black tracking-tighter leading-none">0.00</h2>
+                                <span class="text-4xl font-black gradient-text leading-none mb-1">Đ</span>
+                            </div>
                         </div>
-                        <div class="grid grid-cols-2 gap-3 mt-8">
-                            <button onclick="openModal('send')" class="h-12 bg-white text-black rounded-xl font-bold text-xs uppercase tracking-widest">Отправить</button>
-                            <button onclick="openModal('receive')" class="h-12 glass text-white rounded-xl font-bold text-xs uppercase tracking-widest">Получить</button>
+
+                        <div class="grid grid-cols-2 gap-3 mt-6 relative z-10">
+                            <button onclick="openModal('send')" class="h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 active:scale-95 transition-all shadow-lg shadow-white/5 cursor-pointer">Отправить</button>
+                            <button onclick="openModal('receive')" class="h-14 glass-panel text-white border border-white/10 rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-white/10 active:scale-95 transition-all cursor-pointer">Получить</button>
                         </div>
                     </div>
+
+                    <!-- История транзакций -->
                     <div class="space-y-4">
-                        <h3 class="text-[10px] font-black text-neutral-600 uppercase tracking-widest">История транзакций</h3>
-                        <div id="history-list" class="space-y-2"></div>
+                        <div class="flex items-center justify-between px-2">
+                            <h3 class="text-[11px] font-black text-neutral-500 uppercase tracking-widest">История операций</h3>
+                        </div>
+                        <div id="tx-history" class="space-y-2 pb-10">
+                            <div class="text-center py-10">
+                                <div class="w-8 h-8 border-2 border-white/10 border-t-orange-500 rounded-full animate-spin mx-auto mb-4"></div>
+                                <p class="text-[10px] font-bold text-neutral-600 uppercase tracking-widest">Загрузка...</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Tab: Chats -->
-                <div id="tab-chats" class="tab-content space-y-4">
-                    <h3 class="text-[10px] font-black text-neutral-600 uppercase tracking-widest">Сообщения</h3>
-                    <div id="chats-list" class="space-y-2"></div>
+                <!-- Вкладка Рефералы -->
+                <div id="tab-referrals" class="tab-content space-y-6">
+                    <div class="dool-card rounded-[2.5rem] p-8 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-32 h-32 gradient-bg blur-[60px] opacity-20"></div>
+                        <h3 class="text-2xl font-black mb-2 relative z-10">Пригласи друга</h3>
+                        <p class="text-neutral-500 text-xs mb-8 leading-relaxed max-w-[80%] relative z-10">Получи <span class="text-white font-bold">10.00 Đ</span> за каждого друга.</p>
+                        
+                        <div class="bg-black/40 border border-white/5 p-4 rounded-2xl space-y-3 relative z-10 backdrop-blur-sm">
+                            <div class="flex items-center justify-between gap-4">
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-[9px] font-black text-neutral-600 uppercase tracking-widest mb-1">Ваша ссылка</p>
+                                    <p id="ref-link" class="text-[10px] font-mono text-neutral-400 truncate bg-transparent outline-none">...</p>
+                                </div>
+                                <button onclick="copyRef()" class="w-10 h-10 flex items-center justify-center bg-white text-black rounded-xl hover:scale-105 transition-transform cursor-pointer">
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="dool-card p-5 rounded-[2rem] flex flex-col items-center justify-center gap-1 aspect-square">
+                            <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center mb-2 text-neutral-400">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            </div>
+                            <p id="ref-count" class="text-2xl font-black">0</p>
+                            <p class="text-[9px] font-bold text-neutral-600 uppercase tracking-wider">Друзей</p>
+                        </div>
+                        <div class="dool-card p-5 rounded-[2rem] flex flex-col items-center justify-center gap-1 aspect-square">
+                            <div class="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center mb-2 text-orange-500">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                            </div>
+                            <p id="ref-earned" class="text-2xl font-black">0</p>
+                            <p class="text-[9px] font-bold text-neutral-600 uppercase tracking-wider">Заработано</p>
+                        </div>
+                    </div>
                 </div>
             </main>
 
-            <!-- Navigation -->
-            <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] h-16 glass rounded-[2rem] flex items-center justify-around px-2 z-50">
-                <button onclick="switchTab('wallet')" id="nav-wallet" class="flex-1 flex justify-center text-orange-500">
-                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            <!-- Навигация -->
+            <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] h-16 bg-[#111]/90 backdrop-blur-xl border border-white/10 rounded-[2rem] flex items-center justify-around px-2 z-50 shadow-2xl">
+                <button onclick="switchTab('wallet')" id="nav-wallet" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-orange-500 cursor-pointer">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
                 </button>
-                <button onclick="switchTab('chats')" id="nav-chats" class="flex-1 flex justify-center text-neutral-600">
-                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                <button onclick="switchTab('referrals')" id="nav-referrals" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
                 </button>
             </nav>
         </div>
 
-        <!-- Chat Room -->
-        <div id="chat-room" class="absolute inset-0 z-[80] bg-black flex flex-col translate-x-full transition-transform duration-300">
-            <header class="p-4 pt-12 border-b border-white/5 flex items-center gap-3 bg-black/80 backdrop-blur-md">
-                <button onclick="closeChat()" class="p-2 text-white"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
-                <img id="chat-avatar" class="w-10 h-10 rounded-full bg-neutral-900 object-cover">
-                <div>
-                    <p id="chat-name" class="text-sm font-black truncate max-w-[150px]">...</p>
-                    <p id="chat-status" class="text-[9px] font-bold uppercase tracking-widest text-neutral-500">Загрузка...</p>
-                </div>
-            </header>
-            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 hide-scroll"></div>
-            <div class="p-4 pb-8 bg-black">
-                <div class="glass rounded-full flex items-center p-1 px-4 gap-2">
-                    <input type="text" id="chat-input" placeholder="Сообщение..." class="flex-1 bg-transparent py-3 outline-none text-sm font-medium">
-                    <button onclick="sendMsg()" class="w-10 h-10 bg-white text-black rounded-full flex items-center justify-center font-bold">></button>
+        <!-- Модалка: Профиль -->
+        <div id="modal-profile" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col items-center justify-center p-8 opacity-0 transition-opacity duration-300">
+            <div class="w-full max-w-xs transform scale-90 transition-transform duration-300" id="modal-profile-content">
+                <div class="bg-[#111] border border-white/10 p-8 rounded-[2.5rem] text-center shadow-2xl">
+                    <h2 class="text-xl font-black mb-6">Ваш Профиль</h2>
+                    <div class="relative inline-block mb-6 group">
+                        <div class="p-1 gradient-bg rounded-full">
+                            <img id="edit-avatar-img" src="" class="w-24 h-24 rounded-full object-cover border-4 border-[#111] bg-neutral-900">
+                        </div>
+                        <label class="absolute bottom-0 right-0 bg-white text-black w-8 h-8 flex items-center justify-center rounded-full cursor-pointer hover:scale-110 transition-transform shadow-lg">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+                            <input type="file" id="avatar-input" class="hidden" accept="image/*">
+                        </label>
+                    </div>
+                    <p id="profile-email" class="text-xs text-neutral-500 font-bold mb-6 truncate px-2">...</p>
+                    <button onclick="closeModal('profile')" class="w-full h-12 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer">Закрыть</button>
                 </div>
             </div>
         </div>
 
-        <!-- Modals -->
-        <div id="modal-container" class="hidden fixed inset-0 z-[150] bg-black/80 backdrop-blur-lg flex flex-col items-center justify-center p-6 transition-opacity opacity-0">
-            
-            <!-- Modal: Profile -->
-            <div id="m-profile" class="hidden w-full max-w-xs glass rounded-[2.5rem] p-6 flex flex-col items-center">
-                <div class="relative group mb-4">
-                    <img id="prof-avatar" class="w-24 h-24 rounded-full object-cover bg-neutral-900 border-4 border-white/5">
-                    <label class="absolute bottom-0 right-0 w-8 h-8 bg-white text-black rounded-full flex items-center justify-center cursor-pointer">
-                        + <input type="file" id="avatar-input" class="hidden" accept="image/*">
-                    </label>
-                </div>
-                <p id="prof-email" class="text-sm font-bold mb-6">...</p>
-                
-                <div class="w-full space-y-2 mb-6">
-                    <div class="flex items-center justify-between px-2 mb-1">
-                        <span class="text-[9px] font-black text-neutral-500 uppercase">Аккаунты</span>
-                        <span id="acc-count" class="text-[9px] text-neutral-600">0/15</span>
+        <!-- Модалка: Отправить -->
+        <div id="modal-send" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
+            <div class="bg-[#0f0f0f] border-t border-white/10 rounded-t-[2.5rem] p-8 pb-10 transform translate-y-full transition-transform duration-300" id="modal-send-content">
+                <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-8"></div>
+                <h2 class="text-2xl font-black mb-6 px-2">Перевод</h2>
+                <div class="space-y-3">
+                    <div class="bg-white/5 rounded-2xl p-4 border border-white/5 focus-within:border-orange-500/50 transition-colors">
+                        <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Получатель</p>
+                        <input type="email" id="send-email" placeholder="email@example.com" class="w-full bg-transparent outline-none font-bold text-sm placeholder:text-neutral-700">
                     </div>
-                    <div id="acc-list" class="space-y-1 max-h-40 overflow-y-auto hide-scroll"></div>
-                    <button onclick="openModal('add-acc')" class="w-full py-2 border border-dashed border-white/10 rounded-xl text-[10px] font-black text-neutral-500 uppercase hover:text-white transition-colors mt-2">Добавить аккаунт</button>
-                </div>
-
-                <div class="w-full grid grid-cols-2 gap-2">
-                    <button onclick="signOut(auth)" class="h-10 bg-red-500/10 text-red-500 rounded-xl text-[10px] font-black uppercase">Выйти</button>
-                    <button onclick="closeModal()" class="h-10 glass text-white rounded-xl text-[10px] font-black uppercase">Закрыть</button>
-                </div>
-            </div>
-
-            <!-- Modal: Add Account -->
-            <div id="m-add-acc" class="hidden w-full max-w-xs glass rounded-[2.5rem] p-8">
-                <h3 class="text-center font-black uppercase tracking-widest text-sm mb-6">Новый аккаунт</h3>
-                <div class="space-y-2 mb-6">
-                    <input id="add-email" type="email" placeholder="Email" class="w-full bg-white/5 p-4 rounded-2xl outline-none font-bold text-sm">
-                    <input id="add-pass" type="password" placeholder="Пароль" class="w-full bg-white/5 p-4 rounded-2xl outline-none font-bold text-sm">
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="closeModal()" class="flex-1 py-4 glass text-[10px] font-black uppercase rounded-2xl">Отмена</button>
-                    <button id="btn-submit-add" class="flex-1 py-4 bg-white text-black text-[10px] font-black uppercase rounded-2xl">Войти</button>
-                </div>
-            </div>
-
-            <!-- Modal: Send -->
-            <div id="m-send" class="hidden w-full max-w-xs glass rounded-[2.5rem] p-8">
-                <h3 class="font-black text-xl mb-6">Перевод</h3>
-                <div class="space-y-3 mb-6">
-                    <input id="send-to" placeholder="Email получателя" class="w-full bg-white/5 p-4 rounded-2xl outline-none font-bold text-sm">
-                    <div class="flex items-center glass rounded-2xl px-4">
-                        <input id="send-amt" type="number" step="0.01" placeholder="0.00" class="w-full bg-transparent py-4 outline-none font-black text-2xl">
-                        <span class="text-xl font-black gradient-text">Đ</span>
+                    <div class="bg-white/5 rounded-2xl p-4 border border-white/5 focus-within:border-orange-500/50 transition-colors">
+                         <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Сумма</p>
+                         <div class="flex items-center gap-2">
+                             <input type="number" id="send-amt" placeholder="0.00" class="w-full bg-transparent outline-none font-black text-3xl placeholder:text-neutral-700">
+                             <span class="text-xl font-black text-orange-500">Đ</span>
+                         </div>
+                    </div>
+                    <div class="flex gap-3 pt-4">
+                        <button onclick="closeModal('send')" class="flex-1 h-14 bg-white/5 text-neutral-400 rounded-2xl font-bold text-xs uppercase tracking-wider cursor-pointer">Отмена</button>
+                        <button id="btn-do-send" class="flex-[2] h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer">Отправить</button>
                     </div>
                 </div>
-                <button id="btn-confirm-send" class="w-full h-14 gradient-bg text-white rounded-2xl font-black uppercase tracking-widest">Подтвердить</button>
-                <button onclick="closeModal()" class="w-full mt-2 py-3 text-neutral-500 text-[10px] font-black uppercase">Отмена</button>
             </div>
+        </div>
 
-            <!-- Modal: Receive -->
-            <div id="m-receive" class="hidden w-full max-w-xs glass rounded-[2.5rem] p-10 text-center">
-                <div class="w-16 h-16 gradient-bg rounded-full flex items-center justify-center mx-auto mb-6">Đ</div>
-                <p class="text-xs text-neutral-500 mb-2">Ваш адрес кошелька</p>
-                <p id="my-addr-text" class="font-mono text-orange-500 font-bold break-all mb-8">...</p>
-                <button onclick="closeModal()" class="text-xs font-black uppercase text-neutral-400">Закрыть</button>
-            </div>
-
-            <!-- Modal: Add Chat -->
-            <div id="m-add-chat" class="hidden w-full max-w-xs glass rounded-[2.5rem] p-8 text-center">
-                <h3 class="font-black mb-4">Начать чат</h3>
-                <input id="new-chat-email" placeholder="Email друга" class="w-full bg-white/5 p-4 rounded-2xl outline-none font-bold text-sm mb-4">
-                <div class="flex gap-2">
-                    <button onclick="closeModal()" class="flex-1 py-3 glass rounded-xl text-[10px] font-black uppercase">Отмена</button>
-                    <button onclick="startChatAction()" class="flex-1 py-3 bg-white text-black rounded-xl text-[10px] font-black uppercase">Начать</button>
+        <!-- Модалка: Получить -->
+        <div id="modal-receive" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl items-center justify-center p-8 opacity-0 transition-opacity duration-300">
+            <div class="bg-[#111] border border-white/10 rounded-[3rem] p-10 w-full text-center transform scale-90 transition-transform duration-300 shadow-2xl" id="modal-receive-content">
+                <div class="w-20 h-20 gradient-bg rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(255,77,0,0.4)]">
+                    <span class="text-4xl font-black text-white">Đ</span>
                 </div>
+                <h2 class="text-xl font-black mb-2">Ваш адрес</h2>
+                <p class="text-neutral-500 text-xs mb-8">Используйте этот email для получения переводов</p>
+                <div onclick="copyMyEmail()" class="bg-white/5 p-4 rounded-2xl font-mono text-orange-500 mb-6 truncate text-sm border border-white/5 cursor-pointer hover:bg-white/10 transition-colors active:scale-95">
+                    <span id="my-email-addr">...</span>
+                </div>
+                <button onclick="closeModal('receive')" class="text-neutral-500 font-bold uppercase text-[10px] hover:text-white transition-colors cursor-pointer">Закрыть</button>
             </div>
-
         </div>
 
     </div>
@@ -213,337 +266,342 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, query, where, orderBy, limit, increment, runTransaction, Timestamp, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, query, where, runTransaction, Timestamp, increment, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyBoFuGY-SSmcGHPGzuWZbdGFeI9_aaAKs8",
-            authDomain: "doolcoinwallet.firebaseapp.com",
-            projectId: "doolcoinwallet",
-            storageBucket: "doolcoinwallet.firebasestorage.app",
-            messagingSenderId: "473549726148",
-            appId: "1:473549726148:web:87663b4944330c0df58491"
+          apiKey: "AIzaSyBoFuGY-SSmcGHPGzuWZbdGFeI9_aaAKs8",
+          authDomain: "doolcoinwallet.firebaseapp.com",
+          projectId: "doolcoinwallet",
+          storageBucket: "doolcoinwallet.firebasestorage.app",
+          messagingSenderId: "473549726148",
+          appId: "1:473549726148:web:87663b4944330c0df58491"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let userState = null;
-        let activeChatEmail = null;
-        let chatUnsub = null;
-        let cachedUsers = {}; // Cache for avatars
+        let myData = null;
+        let lastBal = null;
+        const userCache = {}; 
 
-        // --- Multi-Account Helper ---
-        const getAccs = () => JSON.parse(localStorage.getItem('dc_accs') || '[]');
-        const saveAcc = (email, pass, avatar) => {
-            let accs = getAccs().filter(a => a.email !== email);
-            accs.unshift({ email, pass: btoa(pass), avatar });
-            localStorage.setItem('dc_accs', JSON.stringify(accs.slice(0, 15)));
+        // --- User Info Helper ---
+        async function getUserInfo(email) {
+            if (userCache[email]) return userCache[email];
+            
+            // Заглушка
+            const defaultAv = `https://ui-avatars.com/api/?background=random&color=fff&name=${email.charAt(0).toUpperCase()}&size=128`;
+            let info = { avatar: defaultAv, email: email };
+
+            try {
+                const q = query(collection(db, "users"), where("email", "==", email));
+                const res = await getDocs(q);
+                if (!res.empty) {
+                    const d = res.docs[0].data();
+                    if (d.avatar) info.avatar = d.avatar;
+                }
+            } catch (e) { console.log('Не удалось загрузить аватар:', e); }
+
+            userCache[email] = info;
+            return info;
+        }
+
+        // --- UI Animation Helpers ---
+        window.openModal = (n) => {
+            const m = document.getElementById('modal-'+n);
+            const c = document.getElementById(`modal-${n}-content`);
+            m.classList.remove('hidden');
+            // Force reflow
+            void m.offsetWidth;
+            m.classList.remove('opacity-0');
+            
+            if(n === 'send') c.classList.remove('translate-y-full');
+            else c.classList.remove('scale-90');
         };
 
-        // --- UI Logic ---
-        const showT = (title, msg, type = 'info') => {
+        window.closeModal = (n) => {
+            const m = document.getElementById('modal-'+n);
+            const c = document.getElementById(`modal-${n}-content`);
+            m.classList.add('opacity-0');
+            
+            if(n === 'send') c.classList.add('translate-y-full');
+            else c.classList.add('scale-90');
+
+            setTimeout(() => m.classList.add('hidden'), 300);
+        };
+
+        // Обновленная функция уведомлений (Toast)
+        // Если isError = true, показываем красную точку и стандартную иконку, иначе зеленую и аватар
+        window.showT = async (title, msg, amountStr = '', senderEmail = null, isError = false) => {
             const t = document.getElementById('toast');
+            const status = document.getElementById('toast-status');
+            const amtEl = document.getElementById('toast-amount');
+            
             document.getElementById('toast-title').textContent = title;
             document.getElementById('toast-msg').textContent = msg;
+            
+            if (amountStr) {
+                amtEl.textContent = amountStr;
+                amtEl.classList.remove('hidden');
+            } else {
+                amtEl.classList.add('hidden');
+            }
+            
+            const img = document.getElementById('toast-avatar');
+            
+            if (isError) {
+                // Стиль ошибки
+                status.classList.remove('bg-green-500');
+                status.classList.add('bg-red-500');
+                status.innerHTML = '<svg width="8" height="8" fill="none" stroke="black" stroke-width="3" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>';
+                img.src = `https://ui-avatars.com/api/?background=333&color=fff&name=!`;
+            } else {
+                // Стиль успеха/инфо
+                status.classList.remove('bg-red-500');
+                status.classList.add('bg-green-500');
+                status.innerHTML = '<svg width="8" height="8" fill="none" stroke="black" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>';
+                
+                if (senderEmail) {
+                    const u = await getUserInfo(senderEmail);
+                    img.src = u.avatar;
+                } else {
+                    img.src = `https://ui-avatars.com/api/?background=333&color=fff&name=S`;
+                }
+            }
+            
             t.classList.add('active');
-            setTimeout(() => t.classList.remove('active'), 3000);
-        };
-
-        window.openModal = (id) => {
-            const container = document.getElementById('modal-container');
-            container.classList.remove('hidden');
-            setTimeout(() => container.classList.add('opacity-100'), 10);
-            
-            // Hide all sub-modals
-            ['m-profile', 'm-send', 'm-receive', 'm-add-chat', 'm-add-acc'].forEach(m => document.getElementById(m).classList.add('hidden'));
-            
-            // Show specific
-            document.getElementById('m-'+id).classList.remove('hidden');
-            if(id === 'profile') renderAccountList();
-        };
-
-        window.closeModal = () => {
-            const container = document.getElementById('modal-container');
-            container.classList.remove('opacity-100');
-            setTimeout(() => container.classList.add('hidden'), 300);
+            setTimeout(() => t.classList.remove('active'), 4000);
         };
 
         window.switchTab = (tab) => {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.getElementById('tab-'+tab).classList.add('active');
-            ['wallet', 'chats'].forEach(n => {
-                const el = document.getElementById('nav-'+n);
-                el.classList.toggle('text-orange-500', n === tab);
-                el.classList.toggle('text-neutral-600', n !== tab);
-            });
-            document.getElementById('btn-add-chat').classList.toggle('hidden', tab !== 'chats');
+            
+            const navW = document.getElementById('nav-wallet');
+            const navR = document.getElementById('nav-referrals');
+            
+            if(tab === 'wallet') {
+                navW.classList.replace('text-neutral-600', 'text-orange-500');
+                navR.classList.replace('text-orange-500', 'text-neutral-600');
+            } else {
+                navW.classList.replace('text-orange-500', 'text-neutral-600');
+                navR.classList.replace('text-neutral-600', 'text-orange-500');
+            }
         };
 
-        // --- Core Logic ---
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const userRef = doc(db, "users", user.uid);
-                onSnapshot(userRef, (snap) => {
-                    if(!snap.exists()) {
-                        setDoc(userRef, { email: user.email, balance: 10.0, avatar: '', lastSeen: Timestamp.now() });
-                        return;
-                    }
-                    userState = snap.data();
-                    updateDoc(userRef, { lastSeen: Timestamp.now() });
-                    
-                    document.getElementById('bal-val').textContent = userState.balance.toFixed(2);
-                    document.getElementById('my-name').textContent = user.email;
-                    document.getElementById('prof-email').textContent = user.email;
-                    document.getElementById('my-addr-text').textContent = user.email;
-                    
-                    const av = userState.avatar || `https://ui-avatars.com/api/?name=${user.email.charAt(0)}&background=random&color=fff`;
-                    document.getElementById('my-avatar').src = av;
-                    document.getElementById('prof-avatar').src = av;
-                    
-                    // Update cache for self
-                    cachedUsers[user.email] = { avatar: av };
-
-                    document.getElementById('view-loading').classList.add('hidden');
-                    document.getElementById('view-auth').classList.add('hidden');
-                    document.getElementById('view-main').classList.remove('hidden');
-                });
-                
-                loadHistory(user.email);
-                loadChats(user.email);
+        // --- Logic ---
+        onAuthStateChanged(auth, async (u) => {
+            if (u) {
+                const userRef = doc(db, "users", u.uid);
+                const snap = await getDoc(userRef);
+                if (!snap.exists()) {
+                    await setDoc(userRef, {
+                        email: u.email, balance: 10.0, avatar: '', refCount: 0, refEarned: 0, 
+                        createdAt: Timestamp.now(), lowercaseEmail: u.email.toLowerCase()
+                    });
+                }
+                startApp(u);
             } else {
                 document.getElementById('view-loading').classList.add('hidden');
                 document.getElementById('view-main').classList.add('hidden');
-                document.getElementById('view-auth').classList.remove('hidden');
+                document.getElementById('view-auth').classList.replace('hidden', 'flex');
             }
         });
 
-        // Auth Buttons
         document.getElementById('btn-login').onclick = async () => {
             const e = document.getElementById('auth-email').value;
             const p = document.getElementById('auth-password').value;
             try { 
                 await signInWithEmailAndPassword(auth, e, p); 
-                saveAcc(e, p, ''); // Avatar will update on snapshot
-            } catch (err) { showT('Ошибка', 'Неверные данные'); }
+            } catch { 
+                showT('Ошибка', 'Неверный логин или пароль', '', null, true);
+            }
         };
 
-        document.getElementById('btn-reg').onclick = async () => {
+        document.getElementById('btn-register').onclick = async () => {
             const e = document.getElementById('auth-email').value;
             const p = document.getElementById('auth-password').value;
-            try { await createUserWithEmailAndPassword(auth, e, p); } catch (err) { showT('Ошибка', 'Попробуйте другой email'); }
-        };
-
-        document.getElementById('btn-submit-add').onclick = async () => {
-             const e = document.getElementById('add-email').value;
-             const p = document.getElementById('add-pass').value;
-             try {
-                 await signInWithEmailAndPassword(auth, e, p);
-                 saveAcc(e, p, '');
-                 closeModal();
-             } catch(e) { showT('Ошибка', 'Вход не удался'); }
-        };
-
-        // Transfer Logic
-        document.getElementById('btn-confirm-send').onclick = async () => {
-            const to = document.getElementById('send-to').value.trim().toLowerCase();
-            const amt = parseFloat(document.getElementById('send-amt').value);
-            if(to === auth.currentUser.email) return showT('Ошибка', 'Нельзя себе');
-            if(!amt || amt < 0.01) return showT('Ошибка', 'Минимум 0.01');
-            if(amt > userState.balance) return showT('Ошибка', 'Мало денег');
-
+            if (p.length < 6) return showT('Ошибка', 'Пароль слишком короткий', '', null, true);
             try {
-                const q = query(collection(db, "users"), where("email", "==", to));
-                const res = await getDocs(q);
-                if(res.empty) throw new Error("Нет такого пользователя");
-                const receiverRef = res.docs[0].ref;
-
-                await runTransaction(db, async (t) => {
-                    const senderRef = doc(db, "users", auth.currentUser.uid);
-                    t.update(senderRef, { balance: increment(-amt) });
-                    t.update(receiverRef, { balance: increment(amt) });
-                    t.set(doc(collection(db, "transactions")), {
-                        from: auth.currentUser.email, to, amount: amt, date: Timestamp.now(), parties: [auth.currentUser.email, to]
-                    });
-                });
-                closeModal();
-                showT('Успешно', 'Перевод выполнен');
-            } catch(e) { showT('Ошибка', e.message); }
+                await createUserWithEmailAndPassword(auth, e, p);
+                const ref = new URLSearchParams(window.location.search).get('ref');
+                if (ref) {
+                    const q = query(collection(db, "users"), where("email", "==", ref));
+                    const r = await getDocs(q);
+                    if (!r.empty) {
+                        updateDoc(r.docs[0].ref, { 
+                            balance: increment(10), refCount: increment(1), refEarned: increment(10) 
+                        });
+                    }
+                }
+            } catch { 
+                showT('Ошибка', 'Не удалось создать аккаунт', '', null, true);
+            }
         };
 
-        // Helpers for async avatar loading
-        async function getPartnerData(email) {
-            if(cachedUsers[email]) return cachedUsers[email];
-            const q = query(collection(db, "users"), where("email", "==", email));
-            const snap = await getDocs(q);
-            if(!snap.empty) {
-                const d = snap.docs[0].data();
-                cachedUsers[email] = { avatar: d.avatar, lastSeen: d.lastSeen };
-                return cachedUsers[email];
-            }
-            return { avatar: `https://ui-avatars.com/api/?name=${email.charAt(0)}` };
-        }
+        function startApp(u) {
+            document.getElementById('main-username').textContent = u.email;
+            document.getElementById('profile-email').textContent = u.email;
+            document.getElementById('my-email-addr').textContent = u.email;
+            document.getElementById('ref-link').textContent = `${window.location.origin}?ref=${u.email}`;
 
-        const loadHistory = (email) => {
-            const q = query(collection(db, "transactions"), where("parties", "array-contains", email), orderBy("date", "desc"), limit(15));
-            onSnapshot(q, (snap) => {
-                const list = document.getElementById('history-list');
-                list.innerHTML = '';
-                snap.forEach(async d => {
-                    const tx = d.data();
-                    const isOut = tx.from === email;
-                    const partner = isOut ? tx.to : tx.from;
-                    const item = document.createElement('div');
-                    item.className = "flex items-center justify-between glass p-4 rounded-2xl";
-                    item.innerHTML = `
-                        <div class="flex items-center gap-3">
-                            <img id="hist-av-${d.id}" class="w-8 h-8 rounded-full bg-neutral-900 object-cover">
-                            <div>
-                                <p class="text-[10px] font-bold text-white truncate max-w-[120px]">${partner}</p>
-                                <p class="text-[8px] font-black uppercase text-neutral-600 tracking-widest">${isOut ? 'Расход' : 'Доход'}</p>
+            // 1. Слушаем профиль
+            onSnapshot(doc(db, "users", u.uid), async (snap) => {
+                const d = snap.data();
+                if (!d) return;
+
+                if (lastBal !== null && d.balance > lastBal) {
+                    const diff = d.balance - lastBal;
+                    handleIncomingTransfer(u.email, diff);
+                }
+
+                myData = d;
+                lastBal = d.balance;
+
+                document.getElementById('balance-val').textContent = d.balance.toFixed(2);
+                document.getElementById('ref-count').textContent = d.refCount || 0;
+                document.getElementById('ref-earned').textContent = (d.refEarned || 0).toFixed(2);
+                
+                const av = d.avatar || `https://ui-avatars.com/api/?background=random&color=fff&name=${u.email.charAt(0)}`;
+                document.getElementById('main-avatar').src = av;
+                document.getElementById('edit-avatar-img').src = av;
+
+                document.getElementById('view-auth').classList.add('hidden');
+                document.getElementById('view-loading').classList.add('hidden');
+                document.getElementById('view-main').classList.replace('hidden', 'flex');
+            });
+
+            // 2. История
+            const qTx = query(collection(db, "transactions"), where("parties", "array-contains", u.email));
+            
+            onSnapshot(qTx, async (snap) => {
+                const list = document.getElementById('tx-history');
+                if (snap.empty) {
+                    list.innerHTML = '<p class="text-center text-neutral-800 text-[10px] uppercase font-bold py-4">История пуста</p>';
+                    return;
+                }
+
+                const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date);
+                
+                let html = '';
+                for (const tx of docs) {
+                    const isSent = tx.from === u.email;
+                    const partner = isSent ? tx.to : tx.from;
+                    let av = `https://ui-avatars.com/api/?background=222&color=666&name=${partner.charAt(0)}`;
+                    if (userCache[partner]) av = userCache[partner].avatar;
+                    else {
+                         getUserInfo(partner).then(inf => {
+                             const el = document.getElementById(`av-${tx.date.toMillis()}`);
+                             if(el) el.src = inf.avatar;
+                         });
+                    }
+
+                    const dateStr = tx.date ? new Date(tx.date.toMillis()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+
+                    html += `
+                    <div class="flex items-center justify-between p-4 rounded-[1.5rem] bg-white/[0.03] border border-white/5">
+                        <div class="flex items-center gap-3 overflow-hidden">
+                            <img id="av-${tx.date ? tx.date.toMillis() : ''}" src="${av}" class="w-10 h-10 rounded-full bg-neutral-800 object-cover border border-white/5 shrink-0">
+                            <div class="min-w-0">
+                                <p class="text-[9px] font-black uppercase ${isSent ? 'text-neutral-500' : 'text-[#FF4D00]'} tracking-widest mb-0.5">${isSent ? 'Кому:' : 'От:'}</p>
+                                <p class="text-[11px] font-bold text-white truncate w-32 leading-tight">${partner}</p>
                             </div>
                         </div>
-                        <p class="text-sm font-black ${isOut ? 'text-white' : 'text-orange-500'}">${isOut ? '-' : '+'}${tx.amount.toFixed(2)}</p>
-                    `;
-                    list.appendChild(item);
-                    const pData = await getPartnerData(partner);
-                    document.getElementById(`hist-av-${d.id}`).src = pData.avatar || `https://ui-avatars.com/api/?name=${partner.charAt(0)}&background=333&color=fff`;
-                });
+                        <div class="text-right">
+                            <p class="text-sm font-black ${isSent ? 'text-white' : 'text-[#FF4D00]'}">${isSent ? '-' : '+'}${tx.amount.toFixed(2)}</p>
+                            <p class="text-[9px] text-neutral-600 font-bold uppercase">${dateStr}</p>
+                        </div>
+                    </div>`;
+                }
+                list.innerHTML = html;
             });
-        };
+        }
 
-        const loadChats = (email) => {
-            const q = query(collection(db, "chats"), where("participants", "array-contains", email), orderBy("lastUpd", "desc"));
-            onSnapshot(q, (snap) => {
-                const list = document.getElementById('chats-list');
-                list.innerHTML = '';
-                snap.forEach(async d => {
-                    const c = d.data();
-                    const partner = c.participants.find(p => p !== email);
-                    const pData = await getPartnerData(partner);
-                    const isOnline = pData.lastSeen && (Date.now() - pData.lastSeen.toMillis() < 300000);
+        async function handleIncomingTransfer(myEmail, amountDiff) {
+            try {
+                const q = query(collection(db, "transactions"), where("to", "==", myEmail));
+                const snap = await getDocs(q);
+                
+                if (!snap.empty) {
+                    const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date);
+                    const lastTx = docs[0];
                     
-                    const item = document.createElement('div');
-                    item.onclick = () => openChat(partner);
-                    item.className = "flex items-center gap-4 glass p-4 rounded-[1.5rem] cursor-pointer active:scale-95 transition-all";
-                    item.innerHTML = `
-                        <div class="relative">
-                            <img id="chat-av-list-${d.id}" src="${pData.avatar || `https://ui-avatars.com/api/?name=${partner.charAt(0)}`}" class="w-12 h-12 rounded-full object-cover">
-                            ${isOnline ? '<div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-black rounded-full"></div>' : ''}
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-black truncate">${partner}</p>
-                            <p class="text-xs text-neutral-500 truncate">${c.lastMsg || 'Нет сообщений'}</p>
-                        </div>
-                    `;
-                    list.appendChild(item);
-                });
-            });
-        };
+                    if (Math.abs(lastTx.amount - amountDiff) < 0.01) {
+                        showT('Входящий перевод', lastTx.from, `+${amountDiff.toFixed(2)} Đ`, lastTx.from);
+                        return;
+                    }
+                }
+                showT('Пополнение', 'Система', `+${amountDiff.toFixed(2)} Đ`);
+            } catch(e) { console.log(e); }
+        }
 
-        // Chat View
-        window.openChat = async (email) => {
-            activeChatEmail = email;
-            const pData = await getPartnerData(email);
-            document.getElementById('chat-name').textContent = email;
-            document.getElementById('chat-avatar').src = pData.avatar || `https://ui-avatars.com/api/?name=${email.charAt(0)}`;
-            
-            const isOnline = pData.lastSeen && (Date.now() - pData.lastSeen.toMillis() < 300000);
-            document.getElementById('chat-status').textContent = isOnline ? 'В сети' : 'Офлайн';
-            document.getElementById('chat-status').className = `text-[9px] font-bold uppercase tracking-widest ${isOnline ? 'text-green-500' : 'text-neutral-500'}`;
-
-            const chatId = [auth.currentUser.email, email].sort().join('_');
-            const msgsDiv = document.getElementById('chat-messages');
-            msgsDiv.innerHTML = '';
-            
-            if(chatUnsub) chatUnsub();
-            const q = query(collection(db, "chats", chatId, "messages"), orderBy("time", "asc"));
-            chatUnsub = onSnapshot(q, (snap) => {
-                msgsDiv.innerHTML = '';
-                snap.forEach(mDoc => {
-                    const m = mDoc.data();
-                    const isMe = m.from === auth.currentUser.email;
-                    msgsDiv.innerHTML += `
-                        <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
-                            <div class="chat-bubble ${isMe ? 'msg-me' : 'msg-them'}">${m.text}</div>
-                        </div>
-                    `;
-                });
-                msgsDiv.scrollTop = msgsDiv.scrollHeight;
-            });
-
-            document.getElementById('chat-room').classList.remove('translate-x-full');
-        };
-
-        window.closeChat = () => {
-            document.getElementById('chat-room').classList.add('translate-x-full');
-            activeChatEmail = null;
-        };
-
-        window.sendMsg = async () => {
-            const input = document.getElementById('chat-input');
-            const text = input.value.trim();
-            if(!text || !activeChatEmail) return;
-            input.value = '';
-
-            const chatId = [auth.currentUser.email, activeChatEmail].sort().join('_');
-            const chatRef = doc(db, "chats", chatId);
-            await setDoc(chatRef, { lastMsg: text, lastUpd: Timestamp.now(), participants: [auth.currentUser.email, activeChatEmail] }, {merge: true});
-            await addDoc(collection(db, "chats", chatId, "messages"), { from: auth.currentUser.email, text, time: Timestamp.now() });
-        };
-
-        window.startChatAction = () => {
-            const e = document.getElementById('new-chat-email').value.trim().toLowerCase();
-            if(!e || e === auth.currentUser.email) return;
-            closeModal();
-            openChat(e);
-        };
-
-        // Profile Extras
+        // --- Actions ---
         document.getElementById('avatar-input').onchange = (e) => {
             const file = e.target.files[0];
-            if(!file) return;
+            if (!file) return;
             const reader = new FileReader();
-            reader.onload = (ev) => {
-                updateDoc(doc(db, "users", auth.currentUser.uid), { avatar: ev.target.result });
-                // Also update in accounts storage
-                let accs = getAccs();
-                const idx = accs.findIndex(a => a.email === auth.currentUser.email);
-                if(idx !== -1) {
-                    accs[idx].avatar = ev.target.result;
-                    localStorage.setItem('dc_accs', JSON.stringify(accs));
+            reader.onload = async (ev) => {
+                try {
+                    await updateDoc(doc(db, "users", auth.currentUser.uid), { avatar: ev.target.result });
+                    showT('Профиль', 'Аватар обновлен');
+                } catch { 
+                    showT('Ошибка', 'Не удалось загрузить фото', '', null, true);
                 }
             };
             reader.readAsDataURL(file);
         };
 
-        function renderAccountList() {
-            const list = document.getElementById('acc-list');
-            const accs = getAccs();
-            document.getElementById('acc-count').textContent = `${accs.length}/15`;
-            list.innerHTML = '';
-            accs.forEach(a => {
-                const isCurrent = a.email === auth.currentUser.email;
-                const div = document.createElement('div');
-                div.className = `flex items-center gap-3 p-2 rounded-xl transition-all ${isCurrent ? 'bg-orange-500/10 border border-orange-500/20' : 'hover:bg-white/5 cursor-pointer'}`;
-                div.innerHTML = `
-                    <img src="${a.avatar || `https://ui-avatars.com/api/?name=${a.email.charAt(0)}&background=333&color=fff`}" class="w-7 h-7 rounded-full object-cover">
-                    <p class="text-[10px] font-bold truncate flex-1 ${isCurrent ? 'text-orange-500' : ''}">${a.email}</p>
-                    ${isCurrent ? '<div class="w-1.5 h-1.5 rounded-full bg-orange-500"></div>' : ''}
-                `;
-                if(!isCurrent) div.onclick = () => quickSwitch(a.email, atob(a.pass));
-                list.appendChild(div);
-            });
-        }
+        document.getElementById('btn-do-send').onclick = async () => {
+            const to = document.getElementById('send-email').value.trim().toLowerCase();
+            const amt = parseFloat(document.getElementById('send-amt').value);
+            const myEmail = auth.currentUser.email;
 
-        async function quickSwitch(email, pass) {
+            if (to === myEmail) return showT('Ошибка', 'Нельзя отправить себе', '', null, true);
+            if (!amt || amt <= 0 || amt > myData.balance) return showT('Ошибка', 'Некорректная сумма', '', null, true);
+
+            const btn = document.getElementById('btn-do-send');
+            btn.disabled = true; btn.textContent = '...';
+
             try {
-                await signInWithEmailAndPassword(auth, email, pass);
-                closeModal();
-            } catch(e) { showT('Ошибка', 'Не удалось переключить'); }
-        }
+                const q = query(collection(db, "users"), where("email", "==", to));
+                const res = await getDocs(q);
+                if (res.empty) throw new Error("Пользователь не найден");
+                const receiverRef = res.docs[0].ref;
 
-        window.signOut = (auth) => signOut(auth);
+                await runTransaction(db, async (t) => {
+                    const senderRef = doc(db, "users", auth.currentUser.uid);
+                    const sDoc = await t.get(senderRef);
+                    if (sDoc.data().balance < amt) throw new Error("Недостаточно средств");
+
+                    t.update(senderRef, { balance: increment(-amt) });
+                    t.update(receiverRef, { balance: increment(amt) });
+                    
+                    const txRef = doc(collection(db, "transactions"));
+                    t.set(txRef, {
+                        from: myEmail, to: to, amount: amt, date: Timestamp.now(), parties: [myEmail, to]
+                    });
+                });
+                
+                closeModal('send');
+                document.getElementById('send-amt').value = '';
+                document.getElementById('send-email').value = '';
+                showT('Успешно', `Перевод для ${to}`, `-${amt.toFixed(2)} Đ`);
+
+            } catch (e) { 
+                showT('Ошибка', e.message, '', null, true); 
+            }
+            finally { btn.disabled = false; btn.textContent = 'Отправить'; }
+        };
+
+        window.copyRef = () => { 
+            navigator.clipboard.writeText(document.getElementById('ref-link').textContent); 
+            showT('Успешно', 'Ссылка скопирована');
+        };
+        window.copyMyEmail = () => { 
+            navigator.clipboard.writeText(auth.currentUser.email); 
+            showT('Успешно', 'Email скопирован');
+        };
+        document.getElementById('btn-logout').onclick = () => signOut(auth);
 
     </script>
 </body>
