@@ -34,10 +34,19 @@
         /* --- Scanner Styles Fixed --- */
         #modal-scan-content { position: relative; background: #000; }
         #reader { width: 100%; height: 100%; overflow: hidden; position: relative; }
+        
+        /* FIX: Убираем любые рамки и границы у видео и внутренних элементов библиотеки */
         #reader video { 
             width: 100% !important; 
             height: 100% !important; 
             object-fit: cover !important; /* Убирает черные полосы и растягивает видео */
+            border-radius: 0 !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+        #reader * {
+            border: none !important;
+            box-shadow: none !important;
         }
         
         /* Overlay using box-shadow technique (Stable & Clean) */
@@ -677,7 +686,9 @@
 
              html5QrCode = new Html5Qrcode("reader");
 
-             const config = { fps: 15, qrbox: { width: 250, height: 250 }, aspectRatio: window.innerHeight / window.innerWidth };
+             // FIX: Removed qrbox to prevent weird frames and library-side cropping artifacts
+             // The UI overlay handles the visual aspect.
+             const config = { fps: 15, aspectRatio: window.innerHeight / window.innerWidth };
              
              html5QrCode.start(
                  { facingMode: "environment" }, 
