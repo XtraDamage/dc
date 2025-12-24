@@ -7,6 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- QR Code Scanner Library (Core) -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <!-- QR Code Generator Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         /* Блокировка и базовые стили */
@@ -29,43 +31,94 @@
         .hide-scroll::-webkit-scrollbar { display: none; }
         .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
 
-        /* Custom Scanner Overlay */
+        /* --- Scanner Styles Redesigned --- */
         #reader { width: 100%; height: 100%; border-radius: 1.5rem; overflow: hidden; position: relative; background: black; }
         #reader video { object-fit: cover; width: 100%; height: 100%; border-radius: 1.5rem; }
         
-        .scan-overlay {
+        /* Mask effect for scanner focus */
+        .scan-mask-container {
             position: absolute; inset: 0; z-index: 10; pointer-events: none;
-            border: 2px solid rgba(255, 77, 0, 0.3); border-radius: 1.5rem;
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+            display: flex; align-items: center; justify-content: center;
         }
-        .scan-line {
-            position: absolute; width: 100%; height: 2px; background: #FF4D00;
-            box-shadow: 0 0 10px #FF4D00, 0 0 20px #FF4D00;
-            top: 50%; animation: scanAnim 2s infinite ease-in-out; opacity: 0.8;
-        }
-        @keyframes scanAnim { 0% { transform: translateY(-120px); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateY(120px); opacity: 0; } }
-        
-        /* Orange Glass QR Style */
-        .qr-glass-container {
-            background: #000;
-            padding: 10px;
-            border-radius: 20px;
-            box-shadow: 0 0 20px rgba(255, 77, 0, 0.15), inset 0 0 20px rgba(255, 77, 0, 0.05);
-            border: 1px solid rgba(255, 77, 0, 0.2);
+        .scan-frame {
+            width: 260px; height: 260px;
             position: relative;
+            box-shadow: 0 0 0 9999px rgba(0,0,0,0.85); /* Darkens everything outside */
+            border-radius: 1.5rem;
+            /* Glowing borders */
+        }
+        .scan-corner {
+            position: absolute; width: 30px; height: 30px;
+            border-color: #FF4D00;
+            filter: drop-shadow(0 0 5px #FF4D00);
+            opacity: 0.9;
+            transition: all 0.3s;
+        }
+        /* Corners positioning */
+        .tl { top: -2px; left: -2px; border-top: 3px solid; border-left: 3px solid; border-top-left-radius: 1rem; }
+        .tr { top: -2px; right: -2px; border-top: 3px solid; border-right: 3px solid; border-top-right-radius: 1rem; }
+        .bl { bottom: -2px; left: -2px; border-bottom: 3px solid; border-left: 3px solid; border-bottom-left-radius: 1rem; }
+        .br { bottom: -2px; right: -2px; border-bottom: 3px solid; border-right: 3px solid; border-bottom-right-radius: 1rem; }
+
+        .scan-laser {
+            position: absolute; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, #FF4D00, transparent);
+            box-shadow: 0 0 15px #FF4D00, 0 0 30px #FF4D00;
+            top: 50%; opacity: 0.8;
+            animation: scanAnim 2.5s infinite ease-in-out;
+        }
+        @keyframes scanAnim { 
+            0% { transform: translateY(-120px); opacity: 0; } 
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { transform: translateY(120px); opacity: 0; } 
+        }
+        
+        /* --- Premium QR Generator Styles --- */
+        .qr-premium-wrapper {
+            position: relative;
+            padding: 15px;
+            background: linear-gradient(145deg, #161616, #050505);
+            border-radius: 32px;
+            box-shadow: 
+                0 20px 40px -10px rgba(0,0,0,0.8),
+                inset 0 1px 1px rgba(255,255,255,0.1),
+                0 0 0 1px rgba(255,255,255,0.03);
+            display: inline-block;
+        }
+        /* Inner glow frame */
+        .qr-glow-frame {
+            position: relative;
+            background: white;
+            padding: 10px;
+            border-radius: 24px;
             overflow: hidden;
+            box-shadow: 0 0 30px rgba(255, 77, 0, 0.15); /* Orange glow behind white */
         }
-        .qr-glass-img {
-            filter: drop-shadow(0 0 4px rgba(255, 77, 0, 0.5));
-            mix-blend-mode: screen; /* Смешивание для эффекта свечения */
+        /* Logo overlay in QR center */
+        .qr-logo-overlay {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 44px; height: 44px;
+            background: black;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            border: 2px solid white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            z-index: 10;
         }
+
         .qr-error-overlay {
             position: absolute; inset: 0; background: rgba(0,0,0,0.9);
             display: flex; flex-col; align-items: center; justify-content: center;
             opacity: 0; pointer-events: none; transition: opacity 0.3s;
-            z-index: 20;
+            z-index: 20; border-radius: 32px;
         }
         .qr-error-overlay.active { opacity: 1; pointer-events: auto; }
+
+        /* Balance Text Sizing Transition */
+        #balance-val { transition: font-size 0.3s ease; }
 
     </style>
 </head>
@@ -142,15 +195,16 @@
                         <div class="absolute inset-0 gradient-bg opacity-[0.03] group-hover:opacity-[0.05] transition-opacity duration-500"></div>
                         <div class="absolute -right-12 -top-12 w-48 h-48 bg-[#FF4D00] rounded-full blur-[80px] opacity-20"></div>
                         
-                        <div class="relative z-10 flex flex-col items-center justify-center py-4">
+                        <div class="relative z-10 flex flex-col items-center justify-center py-6">
                             <span class="text-[10px] font-bold text-neutral-500 uppercase tracking-[0.2em] mb-2">Общий баланс</span>
-                            <div class="flex items-end gap-1 mb-2">
-                                <h2 id="balance-val" class="text-5xl font-black tracking-tighter leading-none">0.00</h2>
-                                <span class="text-4xl font-black gradient-text leading-none mb-1">Đ</span>
+                            <!-- Контейнер для адаптивного баланса -->
+                            <div class="w-full flex items-baseline justify-center gap-1 mb-2 px-2">
+                                <h2 id="balance-val" class="text-5xl font-black tracking-tighter leading-none whitespace-nowrap overflow-visible">0.00</h2>
+                                <span class="text-2xl font-black gradient-text leading-none mb-1 self-end pb-1">Đ</span>
                             </div>
                         </div>
 
-                        <div class="flex gap-3 mt-6 relative z-10">
+                        <div class="flex gap-3 mt-4 relative z-10">
                             <button onclick="openModal('send')" class="flex-1 h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 active:scale-95 transition-all shadow-lg shadow-white/5 cursor-pointer flex flex-col items-center justify-center">
                                 <span>Отправить</span>
                             </button>
@@ -281,7 +335,7 @@
             </div>
         </div>
 
-        <!-- Модалка: Получить (с Orange Glass QR) -->
+        <!-- Модалка: Получить (с Premium QR) -->
         <div id="modal-receive" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
             <div class="bg-[#111] border border-white/10 rounded-t-[2.5rem] p-8 pb-10 w-full transform translate-y-full transition-transform duration-300 shadow-2xl" id="modal-receive-content">
                 <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-6"></div>
@@ -291,14 +345,22 @@
                     <p class="text-neutral-500 text-xs font-medium">Покажите этот код отправителю</p>
                 </div>
 
-                <!-- QR Code Container -->
+                <!-- Premium QR Code Container -->
                 <div class="flex justify-center mb-6">
-                    <div class="qr-glass-container">
-                        <img id="qr-image" src="" class="w-48 h-48 object-contain qr-glass-img">
-                        <!-- Слой ошибки, если сумма маленькая -->
-                        <div id="qr-error" class="qr-error-overlay rounded-2xl">
+                    <div class="qr-premium-wrapper">
+                         <!-- Error Overlay -->
+                         <div id="qr-error" class="qr-error-overlay">
                              <span class="text-3xl mb-2">⚠️</span>
                              <p class="text-[10px] font-bold text-orange-500 uppercase tracking-widest text-center">Минимум<br>0.01 Đ</p>
+                        </div>
+                        
+                        <div class="qr-glow-frame">
+                            <!-- Logo in Center -->
+                            <div class="qr-logo-overlay">
+                                <span class="font-black text-white text-lg">Đ</span>
+                            </div>
+                            <!-- Actual QR Render Target -->
+                            <div id="qrcode-container"></div>
                         </div>
                     </div>
                 </div>
@@ -325,12 +387,12 @@
             </div>
         </div>
 
-        <!-- Модалка: Сканер V2 -->
-        <div id="modal-scan" class="hidden absolute inset-0 z-[120] bg-black/95 backdrop-blur-xl flex flex-col opacity-0 transition-opacity duration-300">
+        <!-- Модалка: Сканер Pro -->
+        <div id="modal-scan" class="hidden absolute inset-0 z-[120] bg-black flex flex-col opacity-0 transition-opacity duration-300">
             <!-- Header сканера -->
             <div class="absolute top-0 left-0 w-full p-6 z-20 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent">
                  <h2 class="text-xl font-black text-white drop-shadow-md">Сканирование</h2>
-                 <button onclick="closeModal('scan')" class="w-10 h-10 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center text-white cursor-pointer hover:bg-white/20 transition-all">
+                 <button onclick="closeModal('scan')" class="w-10 h-10 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center text-white cursor-pointer hover:bg-white/20 transition-all border border-white/10">
                     <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
                 </button>
             </div>
@@ -338,13 +400,16 @@
             <!-- Область камеры -->
             <div class="w-full h-full relative" id="modal-scan-content">
                 <div id="reader"></div>
-                <!-- Наложения для красоты -->
-                <div class="scan-overlay m-4 top-20 bottom-20">
-                     <div class="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-orange-500 rounded-tl-xl"></div>
-                     <div class="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-orange-500 rounded-tr-xl"></div>
-                     <div class="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-orange-500 rounded-bl-xl"></div>
-                     <div class="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-orange-500 rounded-br-xl"></div>
-                     <div class="scan-line"></div>
+                
+                <!-- Mask Overlay -->
+                <div class="scan-mask-container">
+                    <div class="scan-frame">
+                        <div class="scan-corner tl"></div>
+                        <div class="scan-corner tr"></div>
+                        <div class="scan-corner bl"></div>
+                        <div class="scan-corner br"></div>
+                        <div class="scan-laser"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -372,9 +437,8 @@
         let myData = null;
         let lastBal = null;
         const userCache = {};
-        
-        // Используем Core API вместо виджета для полного контроля
         let html5QrCode = null; 
+        let qrCodeObj = null; // Для хранения объекта qrcodejs
 
         // --- Helpers ---
         async function getUserInfo(email) {
@@ -503,6 +567,26 @@
             } catch { showT('Ошибка', 'Не удалось создать аккаунт', '', null, true); }
         };
 
+        // --- NEW: Adaptive Balance Font Size ---
+        function adjustBalanceSize(amountStr) {
+            const el = document.getElementById('balance-val');
+            const len = amountStr.length;
+            
+            // Сбрасываем все классы размера
+            el.classList.remove('text-5xl', 'text-4xl', 'text-3xl', 'text-2xl', 'text-xl');
+            
+            // Применяем новый класс в зависимости от длины
+            if (len > 12) {
+                el.classList.add('text-2xl');
+            } else if (len > 9) {
+                el.classList.add('text-3xl');
+            } else if (len > 7) {
+                el.classList.add('text-4xl');
+            } else {
+                el.classList.add('text-5xl');
+            }
+        }
+
         function startApp(u) {
             document.getElementById('main-username').textContent = u.email;
             document.getElementById('profile-email').textContent = u.email;
@@ -517,7 +601,13 @@
                     handleIncomingTransfer(u.email, diff);
                 }
                 myData = d; lastBal = d.balance;
-                document.getElementById('balance-val').textContent = d.balance.toFixed(2);
+                
+                // Update Balance with adaptive sizing
+                const balStr = d.balance.toFixed(2);
+                const balEl = document.getElementById('balance-val');
+                balEl.textContent = balStr;
+                adjustBalanceSize(balStr);
+
                 document.getElementById('ref-count').textContent = d.refCount || 0;
                 document.getElementById('ref-earned').textContent = (d.refEarned || 0).toFixed(2);
                 const av = d.avatar || `https://ui-avatars.com/api/?background=random&color=fff&name=${u.email.charAt(0)}`;
@@ -576,44 +666,51 @@
 
         // --- Logic V2.1: Advanced QR & Scanner ---
         
-        // 1. Orange Glass QR
+        // 1. Premium Client-Side QR Generation
         window.updateQR = () => {
             const email = auth.currentUser.email;
             let amt = parseFloat(document.getElementById('receive-amt-req').value);
             const errOverlay = document.getElementById('qr-error');
+            const container = document.getElementById('qrcode-container');
             
-            // Если поле пустое, считаем как 0 (просто email)
             if(isNaN(amt)) amt = 0;
 
-            // Валидация: Если введено число, но оно меньше 0.01 и больше 0 - это ошибка
             if (amt > 0 && amt < 0.01) {
                 errOverlay.classList.add('active');
-                return; // Не обновляем картинку
+                return; 
             } else {
                 errOverlay.classList.remove('active');
             }
 
             const data = JSON.stringify({ t: "req", e: email, a: amt });
             
-            // Orange pixels (FF4D00) on Black background (000000) for "Glass" contrast
-            // Используем api.qrserver.com с правильными цветами
-            const url = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&color=FF4D00&bgcolor=000000&margin=10&data=${encodeURIComponent(data)}`;
-            document.getElementById('qr-image').src = url;
+            // Clear previous QR
+            container.innerHTML = '';
+            
+            // Generate new QR using library
+            // Color: Black modules on Transparent background (to let the white glow frame show)
+            // Actually library expects a background color. 
+            // We use Black Dots on White Background to contrast with the dark theme inside the glow frame.
+            new QRCode(container, {
+                text: data,
+                width: 180,
+                height: 180,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H // High error correction for logo overlay
+            });
         };
         
         document.getElementById('receive-amt-req').oninput = updateQR;
 
         // 2. Scanner Logic (Core API, Auto-start, Back Camera Only)
         window.startScannerV2 = () => {
-             if (html5QrCode) return; // already active
+             if (html5QrCode) return; 
 
-             // Инициализация на контейнер
              html5QrCode = new Html5Qrcode("reader");
 
-             const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+             const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
              
-             // Запуск напрямую с environment (задняя камера)
-             // Это убирает диалог выбора камеры и автозапускает её
              html5QrCode.start(
                  { facingMode: "environment" }, 
                  config, 
@@ -627,7 +724,6 @@
         };
 
         const onScanSuccess = (decodedText, decodedResult) => {
-             // Останавливаем сканер при успехе
              closeModal('scan');
              
              try {
@@ -647,7 +743,7 @@
         };
 
         const onScanError = (errorMessage) => {
-            // ignore scan errors (running continuously)
+            // ignore scan errors
         };
 
         window.stopScannerV2 = () => {
