@@ -105,44 +105,70 @@
         /* Google Btn Animation */
         .google-btn-hover:hover { box-shadow: 0 0 20px rgba(255, 255, 255, 0.2); }
 
-        /* --- FIRE IN THE BANK STYLES --- */
-        .bank-stack-container {
+        /* --- UPDATED: REALISTIC JAR WITH FIRE INSIDE --- */
+        .jar-container {
+            width: 140px; height: 180px; margin: 0 auto;
             position: relative;
-            width: 120px;
-            height: 120px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto;
+            margin-bottom: 1rem;
         }
-        .bank-layer-bottom {
-            font-size: 80px;
-            opacity: 0.5;
-            position: absolute;
+        /* Glass Jar Shape with Overflow Hidden to clip fire */
+        .jar-glass {
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+            border: 2px solid rgba(255,255,255,0.15);
+            border-radius: 2rem;
+            border-top-left-radius: 1rem; border-top-right-radius: 1rem;
+            box-shadow: inset 0 0 20px rgba(255,255,255,0.02), 0 10px 30px rgba(0,0,0,0.5);
+            overflow: hidden; /* Clips the fire */
+            z-index: 10;
+        }
+        /* Jar Lid area */
+        .jar-lid {
+            position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+            width: 80%; height: 15px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 4px;
+            z-index: 20;
+        }
+        /* The Fire (Confined inside .jar-glass via overflow:hidden) */
+        .jar-fire-core {
+            position: absolute; bottom: -20px; left: 50%;
+            width: 80px; height: 80px;
+            transform: translateX(-50%);
+            background: radial-gradient(circle, #ffaa00 0%, #ff4d00 40%, transparent 70%);
+            filter: blur(10px);
+            opacity: 0.8;
+            animation: fireCore 2s infinite alternate ease-in-out;
             z-index: 1;
-            filter: grayscale(0.5);
         }
-        .bank-layer-fire {
-            font-size: 40px;
-            position: absolute;
+        .jar-fire-flame {
+            position: absolute; bottom: 10px; left: 50%;
+            width: 60px; height: 100px;
+            transform: translateX(-50%);
+            background: linear-gradient(to top, #ffaa00, #ff4d00, transparent);
+            border-radius: 50% 50% 20% 20%;
+            filter: blur(15px);
+            mix-blend-mode: screen;
+            animation: fireFlame 3s infinite ease-in-out;
             z-index: 2;
-            top: 55%;
-            left: 50%;
-            transform: translate(-50%, -20%);
-            animation: firePulse 1.5s infinite alternate ease-in-out;
-            filter: drop-shadow(0 0 15px rgba(255, 77, 0, 0.8));
         }
-        .bank-layer-top {
-            font-size: 80px;
-            opacity: 0.4;
-            position: absolute;
-            z-index: 3;
-            pointer-events: none;
-            mix-blend-mode: overlay;
+        /* Glass Reflections */
+        .jar-shine {
+            position: absolute; top: 10px; right: 10px;
+            width: 20px; height: 60px;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.2), transparent);
+            border-radius: 20px; z-index: 30; pointer-events: none;
         }
-        @keyframes firePulse {
-            0% { transform: translate(-50%, -20%) scale(1); opacity: 0.8; }
-            100% { transform: translate(-50%, -25%) scale(1.15); opacity: 1; }
+
+        @keyframes fireCore { 
+            0% { transform: translateX(-50%) scale(1); opacity: 0.7; }
+            100% { transform: translateX(-50%) scale(1.2); opacity: 0.9; }
+        }
+        @keyframes fireFlame {
+            0% { height: 80px; transform: translateX(-50%) skewX(-2deg); }
+            50% { height: 110px; transform: translateX(-50%) skewX(2deg); }
+            100% { height: 90px; transform: translateX(-50%) skewX(-1deg); }
         }
 
     </style>
@@ -329,17 +355,22 @@
                     </div>
                 </div>
 
-                <!-- BANK TAB (NEW) -->
+                <!-- BANK TAB (UPDATED) -->
                 <div id="tab-bank" class="tab-content space-y-6">
                     <div class="text-center pt-4 pb-2">
                         <h2 class="text-xl font-black uppercase tracking-widest text-neutral-400">Стейкинг</h2>
                         <p class="text-[10px] text-orange-500 font-bold uppercase tracking-widest">+5% в неделю ⌛</p>
                     </div>
 
-                    <div class="bank-stack-container">
-                        <span class="bank-layer-bottom">🫙</span>
-                        <span class="bank-layer-fire">🔥</span>
-                        <span class="bank-layer-top">🫙</span>
+                    <!-- Realistic Jar with Fire Inside -->
+                    <div class="jar-container">
+                        <div class="jar-lid"></div>
+                        <div class="jar-glass">
+                            <!-- Fire contained within jar-glass -->
+                            <div class="jar-fire-core"></div>
+                            <div class="jar-fire-flame"></div>
+                            <div class="jar-shine"></div>
+                        </div>
                     </div>
 
                     <div class="dool-card rounded-[2.5rem] p-8 text-center relative overflow-hidden">
@@ -354,9 +385,12 @@
                         <div class="h-[1px] bg-white/10 w-full my-6 relative z-10"></div>
                         
                         <div class="relative z-10">
-                             <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Накопленный доход</p>
-                             <p id="bank-profit-val" class="text-lg font-bold text-green-500">+0.00 Đ</p>
-                             <button id="btn-claim-interest" class="mt-2 text-[10px] bg-white/10 hover:bg-green-500/20 text-white px-3 py-1 rounded-full transition-colors disabled:opacity-50" onclick="claimInterest()">Забрать</button>
+                             <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Накоплено</p>
+                             <div class="flex items-center justify-center gap-2 mb-3">
+                                <p id="bank-profit-val" class="text-2xl font-bold text-green-500 font-mono tracking-tight">+0.000</p>
+                             </div>
+                             
+                             <button id="btn-claim-interest" class="w-full h-12 bg-white/10 hover:bg-green-500 hover:text-black border border-white/5 text-white rounded-xl font-black text-[10px] uppercase tracking-wider transition-all disabled:opacity-30 disabled:hover:bg-white/10 disabled:hover:text-white" onclick="claimInterest()" disabled>Собрать доход</button>
                         </div>
                     </div>
 
@@ -379,8 +413,8 @@
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
                 </button>
                 <button onclick="switchTab('bank')" id="nav-bank" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
-                     <!-- Bank Icon -->
-                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M3 21h18M5 21v-7M19 21v-7M4 10a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v3H4v-3zM12 3L2 14h20L12 3z"/></svg>
+                     <!-- CORRECT JAR ICON -->
+                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v3a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V2"/><rect x="6" y="6" width="12" height="16" rx="3"/></svg>
                 </button>
                 <button onclick="switchTab('referrals')" id="nav-referrals" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
@@ -715,7 +749,34 @@
                     const email = u.email;
                     const emailLower = u.email.toLowerCase();
 
-                    // Init data including Bank fields
+                    // --- ROBUST REFERRAL LOGIC START ---
+                    const refEmail = localStorage.getItem('dool_ref');
+                    
+                    if (refEmail && refEmail !== emailLower) {
+                        try {
+                            // 1. Попытка найти по lowercaseEmail (новый стандарт)
+                            let q = query(collection(db, "users"), where("lowercaseEmail", "==", refEmail));
+                            let refSnap = await getDocs(q);
+
+                            // 2. Фолбэк: если не нашли, пробуем искать по обычному email (для старых юзеров)
+                            if (refSnap.empty) {
+                                q = query(collection(db, "users"), where("email", "==", refEmail));
+                                refSnap = await getDocs(q);
+                            }
+
+                            if (!refSnap.empty) {
+                                const referrerDoc = refSnap.docs[0];
+                                await updateDoc(referrerDoc.ref, {
+                                    balance: increment(10),
+                                    refCount: increment(1),
+                                    refEarned: increment(10)
+                                });
+                            }
+                        } catch (err) { console.error("Referral Error:", err); }
+                    }
+                    localStorage.removeItem('dool_ref');
+                    // --- ROBUST REFERRAL LOGIC END ---
+
                     await setDoc(userRef, {
                         email: email, 
                         lowercaseEmail: emailLower,
@@ -727,23 +788,6 @@
                         refEarned: 0, 
                         createdAt: Timestamp.now()
                     });
-
-                    const refEmail = localStorage.getItem('dool_ref');
-                    if (refEmail && refEmail !== emailLower) {
-                        try {
-                            const q = query(collection(db, "users"), where("lowercaseEmail", "==", refEmail));
-                            const refSnap = await getDocs(q);
-                            if (!refSnap.empty) {
-                                const referrerDoc = refSnap.docs[0];
-                                await updateDoc(referrerDoc.ref, {
-                                    balance: increment(10),
-                                    refCount: increment(1),
-                                    refEarned: increment(10)
-                                });
-                            }
-                        } catch (err) {}
-                    }
-                    localStorage.removeItem('dool_ref');
                 }
                 
                 startApp(u);
@@ -870,14 +914,14 @@
             reader.readAsDataURL(file);
         };
 
-        // --- Bank Logic ---
+        // --- Bank Logic Updated (3 Decimals) ---
         
         let pendingInterest = 0;
         
         function updateBankInterest(d) {
             const bankBal = d.bankBalance || 0;
             if (bankBal <= 0 || !d.lastBankUpdate) {
-                document.getElementById('bank-profit-val').textContent = "+0.00 Đ";
+                document.getElementById('bank-profit-val').textContent = "+0.000";
                 document.getElementById('btn-claim-interest').disabled = true;
                 return;
             }
@@ -887,18 +931,18 @@
             const diffMs = now - lastUpdate;
             const diffWeeks = diffMs / (1000 * 60 * 60 * 24 * 7);
             
-            // 5% per week
+            // 5% per week continuous
             pendingInterest = bankBal * 0.05 * diffWeeks;
             
-            document.getElementById('bank-profit-val').textContent = `+${pendingInterest.toFixed(4)} Đ`;
-            document.getElementById('btn-claim-interest').disabled = pendingInterest < 0.0001;
+            // "тысячных" -> 3 decimals
+            document.getElementById('bank-profit-val').textContent = `+${pendingInterest.toFixed(3)}`; 
+            document.getElementById('btn-claim-interest').disabled = pendingInterest < 0.001;
             
-            // Auto-animate locally
             requestAnimationFrame(() => updateBankInterest(d));
         }
 
         window.claimInterest = async () => {
-             if (pendingInterest < 0.0001) return;
+             if (pendingInterest < 0.001) return;
              const btn = document.getElementById('btn-claim-interest');
              btn.disabled = true;
              
@@ -907,18 +951,18 @@
                  await runTransaction(db, async (t) => {
                      const uDoc = await t.get(userRef);
                      const d = uDoc.data();
-                     // Recalculate strictly in transaction
                      const lastUpdate = d.lastBankUpdate.toDate();
                      const now = new Date();
                      const diffWeeks = (now - lastUpdate) / (1000 * 60 * 60 * 24 * 7);
                      const interest = (d.bankBalance || 0) * 0.05 * diffWeeks;
                      
+                     // Adding interest to BANK balance (reinvesting)
                      t.update(userRef, {
                          bankBalance: increment(interest),
                          lastBankUpdate: Timestamp.now()
                      });
                  });
-                 showT('Банк', 'Проценты получены!', `+${pendingInterest.toFixed(2)} Đ`);
+                 showT('Банк', 'Доход собран!', `+${pendingInterest.toFixed(3)} Đ`);
              } catch(e) { console.error(e); }
         };
 
@@ -929,11 +973,22 @@
             
             try {
                 const userRef = doc(db, "users", auth.currentUser.uid);
-                await updateDoc(userRef, {
-                    balance: increment(-amt),
-                    bankBalance: increment(amt),
-                    lastBankUpdate: Timestamp.now() // Reset timer on deposit to simplify interest logic for demo
+                
+                await runTransaction(db, async (t) => {
+                     const uDoc = await t.get(userRef);
+                     const d = uDoc.data();
+                     const lastUpdate = d.lastBankUpdate.toDate();
+                     const now = new Date();
+                     const diffWeeks = (now - lastUpdate) / (1000 * 60 * 60 * 24 * 7);
+                     const interest = (d.bankBalance || 0) * 0.05 * diffWeeks;
+
+                     t.update(userRef, {
+                         balance: increment(-amt),
+                         bankBalance: increment(amt + interest), // Deposit + Accrued Interest
+                         lastBankUpdate: Timestamp.now()
+                     });
                 });
+
                 closeModal('deposit');
                 document.getElementById('deposit-amt').value = '';
                 showT('Банк', 'Депозит успешен');
@@ -948,11 +1003,19 @@
             
             try {
                 const userRef = doc(db, "users", auth.currentUser.uid);
-                 // Claim interest first implicitly or just withdraw principal (simplifying: withdraw principal, keep timer)
-                 // For true bank simulation, usually interest is calculated daily. Here we just simple withdraw.
-                await updateDoc(userRef, {
-                    balance: increment(amt),
-                    bankBalance: increment(-amt)
+                await runTransaction(db, async (t) => {
+                     const uDoc = await t.get(userRef);
+                     const d = uDoc.data();
+                     const lastUpdate = d.lastBankUpdate.toDate();
+                     const now = new Date();
+                     const diffWeeks = (now - lastUpdate) / (1000 * 60 * 60 * 24 * 7);
+                     const interest = (d.bankBalance || 0) * 0.05 * diffWeeks;
+
+                     t.update(userRef, {
+                         balance: increment(amt),
+                         bankBalance: increment(-amt + interest), // Withdraw + Accrued Interest
+                         lastBankUpdate: Timestamp.now()
+                     });
                 });
                 closeModal('withdraw');
                 document.getElementById('withdraw-amt').value = '';
@@ -1078,6 +1141,12 @@
             } else {
                 copyRef();
             }
+        };
+        
+        window.copyMyEmail = () => {
+            const email = document.getElementById('my-email-addr').innerText;
+            navigator.clipboard.writeText(email);
+            showT('Копирование', 'Адрес скопирован');
         };
 
         document.getElementById('btn-logout').onclick = () => signOut(auth);
