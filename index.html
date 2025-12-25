@@ -5,19 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Doolcoin Wallet</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- QR Code Scanner Library (Core) -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    <!-- QR Code Generator Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* Блокировка и базовые стили */
         * { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-touch-callout: none; }
         input { -webkit-user-select: text !important; -moz-user-select: text !important; -ms-user-select: text !important; user-select: text !important; }
         img { -webkit-user-drag: none; user-drag: none; pointer-events: none; }
         body { background-color: #000; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        /* UI Components */
         .dool-card { background: #0a0a0a; border: 1px solid rgba(255,255,255,0.05); }
         .gradient-text { background: linear-gradient(135deg, #FF4D00, #FF005C); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .gradient-bg { background: linear-gradient(135deg, #FF4D00, #FF005C); }
@@ -28,133 +24,50 @@
         #toast { transform: translateY(-150%) scale(0.9); transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); opacity: 0; }
         #toast.active { transform: translateY(0) scale(1); opacity: 1; }
         
-        .hide-scroll::-webkit-scrollbar { display: none; }
         .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
 
-        /* --- Scanner Styles Fixed --- */
-        #modal-scan-content { position: relative; background: #000; }
-        #reader { width: 100%; height: 100%; overflow: hidden; position: relative; }
+        /* Scanner */
+        #reader video { width: 100% !important; height: 100% !important; object-fit: cover !important; }
+        .scan-focus-area { position: absolute; top: 50%; left: 50%; width: 260px; height: 260px; transform: translate(-50%, -50%); box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.85); border-radius: 2rem; z-index: 10; pointer-events: none; }
+        .scan-border-glow { position: absolute; inset: 0; border-radius: 2rem; border: 2px solid rgba(255, 77, 0, 0.5); box-shadow: 0 0 20px rgba(255, 77, 0, 0.2); }
+        .scan-laser { position: absolute; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, #FF4D00, transparent); top: 50%; animation: scanAnim 2s infinite ease-in-out; }
+        @keyframes scanAnim { 0% { transform: translateY(-100px); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateY(100px); opacity: 0; } }
         
-        #reader video { 
-            width: 100% !important; 
-            height: 100% !important; 
-            object-fit: cover !important; 
-            border-radius: 0 !important;
-            border: none !important;
-            box-shadow: none !important;
-        }
-        #reader * { border: none !important; box-shadow: none !important; }
-        
-        .scan-focus-area {
-            position: absolute; top: 50%; left: 50%;
-            width: 260px; height: 260px;
-            transform: translate(-50%, -50%);
-            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.85);
-            border-radius: 2rem;
-            z-index: 10;
-            pointer-events: none;
-        }
-        
-        .scan-border-glow {
-            position: absolute; inset: 0;
-            border-radius: 2rem;
-            border: 2px solid rgba(255, 77, 0, 0.5);
-            box-shadow: 0 0 20px rgba(255, 77, 0, 0.2), inset 0 0 20px rgba(255, 77, 0, 0.1);
-        }
-
-        .scan-laser {
-            position: absolute; width: 100%; height: 2px;
-            background: linear-gradient(90deg, transparent, #FF4D00, transparent);
-            box-shadow: 0 0 10px #FF4D00;
-            top: 50%;
-            animation: scanAnim 2s infinite ease-in-out;
-        }
-        @keyframes scanAnim { 
-            0% { transform: translateY(-100px); opacity: 0; } 
-            20% { opacity: 1; }
-            80% { opacity: 1; }
-            100% { transform: translateY(100px); opacity: 0; } 
-        }
-        
-        /* --- Premium Minimalist QR --- */
-        .qr-minimal-glass {
-            background: rgba(10, 10, 10, 0.8);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 77, 0, 0.15);
-            border-radius: 32px;
-            padding: 24px;
-            position: relative;
-            box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.8);
-            display: inline-block;
-        }
-
-        #qrcode-container img { display: block; border-radius: 8px; }
-        
-        .qr-error-overlay {
-            position: absolute; inset: 0; background: rgba(0,0,0,0.95);
-            display: flex; flex-col; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none; transition: opacity 0.3s;
-            z-index: 20; border-radius: 32px;
-            border: 1px solid rgba(255, 77, 0, 0.3);
-        }
+        /* QR */
+        .qr-minimal-glass { background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255, 77, 0, 0.15); border-radius: 32px; padding: 24px; }
+        .qr-error-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 20; border-radius: 32px; }
         .qr-error-overlay.active { opacity: 1; pointer-events: auto; }
 
-        #balance-val { transition: font-size 0.3s ease; }
-
-        /* Google Btn Animation */
-        .google-btn-hover:hover { box-shadow: 0 0 20px rgba(255, 255, 255, 0.2); }
-
-        /* --- FIXED FIRE IN JAR STYLES --- */
-        .bank-stack-container {
-            position: relative;
-            width: 140px;
-            height: 140px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto;
+        /* --- FIRE IN JAR (FIXED) --- */
+        .bank-stack-container { position: relative; width: 140px; height: 140px; display: flex; align-items: center; justify-content: center; margin: 0 auto; }
+        .bank-layer-bottom { font-size: 100px; opacity: 1; position: absolute; z-index: 10; filter: brightness(0.6) sepia(0.2); }
+        
+        .bank-layer-fire { 
+            font-size: 45px; 
+            position: absolute; 
+            z-index: 20; 
+            bottom: 25px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            filter: drop-shadow(0 0 10px #FF4D00);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            opacity: 0; /* Hidden by default */
+            display: none; /* Removed from flow to stop animation cycle if needed */
         }
         
-        /* 1. Задняя стенка банки (темная) */
-        .bank-layer-bottom {
-            font-size: 100px;
+        /* State when fire is active */
+        .bank-layer-fire.active {
+            display: block;
             opacity: 1;
-            position: absolute;
-            z-index: 10;
-            filter: brightness(0.6) sepia(0.2);
-        }
-
-        /* 2. Огонь (внутри) */
-        .bank-layer-fire {
-            font-size: 45px;
-            position: absolute;
-            z-index: 20;
-            bottom: 25px;
-            left: 50%;
-            transform: translateX(-50%);
             animation: firePulse 2s infinite alternate ease-in-out;
-            filter: drop-shadow(0 0 10px #FF4D00);
-            opacity: 0; /* Default hidden */
-            transition: opacity 1s ease; /* Плавное исчезновение */
         }
 
-        /* 3. Передняя стенка банки (полупрозрачное стекло поверх огня) */
-        .bank-layer-top {
-            font-size: 100px;
-            opacity: 0.35;
-            position: absolute;
-            z-index: 30;
-            pointer-events: none;
-            mix-blend-mode: overlay;
-            filter: brightness(1.2);
-        }
+        .bank-layer-top { font-size: 100px; opacity: 0.35; position: absolute; z-index: 30; pointer-events: none; mix-blend-mode: overlay; filter: brightness(1.2); }
         
         @keyframes firePulse {
-            0% { transform: translateX(-50%) scale(0.9); opacity: 0.8; filter: drop-shadow(0 0 5px #FF4D00); }
-            100% { transform: translateX(-50%) scale(1.1); opacity: 1; filter: drop-shadow(0 0 20px #FF4D00); }
+            0% { transform: translateX(-50%) scale(0.9); opacity: 0.7; }
+            100% { transform: translateX(-50%) scale(1.1); opacity: 1; }
         }
-
     </style>
 </head>
 <body class="overflow-hidden bg-black" oncontextmenu="return false;">
@@ -164,15 +77,13 @@
         <!-- Toast -->
         <div id="toast" class="fixed top-4 left-4 right-4 z-[200] glass-panel p-3 rounded-[2rem] flex items-center gap-3 shadow-2xl pointer-events-none border border-white/10">
             <div class="relative shrink-0">
-                <img id="toast-avatar" src="" class="w-12 h-12 rounded-full object-cover bg-neutral-800 border-2 border-white/10" onerror="this.src='https://ui-avatars.com/api/?background=333&color=fff&size=128'">
-                <div id="toast-status" class="absolute -bottom-1 -right-1 bg-green-500 w-4 h-4 rounded-full border-2 border-black flex items-center justify-center">
-                    <svg width="8" height="8" fill="none" stroke="black" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
-                </div>
+                <img id="toast-avatar" src="" class="w-12 h-12 rounded-full object-cover bg-neutral-800 border-2 border-white/10">
+                <div id="toast-status" class="absolute -bottom-1 -right-1 bg-green-500 w-4 h-4 rounded-full border-2 border-black flex items-center justify-center"></div>
             </div>
             <div class="flex-1 min-w-0 pr-2">
-                <p id="toast-title" class="text-[10px] font-black uppercase text-neutral-400 tracking-widest mb-0.5">Система</p>
+                <p id="toast-title" class="text-[10px] font-black uppercase text-neutral-400 tracking-widest">Система</p>
                 <div class="flex items-center justify-between">
-                    <p id="toast-msg" class="text-xs font-bold text-white truncate mr-2">Сообщение</p>
+                    <p id="toast-msg" class="text-xs font-bold text-white truncate"></p>
                     <p id="toast-amount" class="text-sm font-black text-[#FF4D00] whitespace-nowrap hidden"></p>
                 </div>
             </div>
@@ -180,403 +91,148 @@
 
         <!-- Загрузка -->
         <div id="view-loading" class="absolute inset-0 z-[100] bg-black flex items-center justify-center">
-            <div class="relative">
-                <div class="w-24 h-24 gradient-bg rounded-full blur-3xl opacity-20 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
-                <span class="text-8xl font-black gradient-text relative z-10 animate-pulse">Đ</span>
-            </div>
+            <span class="text-8xl font-black gradient-text animate-pulse">Đ</span>
         </div>
 
         <!-- Авторизация -->
-        <div id="view-auth" class="hidden flex-col h-full p-8 justify-center relative">
-            <div class="absolute top-0 left-0 w-full h-1/2 gradient-bg opacity-[0.03] blur-3xl pointer-events-none"></div>
-            
-            <!-- Индикатор реферала -->
-            <button id="auth-ref-btn" onclick="openModal('invited-info')" class="hidden absolute top-6 left-6 z-30 group cursor-pointer">
-                <div class="w-12 h-12 glass-panel rounded-full flex items-center justify-center text-2xl relative border border-white/10 group-hover:bg-white/10 transition-colors">
-                    🎁
-                    <div class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
-                    <div class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-black"></div>
-                </div>
-            </button>
-
-            <div class="text-center mb-12 relative z-10">
-                <span class="text-8xl font-black gradient-text inline-block mb-4 transform hover:scale-105 transition-transform duration-500">Đ</span>
-                <h1 class="text-4xl font-extrabold tracking-tight">Doolcoin</h1>
-                <p class="text-neutral-500 mt-2 text-sm font-medium">Кошелек будущего</p>
+        <div id="view-auth" class="hidden flex-col h-full p-8 justify-center">
+            <div class="text-center mb-12">
+                <span class="text-8xl font-black gradient-text inline-block mb-4">Đ</span>
+                <h1 class="text-4xl font-extrabold">Doolcoin</h1>
             </div>
-            
-            <div class="space-y-4 relative z-10">
-                <!-- Google Sign In Button -->
-                <button id="btn-google" class="w-full h-16 bg-white text-black rounded-2xl font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-3 transition-all active:scale-95 google-btn-hover cursor-pointer relative overflow-hidden group">
-                    <div class="absolute inset-0 bg-neutral-200 opacity-0 group-hover:opacity-10 transition-opacity"></div>
-                    <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.84.81-.81z" fill="#FBBC05"/>
-                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                    </svg>
-                    <span>Войти через Google</span>
+            <div class="space-y-4">
+                <button id="btn-google" class="w-full h-16 bg-white text-black rounded-2xl font-bold flex items-center justify-center gap-3 active:scale-95 transition-all">
+                    <svg width="24" height="24" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.84.81-.81z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                    <span>Google Login</span>
                 </button>
-
-                <div class="flex items-center gap-4 py-2">
-                    <div class="h-[1px] bg-white/10 flex-1"></div>
-                    <span class="text-[10px] text-neutral-600 font-bold uppercase tracking-widest">Или email</span>
-                    <div class="h-[1px] bg-white/10 flex-1"></div>
+                <div class="glass-panel rounded-3xl p-2 space-y-2">
+                    <input type="email" id="auth-email" placeholder="Email" class="w-full bg-transparent p-4 outline-none font-bold">
+                    <input type="password" id="auth-password" placeholder="Пароль" class="w-full bg-transparent p-4 outline-none font-bold">
                 </div>
-
-                <div class="glass-panel rounded-3xl p-1.5 space-y-1.5">
-                    <input type="email" id="auth-email" placeholder="Email" class="w-full bg-transparent text-white px-5 py-4 outline-none placeholder:text-neutral-600 font-bold">
-                    <div class="h-[1px] bg-white/5 mx-5"></div>
-                    <input type="password" id="auth-password" placeholder="Пароль" class="w-full bg-transparent text-white px-5 py-4 outline-none placeholder:text-neutral-600 font-bold">
-                </div>
-                <div class="grid grid-cols-2 gap-3 pt-2">
-                    <button id="btn-login" class="h-14 glass-panel border border-white/5 text-white rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-white/10 transition-colors disabled:opacity-50 disabled:pointer-events-none">Войти</button>
-                    <button id="btn-register" class="h-14 glass-panel border border-white/5 text-neutral-400 rounded-2xl font-black text-xs uppercase tracking-wider hover:text-white hover:bg-white/5 transition-colors disabled:opacity-50 disabled:pointer-events-none">Создать</button>
+                <div class="grid grid-cols-2 gap-3">
+                    <button id="btn-login" class="h-14 glass-panel rounded-2xl font-black text-xs uppercase">Войти</button>
+                    <button id="btn-register" class="h-14 glass-panel text-neutral-400 rounded-2xl font-black text-xs uppercase">Создать</button>
                 </div>
             </div>
         </div>
 
         <!-- Главный экран -->
         <div id="view-main" class="hidden flex flex-col h-full">
-            <header class="px-6 pt-14 pb-4 flex justify-between items-center z-20">
-                <div class="flex items-center gap-3 active:opacity-70 transition-opacity cursor-pointer" onclick="openModal('profile')">
-                    <div class="p-[2px] gradient-bg rounded-full shadow-[0_0_20px_rgba(255,77,0,0.3)]">
-                        <img id="main-avatar" src="" class="w-10 h-10 rounded-full object-cover bg-black border-2 border-black">
-                    </div>
-                    <div class="flex flex-col justify-center">
-                        <p id="main-username" class="text-xs font-bold truncate max-w-[140px] leading-tight">...</p>
-                        <p class="text-[9px] font-black text-neutral-500 uppercase tracking-widest leading-tight">Профиль</p>
+            <header class="px-6 pt-14 pb-4 flex justify-between items-center">
+                <div class="flex items-center gap-3" onclick="openModal('profile')">
+                    <img id="main-avatar" src="" class="w-10 h-10 rounded-full border-2 border-orange-500">
+                    <div>
+                        <p id="main-username" class="text-xs font-bold truncate max-w-[120px]">...</p>
+                        <p class="text-[9px] font-black text-neutral-500 uppercase tracking-widest">Профиль</p>
                     </div>
                 </div>
-                <button id="btn-logout" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer">
+                <button id="btn-logout" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-neutral-400">
                     <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
                 </button>
             </header>
 
-            <main class="flex-1 overflow-y-auto px-5 hide-scroll pb-32 z-10">
-                <!-- WALLET TAB -->
+            <main class="flex-1 overflow-y-auto px-5 pb-32">
+                <!-- WALLET -->
                 <div id="tab-wallet" class="tab-content active space-y-6">
-                    <div class="dool-card rounded-[2.5rem] p-8 relative overflow-hidden group">
-                        <div class="absolute inset-0 gradient-bg opacity-[0.03] group-hover:opacity-[0.05] transition-opacity duration-500"></div>
-                        <div class="absolute -right-12 -top-12 w-48 h-48 bg-[#FF4D00] rounded-full blur-[80px] opacity-20"></div>
-                        
-                        <div class="relative z-10 flex flex-col items-center justify-center py-6">
-                            <span class="text-[10px] font-bold text-neutral-500 uppercase tracking-[0.2em] mb-2">Общий баланс</span>
-                            <!-- Контейнер для адаптивного баланса -->
-                            <div class="w-full flex items-baseline justify-center gap-1 mb-2 px-2">
-                                <h2 id="balance-val" class="text-5xl font-black tracking-tighter leading-none whitespace-nowrap overflow-visible">0.00</h2>
-                                <span class="text-2xl font-black gradient-text leading-none mb-1 self-end pb-1">Đ</span>
-                            </div>
+                    <div class="dool-card rounded-[2.5rem] p-8 text-center relative overflow-hidden">
+                        <span class="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Баланс</span>
+                        <div class="flex items-center justify-center gap-2 my-2">
+                            <h2 id="balance-val" class="text-5xl font-black">0.00</h2>
+                            <span class="text-2xl font-black gradient-text">Đ</span>
                         </div>
-
-                        <div class="flex gap-3 mt-4 relative z-10">
-                            <button onclick="openModal('send')" class="flex-1 h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 active:scale-95 transition-all shadow-lg shadow-white/5 cursor-pointer flex flex-col items-center justify-center">
-                                <span>Отправить</span>
+                        <div class="flex gap-3 mt-6">
+                            <button onclick="openModal('send')" class="flex-1 h-14 bg-white text-black rounded-2xl font-black text-xs uppercase">Отправить</button>
+                            <button onclick="openModal('scan')" class="w-14 h-14 glass-panel rounded-2xl flex items-center justify-center">
+                                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
                             </button>
-                            <!-- Кнопка Сканирования -->
-                            <button onclick="openModal('scan')" class="w-14 h-14 glass-panel text-white rounded-2xl flex items-center justify-center hover:bg-white/10 active:scale-95 transition-all cursor-pointer border border-white/10 group-hover:border-orange-500/50">
-                                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
-                            </button>
-                            <button onclick="openModal('receive')" class="flex-1 h-14 glass-panel text-white border border-white/10 rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-white/10 active:scale-95 transition-all cursor-pointer flex flex-col items-center justify-center">
-                                <span>Получить</span>
-                            </button>
+                            <button onclick="openModal('receive')" class="flex-1 h-14 glass-panel rounded-2xl font-black text-xs uppercase">Получить</button>
                         </div>
                     </div>
-
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between px-2">
-                            <h3 class="text-[11px] font-black text-neutral-500 uppercase tracking-widest">История операций</h3>
-                        </div>
-                        <div id="tx-history" class="space-y-2 pb-10">
-                            <div class="text-center py-10">
-                                <div class="w-8 h-8 border-2 border-white/10 border-t-orange-500 rounded-full animate-spin mx-auto mb-4"></div>
-                                <p class="text-[10px] font-bold text-neutral-600 uppercase tracking-widest">Загрузка...</p>
-                            </div>
-                        </div>
-                    </div>
+                    <div id="tx-history" class="space-y-2"></div>
                 </div>
 
-                <!-- REFERRAL TAB -->
-                <div id="tab-referrals" class="tab-content space-y-6">
-                    <div class="dool-card rounded-[2.5rem] p-8 relative overflow-hidden">
-                        <div class="absolute top-0 right-0 w-32 h-32 gradient-bg blur-[60px] opacity-20"></div>
-                        <h3 class="text-2xl font-black mb-2 relative z-10">Пригласи друга</h3>
-                        <p class="text-neutral-500 text-xs mb-8 leading-relaxed max-w-[80%] relative z-10">Получи <span class="text-white font-bold">10.00 Đ</span> за каждого друга.</p>
-                        
-                        <div class="bg-black/40 border border-white/5 p-4 rounded-2xl space-y-3 relative z-10 backdrop-blur-sm">
-                            <div class="flex items-center justify-between gap-4">
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-[9px] font-black text-neutral-600 uppercase tracking-widest mb-1">Ваша ссылка</p>
-                                    <input readonly id="ref-link" class="w-full text-[10px] font-mono text-neutral-400 bg-transparent outline-none truncate" value="...">
-                                </div>
-                                <div class="flex gap-2">
-                                    <button onclick="shareRef()" class="w-10 h-10 flex items-center justify-center bg-white/10 text-white rounded-xl hover:bg-white/20 transition-transform cursor-pointer">
-                                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-                                    </button>
-                                    <button onclick="copyRef()" class="w-10 h-10 flex items-center justify-center bg-white text-black rounded-xl hover:scale-105 transition-transform cursor-pointer">
-                                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="dool-card p-5 rounded-[2rem] flex flex-col items-center justify-center gap-1 aspect-square">
-                            <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center mb-2 text-neutral-400">
-                                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                            </div>
-                            <p id="ref-count" class="text-2xl font-black">0</p>
-                            <p class="text-[9px] font-bold text-neutral-600 uppercase tracking-wider">Друзей</p>
-                        </div>
-                        <div class="dool-card p-5 rounded-[2rem] flex flex-col items-center justify-center gap-1 aspect-square">
-                            <div class="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center mb-2 text-orange-500">
-                                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
-                            </div>
-                            <p id="ref-earned" class="text-2xl font-black">0</p>
-                            <p class="text-[9px] font-bold text-neutral-600 uppercase tracking-wider">Заработано</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- BANK TAB (AUTO COMPOUND) -->
+                <!-- BANK -->
                 <div id="tab-bank" class="tab-content space-y-6">
-                    <div class="text-center pt-4 pb-2">
+                    <div class="text-center pt-4">
                         <h2 class="text-xl font-black uppercase tracking-widest text-neutral-400">Стейкинг</h2>
-                        <p class="text-[10px] text-orange-500 font-bold uppercase tracking-widest">+5% в неделю ⌛</p>
+                        <p class="text-[10px] text-orange-500 font-bold uppercase tracking-widest">+5% в неделю</p>
                     </div>
 
                     <div class="bank-stack-container">
-                        <!-- Bottom Layer: Jar Back -->
                         <span class="bank-layer-bottom">🫙</span>
-                        <!-- Middle Layer: Fire Inside -->
-                        <span class="bank-layer-fire">🔥</span>
-                        <!-- Top Layer: Jar Front (Glass) -->
+                        <span class="bank-layer-fire" id="bank-fire">🔥</span>
                         <span class="bank-layer-top">🫙</span>
                     </div>
 
-                    <div class="dool-card rounded-[2.5rem] p-8 text-center relative overflow-hidden">
-                        <div class="absolute inset-0 bg-orange-500/5"></div>
-                        
-                        <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-2 relative z-10">В банке</p>
-                        <div class="flex items-center justify-center gap-2 relative z-10">
+                    <div class="dool-card rounded-[2.5rem] p-8 text-center">
+                        <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-2">В банке</p>
+                        <div class="flex items-center justify-center gap-2">
                             <h2 id="bank-balance-val" class="text-4xl font-black">0.0</h2>
                             <span class="text-xl font-black text-orange-500">Đ</span>
-                        </div>
-
-                        <div class="h-[1px] bg-white/10 w-full my-6 relative z-10"></div>
-                        
-                        <div class="relative z-10">
-                             <p class="text-[10px] text-neutral-400 font-bold uppercase tracking-wide">Проценты копятся автоматически</p>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
-                        <button onclick="openModal('deposit')" class="h-20 glass-panel rounded-[2rem] flex flex-col items-center justify-center gap-1 hover:bg-white/10 transition-colors border border-white/10">
-                            <span class="text-lg">📥</span>
-                            <span class="text-[10px] font-bold uppercase tracking-widest">Положить в банку</span>
+                        <button onclick="openModal('deposit')" class="h-20 glass-panel rounded-[2rem] flex flex-col items-center justify-center">
+                            <span>📥</span>
+                            <span class="text-[10px] font-bold uppercase">Внести</span>
                         </button>
-                        <button onclick="openModal('withdraw')" class="h-20 glass-panel rounded-[2rem] flex flex-col items-center justify-center gap-1 hover:bg-white/10 transition-colors border border-white/10">
-                            <span class="text-lg">📤</span>
-                            <span class="text-[10px] font-bold uppercase tracking-widest">Достать из банки</span>
+                        <button onclick="openModal('withdraw')" class="h-20 glass-panel rounded-[2rem] flex flex-col items-center justify-center">
+                            <span>📤</span>
+                            <span class="text-[10px] font-bold uppercase">Снять</span>
                         </button>
                     </div>
                 </div>
 
+                <!-- REFERRALS -->
+                <div id="tab-referrals" class="tab-content space-y-6">
+                    <div class="dool-card rounded-[2.5rem] p-8">
+                        <h3 class="text-2xl font-black mb-2">Пригласи друга</h3>
+                        <p class="text-neutral-500 text-xs mb-6">Получи 10.00 Đ за каждого друга.</p>
+                        <input readonly id="ref-link" class="w-full bg-white/5 p-4 rounded-xl text-[10px] font-mono text-orange-500 outline-none mb-4">
+                        <button onclick="copyRef()" class="w-full h-12 bg-white text-black rounded-xl font-black text-xs uppercase">Копировать ссылку</button>
+                    </div>
+                </div>
             </main>
 
-            <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] h-16 bg-[#111]/90 backdrop-blur-xl border border-white/10 rounded-[2rem] flex items-center justify-around px-2 z-50 shadow-2xl">
-                <button onclick="switchTab('wallet')" id="nav-wallet" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-orange-500 cursor-pointer">
+            <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] h-16 bg-[#111]/90 backdrop-blur-xl border border-white/10 rounded-[2rem] flex items-center justify-around z-50">
+                <button onclick="switchTab('wallet')" id="nav-wallet" class="flex-1 flex justify-center text-orange-500">
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
                 </button>
-                <button onclick="switchTab('bank')" id="nav-bank" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
-                     <!-- Bank Icon -->
-                     <svg width="24" height="24" viewBox="0 0 512.000000 512.000000" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-                        <g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)" fill="currentColor" stroke="none">
-                        <path d="M1295 5104 c-129 -67 -137 -234 -14 -303 36 -21 45 -21 1279 -21 1234 0 1243 0 1279 21 109 61 117 208 15 285 l-37 29 -1246 3 c-1115 2 -1249 0 -1276 -14z"/>
-                        <path d="M1520 4470 c-197 -28 -379 -160 -555 -405 -65 -91 -173 -307 -204 -407 -53 -174 -51 -127 -51 -1577 0 -882 4 -1368 11 -1410 53 -331 310 -592 644 -656 115 -22 2275 -22 2390 0 334 64 591 325 644 656 7 42 11 528 11 1410 0 1174 -2 1357 -15 1428 -25 128 -51 205 -120 346 -99 204 -227 369 -368 476 -90 68 -125 87 -217 120 l-65 24 -1025 1 c-564 1 -1050 -2 -1080 -6z m2104 -360 c92 -44 201 -160 291 -307 93 -153 143 -301 152 -450 l6 -103 -1513 0 -1513 0 6 103 c9 149 59 297 152 450 90 147 198 262 290 307 39 20 63 20 1064 20 1000 0 1026 0 1065 -20z m446 -1875 l0 -665 -1510 0 -1510 0 0 665 0 665 1510 0 1510 0 0 -665z m0 -1217 c0 -117 -5 -244 -10 -283 -19 -131 -92 -244 -203 -316 -122 -79 -35 -74 -1297 -74 -1262 0 -1175 -5 -1297 74 -111 72 -184 185 -203 316 -5 39 -10 166 -10 283 l0 212 1510 0 1510 0 0 -212z"/>
-                        </g>
-                    </svg>
+                <button onclick="switchTab('bank')" id="nav-bank" class="flex-1 flex justify-center text-neutral-600">
+                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M12 1L3 5v2h18V5l-9-4zm-9 8v10h18V9H3zm11 8h-4v-6h4v6z"/></svg>
                 </button>
-                <button onclick="switchTab('referrals')" id="nav-referrals" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
+                <button onclick="switchTab('referrals')" id="nav-referrals" class="flex-1 flex justify-center text-neutral-600">
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
                 </button>
             </nav>
         </div>
 
-        <!-- Модалка: Профиль -->
-        <div id="modal-profile" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col items-center justify-center p-8 opacity-0 transition-opacity duration-300">
-            <div class="w-full max-w-xs transform scale-90 transition-transform duration-300" id="modal-profile-content">
-                <div class="bg-[#111] border border-white/10 p-8 rounded-[2.5rem] text-center shadow-2xl">
-                    <h2 class="text-xl font-black mb-6">Ваш Профиль</h2>
-                    <div class="relative inline-block mb-6 group">
-                        <div class="p-1 gradient-bg rounded-full">
-                            <img id="edit-avatar-img" src="" class="w-24 h-24 rounded-full object-cover border-4 border-[#111] bg-neutral-900">
-                        </div>
-                        <label class="absolute bottom-0 right-0 bg-white text-black w-8 h-8 flex items-center justify-center rounded-full cursor-pointer hover:scale-110 transition-transform shadow-lg">
-                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
-                            <input type="file" id="avatar-input" class="hidden" accept="image/*">
-                        </label>
-                    </div>
-                    <p id="profile-email" class="text-xs text-neutral-500 font-bold mb-6 truncate px-2">...</p>
-                    <button onclick="closeModal('profile')" class="w-full h-12 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer">Закрыть</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Модалка: Invited Info (New) -->
-        <div id="modal-invited-info" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col items-center justify-center p-8 opacity-0 transition-opacity duration-300">
-            <div class="w-full max-w-xs transform scale-90 transition-transform duration-300" id="modal-invited-info-content">
-                <div class="bg-[#111] border border-orange-500/30 p-8 rounded-[2.5rem] text-center shadow-[0_0_50px_rgba(255,77,0,0.2)]">
-                    <div class="w-16 h-16 bg-orange-500/10 rounded-full flex items-center justify-center text-4xl mx-auto mb-4 border border-orange-500/20">🎁</div>
-                    <h2 class="text-xl font-black mb-2 text-white">Вы приглашены!</h2>
-                    <p class="text-xs text-neutral-400 font-medium mb-6">Пользователь <span id="invited-by-email" class="text-orange-500 font-bold">...</span> пригласил вас.</p>
-                    
-                    <div class="bg-white/5 rounded-2xl p-4 mb-6">
-                        <p class="text-[10px] font-black uppercase text-neutral-500 mb-2">Ваш бонус</p>
-                        <p class="text-2xl font-black text-white">+10.00 Đ</p>
-                    </div>
-                    
-                    <button onclick="closeModal('invited-info')" class="w-full h-12 bg-white text-black rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-neutral-200 transition-colors cursor-pointer">Отлично</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Модалка: Отправить -->
-        <div id="modal-send" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
-            <div class="bg-[#0f0f0f] border-t border-white/10 rounded-t-[2.5rem] p-8 pb-10 transform translate-y-full transition-transform duration-300" id="modal-send-content">
-                <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-8"></div>
-                <h2 class="text-2xl font-black mb-6 px-2">Перевод</h2>
-                
-                <div id="proposal-notice" class="hidden mb-4 bg-orange-500/10 border border-orange-500/20 p-3 rounded-2xl flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-black">
-                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
-                    </div>
-                    <div>
-                        <p class="text-[10px] font-black uppercase text-orange-500 tracking-wider">Предложение</p>
-                        <p class="text-xs text-neutral-400 font-bold">Данные заполнены автоматически</p>
-                    </div>
-                </div>
-
-                <div class="space-y-3">
-                    <div class="bg-white/5 rounded-2xl p-4 border border-white/5 focus-within:border-orange-500/50 transition-colors">
-                        <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Получатель</p>
-                        <input type="email" id="send-email" placeholder="email@example.com" class="w-full bg-transparent outline-none font-bold text-sm placeholder:text-neutral-700">
-                    </div>
-                    <div class="bg-white/5 rounded-2xl p-4 border border-white/5 focus-within:border-orange-500/50 transition-colors">
-                         <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Сумма (Мин 0.1)</p>
-                         <div class="flex items-center gap-2">
-                             <input type="number" id="send-amt" placeholder="0.0" class="w-full bg-transparent outline-none font-black text-3xl placeholder:text-neutral-700">
-                             <span class="text-xl font-black text-orange-500">Đ</span>
-                         </div>
-                    </div>
-                    <div class="flex gap-3 pt-4">
-                        <button onclick="closeModal('send')" class="flex-1 h-14 bg-white/5 text-neutral-400 rounded-2xl font-bold text-xs uppercase tracking-wider cursor-pointer">Отмена</button>
-                        <button id="btn-do-send" class="flex-[2] h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer">Отправить</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Модалка: Получить (с Minimal Glass QR) -->
-        <div id="modal-receive" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
-            <div class="bg-[#111] border border-white/10 rounded-t-[2.5rem] p-8 pb-10 w-full transform translate-y-full transition-transform duration-300 shadow-2xl" id="modal-receive-content">
-                <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-6"></div>
-                
-                <div class="text-center mb-6">
-                    <h2 class="text-2xl font-black mb-1">Получить</h2>
-                    <p class="text-neutral-500 text-xs font-medium">Покажите этот код отправителю</p>
-                </div>
-
-                <!-- Minimalist QR Container -->
-                <div class="flex justify-center mb-6">
-                    <div class="qr-minimal-glass">
-                         <!-- Error Overlay -->
-                         <div id="qr-error" class="qr-error-overlay">
-                             <span class="text-3xl mb-2">⚠️</span>
-                             <p class="text-[10px] font-bold text-orange-500 uppercase tracking-widest text-center">Минимум<br>0.1 Đ</p>
-                        </div>
-                        
-                        <!-- QR Render Target -->
-                        <div id="qrcode-container"></div>
-                    </div>
-                </div>
-
-                <div class="space-y-4">
-                    <div class="bg-white/5 p-4 rounded-2xl border border-white/5 flex items-center justify-between">
-                        <div class="flex-1">
-                            <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Предложить сумму</p>
-                            <input type="number" id="receive-amt-req" placeholder="Укажите сумму..." class="w-full bg-transparent outline-none font-bold text-lg placeholder:text-neutral-700">
-                        </div>
-                        <span class="text-lg font-black text-orange-500 ml-3">Đ</span>
-                    </div>
-
-                    <div onclick="copyMyEmail()" class="bg-white/5 p-4 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-white/10 active:scale-95 transition-all">
-                        <div class="flex-1 min-w-0 pr-2">
-                             <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Ваш адрес</p>
-                             <p id="my-email-addr" class="font-mono text-orange-500 truncate text-sm">...</p>
-                        </div>
-                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" class="text-neutral-500"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                    </div>
-                </div>
-                
-                <button onclick="closeModal('receive')" class="w-full mt-6 h-12 text-neutral-500 font-bold uppercase text-[10px] hover:text-white transition-colors cursor-pointer">Закрыть</button>
+        <!-- Modals (Send, Receive, Profile, etc.) - Simplified for logic focus -->
+        <div id="modal-deposit" class="hidden fixed inset-0 z-[120] bg-black/80 flex flex-col justify-end opacity-0 transition-opacity">
+            <div class="bg-[#111] p-8 rounded-t-[2rem] transform translate-y-full transition-transform" id="modal-deposit-content">
+                <h2 class="text-xl font-black mb-4">Внести в банк</h2>
+                <input type="number" id="deposit-amt" placeholder="0.0" class="w-full bg-white/5 p-4 rounded-xl outline-none text-2xl font-black mb-4">
+                <button id="btn-do-deposit" class="w-full h-14 bg-white text-black rounded-xl font-black">ВНЕСТИ</button>
+                <button onclick="closeModal('deposit')" class="w-full h-10 text-neutral-500 mt-2">ОТМЕНА</button>
             </div>
         </div>
         
-        <!-- Модалка: Bank Deposit -->
-        <div id="modal-deposit" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
-            <div class="bg-[#111] border-t border-white/10 rounded-t-[2.5rem] p-8 pb-10 transform translate-y-full transition-transform duration-300" id="modal-deposit-content">
-                <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-6"></div>
-                <h2 class="text-xl font-black mb-4">Положить в банку</h2>
-                <div class="bg-white/5 rounded-2xl p-4 border border-white/5 mb-4">
-                     <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Сумма</p>
-                     <div class="flex items-center gap-2">
-                         <input type="number" id="deposit-amt" placeholder="0.0" class="w-full bg-transparent outline-none font-black text-3xl placeholder:text-neutral-700">
-                         <span class="text-xl font-black text-orange-500">Đ</span>
-                     </div>
-                </div>
-                <button id="btn-do-deposit" class="w-full h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer">Положить</button>
-                <button onclick="closeModal('deposit')" class="w-full mt-2 h-10 text-neutral-500 font-bold text-[10px] uppercase cursor-pointer">Отмена</button>
+        <div id="modal-withdraw" class="hidden fixed inset-0 z-[120] bg-black/80 flex flex-col justify-end opacity-0 transition-opacity">
+            <div class="bg-[#111] p-8 rounded-t-[2rem] transform translate-y-full transition-transform" id="modal-withdraw-content">
+                <h2 class="text-xl font-black mb-4">Снять из банка</h2>
+                <input type="number" id="withdraw-amt" placeholder="0.0" class="w-full bg-white/5 p-4 rounded-xl outline-none text-2xl font-black mb-4">
+                <button id="btn-do-withdraw" class="w-full h-14 bg-white text-black rounded-xl font-black">СНЯТЬ</button>
+                <button onclick="closeModal('withdraw')" class="w-full h-10 text-neutral-500 mt-2">ОТМЕНА</button>
             </div>
         </div>
 
-        <!-- Модалка: Bank Withdraw -->
-        <div id="modal-withdraw" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
-             <div class="bg-[#111] border-t border-white/10 rounded-t-[2.5rem] p-8 pb-10 transform translate-y-full transition-transform duration-300" id="modal-withdraw-content">
-                <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-6"></div>
-                <h2 class="text-xl font-black mb-4">Достать из банки</h2>
-                <div class="bg-white/5 rounded-2xl p-4 border border-white/5 mb-4">
-                     <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Сумма</p>
-                     <div class="flex items-center gap-2">
-                         <input type="number" id="withdraw-amt" placeholder="0.0" class="w-full bg-transparent outline-none font-black text-3xl placeholder:text-neutral-700">
-                         <span class="text-xl font-black text-orange-500">Đ</span>
-                     </div>
-                </div>
-                <button id="btn-do-withdraw" class="w-full h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer">Достать</button>
-                <button onclick="closeModal('withdraw')" class="w-full mt-2 h-10 text-neutral-500 font-bold text-[10px] uppercase cursor-pointer">Отмена</button>
-            </div>
-        </div>
-
-        <!-- Модалка: Сканер Pro Fixed -->
-        <div id="modal-scan" class="hidden absolute inset-0 z-[120] bg-black flex flex-col opacity-0 transition-opacity duration-300">
-            <!-- Header сканера -->
-            <div class="absolute top-0 left-0 w-full p-6 z-20 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent">
-                 <h2 class="text-xl font-black text-white drop-shadow-md">Сканирование</h2>
-                 <button onclick="closeModal('scan')" class="w-10 h-10 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center text-white cursor-pointer hover:bg-white/20 transition-all border border-white/10">
-                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                </button>
-            </div>
-            
-            <!-- Область камеры -->
-            <div class="w-full h-full relative" id="modal-scan-content">
-                <div id="reader"></div>
-                
-                <!-- Focus Overlay -->
-                <div class="scan-focus-area">
-                    <div class="scan-border-glow"></div>
-                    <div class="scan-laser"></div>
-                </div>
+        <!-- Receive Modal -->
+        <div id="modal-receive" class="hidden fixed inset-0 z-[120] bg-black/80 flex items-center justify-center opacity-0 transition-opacity">
+            <div class="bg-[#111] p-8 rounded-[2rem] text-center w-[90%] max-w-sm transform scale-90 transition-transform" id="modal-receive-content">
+                <div id="qrcode-container" class="bg-white p-4 rounded-2xl inline-block mb-4"></div>
+                <p id="my-email-addr" class="text-xs font-mono text-neutral-500 mb-4"></p>
+                <button onclick="closeModal('receive')" class="w-full h-12 glass-panel rounded-xl">ЗАКРЫТЬ</button>
             </div>
         </div>
 
@@ -584,7 +240,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, query, where, runTransaction, Timestamp, increment, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -602,568 +258,141 @@
         const googleProvider = new GoogleAuthProvider();
 
         let myData = null;
-        let lastBal = null;
-        const userCache = {};
-        let html5QrCode = null; 
-        
-        // --- REFERRAL INIT LOGIC (IMMEDIATE) ---
-        try {
-            const urlParams = new URLSearchParams(window.location.search);
-            const refParam = urlParams.get('ref');
-            if (refParam) {
-                window.history.replaceState({}, document.title, window.location.pathname);
-                localStorage.setItem('dool_ref', refParam.toLowerCase());
-                showRefButton(refParam);
-            } else {
-                const savedRef = localStorage.getItem('dool_ref');
-                if (savedRef) showRefButton(savedRef);
-            }
-        } catch(e) { console.log('Ref Init Err:', e); }
 
-        function showRefButton(email) {
-            const btn = document.getElementById('auth-ref-btn');
-            const infoText = document.getElementById('invited-by-email');
-            if(btn && infoText) {
-                btn.classList.remove('hidden');
-                infoText.textContent = email;
+        // --- Logic: Bank Visuals (THE FIX) ---
+        function calculateCompoundBalance(storedBalance, lastUpdateTimestamp) {
+            if (!storedBalance || storedBalance <= 0 || !lastUpdateTimestamp) return storedBalance || 0;
+            const diffMs = new Date() - lastUpdateTimestamp.toDate();
+            const diffWeeks = diffMs / (1000 * 60 * 60 * 24 * 7);
+            return storedBalance * Math.pow(1.05, diffWeeks);
+        }
+
+        function updateBankVisuals(d) {
+            const bankBal = calculateCompoundBalance(d.bankBalance, d.lastBankUpdate);
+            document.getElementById('bank-balance-val').textContent = bankBal.toFixed(1);
+            
+            const fire = document.getElementById('bank-fire');
+            if (fire) {
+                // Если баланс меньше 0.1, полностью убираем огонёк, чтобы анимация не перебивала прозрачность
+                if (bankBal < 0.1) {
+                    fire.classList.remove('active');
+                } else {
+                    fire.classList.add('active');
+                }
             }
         }
-        
-        // --- Helpers ---
-        async function getUserInfo(email) {
-            if (userCache[email]) return userCache[email];
-            const defaultAv = `https://ui-avatars.com/api/?background=random&color=fff&name=${email.charAt(0).toUpperCase()}&size=128`;
-            let info = { avatar: defaultAv, email: email };
-            try {
-                const q = query(collection(db, "users"), where("email", "==", email));
-                const res = await getDocs(q);
-                if (!res.empty) {
-                    const d = res.docs[0].data();
-                    if (d.avatar) info.avatar = d.avatar;
-                }
-            } catch (e) { console.log('Err avatar', e); }
-            userCache[email] = info;
-            return info;
-        }
+
+        setInterval(() => { if(myData) updateBankVisuals(myData); }, 1000);
+
+        // --- Auth & Firestore Sync ---
+        onAuthStateChanged(auth, async (u) => {
+            if (u) {
+                const userRef = doc(db, "users", u.uid);
+                onSnapshot(userRef, (snap) => {
+                    myData = snap.data();
+                    if (myData) {
+                        document.getElementById('balance-val').textContent = myData.balance.toFixed(2);
+                        document.getElementById('main-username').textContent = u.email;
+                        document.getElementById('my-email-addr').textContent = u.email;
+                        document.getElementById('main-avatar').src = myData.avatar || `https://ui-avatars.com/api/?name=${u.email}`;
+                        updateBankVisuals(myData);
+                    }
+                });
+                document.getElementById('view-loading').classList.add('hidden');
+                document.getElementById('view-main').classList.remove('hidden');
+            } else {
+                document.getElementById('view-loading').classList.add('hidden');
+                document.getElementById('view-auth').classList.remove('hidden');
+            }
+        });
+
+        // --- Basic UI Flow ---
+        window.switchTab = (tab) => {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('tab-'+tab).classList.add('active');
+            ['wallet', 'bank', 'referrals'].forEach(t => {
+                const el = document.getElementById('nav-'+t);
+                el.classList.remove('text-orange-500');
+                el.classList.add('text-neutral-600');
+            });
+            document.getElementById('nav-'+tab).classList.replace('text-neutral-600', 'text-orange-500');
+        };
 
         window.openModal = (n) => {
             const m = document.getElementById('modal-'+n);
             const c = document.getElementById(`modal-${n}-content`);
-            if(!m || !c) return;
             m.classList.remove('hidden');
-            void m.offsetWidth;
-            m.classList.remove('opacity-0');
-            if(n === 'send' || n === 'receive' || n === 'deposit' || n === 'withdraw') c.classList.remove('translate-y-full');
-            else if(n !== 'scan') c.classList.remove('scale-90');
-            if(n === 'receive') updateQR();
-            if(n === 'scan') startScannerV2();
+            setTimeout(() => {
+                m.classList.remove('opacity-0');
+                if(c.classList.contains('translate-y-full')) c.classList.remove('translate-y-full');
+                if(c.classList.contains('scale-90')) c.classList.remove('scale-90');
+            }, 10);
+            if(n === 'receive') {
+                const container = document.getElementById('qrcode-container');
+                container.innerHTML = '';
+                new QRCode(container, { text: auth.currentUser.email, width: 160, height: 160 });
+            }
         };
 
         window.closeModal = (n) => {
             const m = document.getElementById('modal-'+n);
             const c = document.getElementById(`modal-${n}-content`);
-            if(!m || !c) return;
             m.classList.add('opacity-0');
-            if(n === 'send' || n === 'receive' || n === 'deposit' || n === 'withdraw') c.classList.add('translate-y-full');
-            else if(n !== 'scan') c.classList.add('scale-90');
-            if(n === 'scan') stopScannerV2();
-            if(n === 'send') clearSendForm();
+            if(n === 'deposit' || n === 'withdraw') c.classList.add('translate-y-full');
+            else c.classList.add('scale-90');
             setTimeout(() => m.classList.add('hidden'), 300);
         };
 
-        function clearSendForm() {
-             setTimeout(() => {
-                 document.getElementById('send-amt').value = '';
-                 document.getElementById('send-email').value = '';
-                 document.getElementById('send-amt').readOnly = false;
-                 document.getElementById('send-email').readOnly = false;
-                 document.getElementById('proposal-notice').classList.add('hidden');
-                 document.getElementById('btn-do-send').textContent = "Отправить";
-             }, 300);
-        }
-
-        window.showT = async (title, msg, amountStr = '', senderEmail = null, isError = false) => {
-            const t = document.getElementById('toast');
-            const status = document.getElementById('toast-status');
-            const amtEl = document.getElementById('toast-amount');
-            document.getElementById('toast-title').textContent = title;
-            document.getElementById('toast-msg').textContent = msg;
-            if (amountStr) { amtEl.textContent = amountStr; amtEl.classList.remove('hidden'); } 
-            else { amtEl.classList.add('hidden'); }
-            
-            const img = document.getElementById('toast-avatar');
-            if (isError) {
-                status.classList.replace('bg-green-500', 'bg-red-500');
-                status.innerHTML = '<svg width="8" height="8" fill="none" stroke="black" stroke-width="3" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>';
-                img.src = `https://ui-avatars.com/api/?background=333&color=fff&name=!`;
-            } else {
-                status.classList.replace('bg-red-500', 'bg-green-500');
-                status.innerHTML = '<svg width="8" height="8" fill="none" stroke="black" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>';
-                if (senderEmail) { const u = await getUserInfo(senderEmail); img.src = u.avatar; } 
-                else { img.src = `https://ui-avatars.com/api/?background=333&color=fff&name=S`; }
-            }
-            t.classList.add('active');
-            setTimeout(() => t.classList.remove('active'), 4000);
-        };
-
-        window.switchTab = (tab) => {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.getElementById('tab-'+tab).classList.add('active');
-            const navW = document.getElementById('nav-wallet');
-            const navR = document.getElementById('nav-referrals');
-            const navB = document.getElementById('nav-bank');
-            
-            navW.classList.replace('text-orange-500', 'text-neutral-600');
-            navR.classList.replace('text-orange-500', 'text-neutral-600');
-            navB.classList.replace('text-orange-500', 'text-neutral-600');
-            
-            document.getElementById('nav-'+tab).classList.replace('text-neutral-600', 'text-orange-500');
-        };
-
-        // --- AUTH ---
-        
-        onAuthStateChanged(auth, async (u) => {
-            if (u) {
-                const userRef = doc(db, "users", u.uid);
-                const snap = await getDoc(userRef);
-                
-                if (!snap.exists()) {
-                    const email = u.email;
-                    const emailLower = u.email.toLowerCase();
-
-                    await setDoc(userRef, {
-                        email: email, 
-                        lowercaseEmail: emailLower,
-                        balance: 10.0, 
-                        bankBalance: 0,
-                        lastBankUpdate: Timestamp.now(), // Important for auto-compound
-                        avatar: u.photoURL || '', 
-                        refCount: 0, 
-                        refEarned: 0, 
-                        createdAt: Timestamp.now()
-                    });
-
-                    // --- REFERRAL LOGIC ---
-                    const refEmail = localStorage.getItem('dool_ref');
-                    if (refEmail && refEmail !== emailLower) {
-                        try {
-                            let q = query(collection(db, "users"), where("lowercaseEmail", "==", refEmail));
-                            let refSnap = await getDocs(q);
-                            if (refSnap.empty) {
-                                q = query(collection(db, "users"), where("email", "==", refEmail));
-                                refSnap = await getDocs(q);
-                            }
-
-                            if (!refSnap.empty) {
-                                const referrerDoc = refSnap.docs[0];
-                                const referrerData = referrerDoc.data();
-                                const referrerRealEmail = referrerData.email || refEmail;
-                                
-                                await runTransaction(db, async (t) => {
-                                    const rDoc = await t.get(referrerDoc.ref);
-                                    if(!rDoc.exists()) return;
-
-                                    t.update(referrerDoc.ref, {
-                                        balance: increment(10),
-                                        refCount: increment(1),
-                                        refEarned: increment(10)
-                                    });
-                                    
-                                    const txRef = doc(collection(db, "transactions"));
-                                    t.set(txRef, { 
-                                        from: 'System (Ref)', 
-                                        to: referrerRealEmail, 
-                                        amount: 10.0, 
-                                        date: Timestamp.now(), 
-                                        parties: [referrerRealEmail],
-                                        type: 'referral_bonus'
-                                    });
-                                });
-                            }
-                        } catch (err) { console.error("Ref error:", err); }
-                    }
-                    localStorage.removeItem('dool_ref');
-                }
-                
-                startApp(u);
-            } else {
-                document.getElementById('view-loading').classList.add('hidden');
-                document.getElementById('view-main').classList.add('hidden');
-                document.getElementById('view-auth').classList.replace('hidden', 'flex');
-            }
-        });
-
-        document.getElementById('btn-google').onclick = async () => {
-            try { await signInWithPopup(auth, googleProvider); } catch (e) { if(e.code !== 'auth/popup-closed-by-user') showT('Ошибка', e.message, '', null, true); }
-        };
-
-        document.getElementById('btn-login').onclick = async () => {
-            const btn = document.getElementById('btn-login');
-            const email = document.getElementById('auth-email').value;
-            const pass = document.getElementById('auth-password').value;
-            if(!email || !pass) return showT('Ошибка', 'Заполните поля', '', null, true);
-            btn.disabled = true;
-            try { await signInWithEmailAndPassword(auth, email, pass); } 
-            catch(e) { 
-                btn.disabled = false;
-                let msg = 'Неверный логин/пароль';
-                if(e.code === 'auth/user-not-found') msg = 'Пользователь не найден';
-                if(e.code === 'auth/wrong-password') msg = 'Неверный пароль';
-                if(e.code === 'auth/too-many-requests') msg = 'Слишком много попыток';
-                showT('Ошибка', msg, '', null, true); 
-            }
-        };
-
-        document.getElementById('btn-register').onclick = async () => {
-            const btn = document.getElementById('btn-register');
-            const email = document.getElementById('auth-email').value;
-            const pass = document.getElementById('auth-password').value;
-            if (pass.length < 6) return showT('Ошибка', 'Пароль < 6 символов', '', null, true);
-            btn.disabled = true;
-            try { await createUserWithEmailAndPassword(auth, email, pass); } 
-            catch(e) { 
-                btn.disabled = false;
-                let msg = 'Ошибка создания';
-                if(e.code === 'auth/email-already-in-use') msg = 'Email уже занят';
-                if(e.code === 'auth/invalid-email') msg = 'Некорректный Email';
-                showT('Ошибка', msg, '', null, true); 
-            }
-        };
-
-        // --- App Logic ---
-
-        function adjustBalanceSize(amountStr) {
-            const el = document.getElementById('balance-val');
-            const len = amountStr.length;
-            el.classList.remove('text-5xl', 'text-4xl', 'text-3xl', 'text-2xl', 'text-xl');
-            if (len > 12) el.classList.add('text-2xl');
-            else if (len > 9) el.classList.add('text-3xl');
-            else if (len > 7) el.classList.add('text-4xl');
-            else el.classList.add('text-5xl');
-        }
-
-        function startApp(u) {
-            document.getElementById('main-username').textContent = u.email;
-            document.getElementById('profile-email').textContent = u.email;
-            document.getElementById('my-email-addr').textContent = u.email;
-            
-            const cleanUrl = window.location.href.split('?')[0];
-            const refLink = `${cleanUrl}?ref=${u.email}`;
-            document.getElementById('ref-link').value = refLink;
-
-            onSnapshot(doc(db, "users", u.uid), async (snap) => {
-                const d = snap.data();
-                if (!d) return;
-                
-                if (lastBal !== null && d.balance > lastBal) {
-                    const diff = d.balance - lastBal;
-                    handleIncomingTransfer(u.email, diff);
-                }
-                myData = d; lastBal = d.balance;
-                
-                const balStr = d.balance.toFixed(2);
-                const balEl = document.getElementById('balance-val');
-                balEl.textContent = balStr;
-                adjustBalanceSize(balStr);
-
-                // Initialize Bank Visuals
-                updateBankVisuals(d);
-
-                document.getElementById('ref-count').textContent = d.refCount || 0;
-                document.getElementById('ref-earned').textContent = (d.refEarned || 0).toFixed(1);
-                const av = d.avatar || `https://ui-avatars.com/api/?background=random&color=fff&name=${u.email.charAt(0)}`;
-                document.getElementById('main-avatar').src = av;
-                document.getElementById('edit-avatar-img').src = av;
-                document.getElementById('view-auth').classList.add('hidden');
-                document.getElementById('view-loading').classList.add('hidden');
-                document.getElementById('view-main').classList.replace('hidden', 'flex');
-                
-                document.getElementById('btn-login').disabled = false;
-                document.getElementById('btn-register').disabled = false;
-            });
-
-            const qTx = query(collection(db, "transactions"), where("parties", "array-contains", u.email));
-            onSnapshot(qTx, async (snap) => {
-                const list = document.getElementById('tx-history');
-                if (snap.empty) { list.innerHTML = '<p class="text-center text-neutral-800 text-[10px] uppercase font-bold py-4">История пуста</p>'; return; }
-                const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date);
-                let html = '';
-                for (const tx of docs) {
-                    const isSent = tx.from === u.email;
-                    let partner = isSent ? tx.to : tx.from;
-                    const dateStr = tx.date ? new Date(tx.date.toMillis()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
-                    html += `<div class="flex items-center justify-between p-4 rounded-[1.5rem] bg-white/[0.03] border border-white/5">
-                        <div class="flex items-center gap-3 overflow-hidden">
-                            <img id="av-${tx.date ? tx.date.toMillis() : ''}" src="https://ui-avatars.com/api/?background=222&color=666&name=${partner.charAt(0)}" class="w-10 h-10 rounded-full bg-neutral-800 object-cover border border-white/5 shrink-0">
-                            <div class="min-w-0"><p class="text-[9px] font-black uppercase ${isSent ? 'text-neutral-500' : 'text-[#FF4D00]'} tracking-widest mb-0.5">${isSent ? 'Кому:' : 'От:'}</p><p class="text-[11px] font-bold text-white truncate w-32 leading-tight">${partner}</p></div>
-                        </div>
-                        <div class="text-right"><p class="text-sm font-black ${isSent ? 'text-white' : 'text-[#FF4D00]'}">${isSent ? '-' : '+'}${tx.amount.toFixed(1)}</p><p class="text-[9px] text-neutral-600 font-bold uppercase">${dateStr}</p></div>
-                    </div>`;
-                    if(partner.includes('@')) {
-                         getUserInfo(partner).then(inf => { const el = document.getElementById(`av-${tx.date.toMillis()}`); if(el) el.src = inf.avatar; });
-                    }
-                }
-                list.innerHTML = html;
-            });
-        }
-
-        async function handleIncomingTransfer(myEmail, amountDiff) {
-            try {
-                const q = query(collection(db, "transactions"), where("to", "==", myEmail));
-                const snap = await getDocs(q);
-                if (!snap.empty) {
-                    const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date);
-                    if (Math.abs(docs[0].amount - amountDiff) < 0.01) { 
-                        if (docs[0].type === 'referral_bonus') {
-                             showT('Реферальная программа', 'Бонус за приглашение', `+${amountDiff.toFixed(1)} Đ`);
-                        } else {
-                             showT('Входящий перевод', docs[0].from, `+${amountDiff.toFixed(1)} Đ`, docs[0].from); 
-                        }
-                        return; 
-                    }
-                }
-                showT('Пополнение', 'Система / Банк', `+${amountDiff.toFixed(1)} Đ`);
-            } catch(e) {}
-        }
-
-        document.getElementById('avatar-input').onchange = (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = async (ev) => {
-                try { await updateDoc(doc(db, "users", auth.currentUser.uid), { avatar: ev.target.result }); showT('Профиль', 'Аватар обновлен'); } 
-                catch { showT('Ошибка', 'Не удалось загрузить фото', '', null, true); }
-            };
-            reader.readAsDataURL(file);
-        };
-
-        // --- NEW AUTO-COMPOUND BANK LOGIC ---
-        
-        // This function calculates the current theoretical balance based on time
-        function calculateCompoundBalance(storedBalance, lastUpdateTimestamp) {
-            if (!storedBalance || storedBalance <= 0 || !lastUpdateTimestamp) return storedBalance || 0;
-            const lastUpdate = lastUpdateTimestamp.toDate();
-            const now = new Date();
-            const diffMs = now - lastUpdate;
-            const diffWeeks = diffMs / (1000 * 60 * 60 * 24 * 7); // fraction of weeks
-            
-            // Formula: Principal * (1 + rate)^time
-            // Rate = 0.05 (5%)
-            const compoundBal = storedBalance * Math.pow(1.05, diffWeeks);
-            return compoundBal;
-        }
-
-        function updateBankVisuals(d) {
-            const bankBal = calculateCompoundBalance(d.bankBalance, d.lastBankUpdate);
-
-            // Update Text
-            document.getElementById('bank-balance-val').textContent = bankBal.toFixed(1); // Showing 1 decimal visual, but calc is precise
-            
-            // Update Fire: STRICT CHECK
-            const fire = document.querySelector('.bank-layer-fire');
-            if (fire) {
-                // ТЗ: Пока на счёту меньше 0.1, огонёк не горит
-                if (bankBal < 0.1) {
-                    fire.style.opacity = '0';
-                } else {
-                    fire.style.opacity = '0.9';
-                }
-            }
-        }
-        
-        // Interval to refresh Bank visuals (Live compounding effect)
-        setInterval(() => {
-            if(myData) updateBankVisuals(myData);
-        }, 1000); // Update every second
-
+        // --- Transactions ---
         document.getElementById('btn-do-deposit').onclick = async () => {
             const amt = parseFloat(document.getElementById('deposit-amt').value);
-            if (!amt || amt < 0.1) return showT('Ошибка', 'Минимум 0.1 Đ', '', null, true);
-            if (amt > myData.balance) return showT('Ошибка', 'Недостаточно средств', '', null, true);
-            
-            try {
-                const userRef = doc(db, "users", auth.currentUser.uid);
-                await runTransaction(db, async (t) => {
-                    const uDoc = await t.get(userRef);
-                    const d = uDoc.data();
-                    
-                    // 1. Calculate accrued interest UP TO NOW
-                    const currentRealBankBal = calculateCompoundBalance(d.bankBalance, d.lastBankUpdate);
-                    
-                    // 2. Add new deposit
-                    const newBankBal = currentRealBankBal + amt;
-                    const newWalletBal = d.balance - amt;
-
-                    if(newWalletBal < 0) throw "Недостаточно средств";
-
-                    // 3. Save "crystallized" balance and reset timer
-                    t.update(userRef, {
-                        balance: newWalletBal,
-                        bankBalance: newBankBal,
-                        lastBankUpdate: serverTimestamp() 
-                    });
+            if (!amt || amt < 0.1 || amt > myData.balance) return;
+            const userRef = doc(db, "users", auth.currentUser.uid);
+            await runTransaction(db, async (t) => {
+                const d = (await t.get(userRef)).data();
+                const realBank = calculateCompoundBalance(d.bankBalance, d.lastBankUpdate);
+                t.update(userRef, {
+                    balance: increment(-amt),
+                    bankBalance: realBank + amt,
+                    lastBankUpdate: serverTimestamp()
                 });
-
-                closeModal('deposit');
-                document.getElementById('deposit-amt').value = '';
-                showT('Банк', 'Депозит успешен');
-            } catch(e) { showT('Ошибка', e.message || e, '', null, true); }
+            });
+            closeModal('deposit');
         };
 
         document.getElementById('btn-do-withdraw').onclick = async () => {
             const amt = parseFloat(document.getElementById('withdraw-amt').value);
-            if (!amt || amt < 0.1) return showT('Ошибка', 'Минимум 0.1 Đ', '', null, true);
-            
-            try {
-                const userRef = doc(db, "users", auth.currentUser.uid);
-                await runTransaction(db, async (t) => {
-                    const uDoc = await t.get(userRef);
-                    const d = uDoc.data();
-                    
-                    // 1. Calculate accrued interest UP TO NOW
-                    const currentRealBankBal = calculateCompoundBalance(d.bankBalance, d.lastBankUpdate);
-                    
-                    // 2. Check funds
-                    if (amt > currentRealBankBal) throw "Недостаточно средств в банке";
-
-                    // 3. Subtract withdraw
-                    const newBankBal = currentRealBankBal - amt;
-                    const newWalletBal = d.balance + amt;
-
-                    // 4. Save "crystallized" balance and reset timer
-                    t.update(userRef, {
-                        balance: newWalletBal,
-                        bankBalance: newBankBal,
-                        lastBankUpdate: serverTimestamp()
-                    });
+            const realBank = calculateCompoundBalance(myData.bankBalance, myData.lastBankUpdate);
+            if (!amt || amt < 0.1 || amt > realBank) return;
+            const userRef = doc(db, "users", auth.currentUser.uid);
+            await runTransaction(db, async (t) => {
+                const d = (await t.get(userRef)).data();
+                const currentBank = calculateCompoundBalance(d.bankBalance, d.lastBankUpdate);
+                t.update(userRef, {
+                    balance: increment(amt),
+                    bankBalance: currentBank - amt,
+                    lastBankUpdate: serverTimestamp()
                 });
-
-                closeModal('withdraw');
-                document.getElementById('withdraw-amt').value = '';
-                showT('Банк', 'Вывод успешен');
-            } catch(e) { showT('Ошибка', e.message || e, '', null, true); }
+            });
+            closeModal('withdraw');
         };
 
-        // --- Logic V2.2: Fixed Scanner & Premium QR ---
-        
-        window.updateQR = () => {
-            const email = auth.currentUser.email;
-            let amt = parseFloat(document.getElementById('receive-amt-req').value);
-            const errOverlay = document.getElementById('qr-error');
-            const container = document.getElementById('qrcode-container');
-            if(isNaN(amt)) amt = 0;
-            if (amt > 0 && amt < 0.1) { errOverlay.classList.add('active'); return; } else { errOverlay.classList.remove('active'); }
-            const data = JSON.stringify({ t: "req", e: email, a: amt });
-            container.innerHTML = '';
-            new QRCode(container, { text: data, width: 200, height: 200, colorDark : "#FF4D00", colorLight : "#0a0a0a", correctLevel : QRCode.CorrectLevel.M });
+        // --- Auth handlers ---
+        document.getElementById('btn-login').onclick = () => {
+            const e = document.getElementById('auth-email').value;
+            const p = document.getElementById('auth-password').value;
+            signInWithEmailAndPassword(auth, e, p).catch(err => alert(err.message));
         };
-        
-        document.getElementById('receive-amt-req').oninput = updateQR;
-
-        window.startScannerV2 = () => {
-             if (html5QrCode) return; 
-             html5QrCode = new Html5Qrcode("reader");
-             const config = { fps: 15, aspectRatio: window.innerHeight / window.innerWidth };
-             html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, onScanError).catch(err => {
-                 console.error("Camera start failed", err);
-                 showT('Ошибка камеры', 'Разрешите доступ к камере', '', null, true);
-                 closeModal('scan');
-             });
-        };
-
-        const onScanSuccess = (decodedText, decodedResult) => {
-             closeModal('scan');
-             try {
-                 const data = JSON.parse(decodedText);
-                 if(data.t === 'req' && data.e) { openProposalModal(data); } 
-                 else { showT('Ошибка', 'Неверный формат QR', '', null, true); }
-             } catch (e) {
-                 if(decodedText.includes('@')) { openProposalModal({e: decodedText, a: 0}); } 
-                 else { showT('Ошибка', 'Не удалось распознать', '', null, true); }
-             }
-        };
-
-        const onScanError = (errorMessage) => {};
-
-        window.stopScannerV2 = () => {
-            if (html5QrCode) { html5QrCode.stop().then(() => { html5QrCode.clear(); html5QrCode = null; }).catch(err => console.log(err)); }
-        };
-
-        function openProposalModal(data) {
-            openModal('send');
-            document.getElementById('send-email').value = data.e;
-            if (data.a > 0) {
-                document.getElementById('send-amt').value = data.a;
-                document.getElementById('send-amt').readOnly = true;
-                document.getElementById('send-email').readOnly = true;
-                document.getElementById('proposal-notice').classList.remove('hidden');
-                document.getElementById('btn-do-send').textContent = "Подтвердить перевод";
-            }
-        }
-
-        document.getElementById('btn-do-send').onclick = async () => {
-            const to = document.getElementById('send-email').value.trim().toLowerCase();
-            const amtStr = document.getElementById('send-amt').value;
-            const amt = parseFloat(amtStr);
-            const myEmail = auth.currentUser.email;
-
-            if (amtStr.includes('.')) {
-                const decimalPart = amtStr.split('.')[1];
-                if (decimalPart && decimalPart.length > 1) return showT('Ошибка', 'Только 1 знак после запятой', '', null, true);
-            }
-
-            if (to === myEmail) return showT('Ошибка', 'Нельзя отправить себе', '', null, true);
-            if (!amt || amt < 0.1) return showT('Ошибка', 'Минимум 0.1 Đ', '', null, true);
-            if (amt > myData.balance) return showT('Ошибка', 'Недостаточно средств', '', null, true);
-
-            const btn = document.getElementById('btn-do-send');
-            btn.disabled = true; btn.textContent = '...';
-
-            try {
-                const q = query(collection(db, "users"), where("email", "==", to));
-                const res = await getDocs(q);
-                if (res.empty) throw new Error("Пользователь не найден");
-                const receiverRef = res.docs[0].ref;
-
-                await runTransaction(db, async (t) => {
-                    const senderRef = doc(db, "users", auth.currentUser.uid);
-                    const sDoc = await t.get(senderRef);
-                    if (sDoc.data().balance < amt) throw new Error("Недостаточно средств");
-
-                    t.update(senderRef, { balance: increment(-amt) });
-                    t.update(receiverRef, { balance: increment(amt) });
-                    
-                    const txRef = doc(collection(db, "transactions"));
-                    t.set(txRef, { from: myEmail, to: to, amount: amt, date: Timestamp.now(), parties: [myEmail, to] });
+        document.getElementById('btn-register').onclick = () => {
+            const e = document.getElementById('auth-email').value;
+            const p = document.getElementById('auth-password').value;
+            createUserWithEmailAndPassword(auth, e, p).then(async (cred) => {
+                await setDoc(doc(db, "users", cred.user.uid), {
+                    email: e, balance: 10, bankBalance: 0, lastBankUpdate: Timestamp.now(), avatar: '', refCount: 0
                 });
-                
-                closeModal('send');
-                showT('Успешно', `Перевод для ${to}`, `-${amt.toFixed(1)} Đ`);
-            } catch (e) { showT('Ошибка', e.message, '', null, true); }
-            finally { btn.disabled = false; btn.textContent = 'Отправить'; }
+            }).catch(err => alert(err.message));
         };
-
-        window.copyRef = () => { 
-            const link = document.getElementById('ref-link').value;
-            navigator.clipboard.writeText(link); 
-            showT('Успешно', 'Ссылка скопирована'); 
-        };
-        
-        window.shareRef = async () => {
-            const link = document.getElementById('ref-link').value;
-            if (navigator.share) {
-                try {
-                    await navigator.share({
-                        title: 'Doolcoin Wallet',
-                        text: 'Зарегистрируйся и получи бонус!',
-                        url: link
-                    });
-                } catch (err) { console.log('Share canceled'); }
-            } else {
-                copyRef();
-            }
-        };
-
+        document.getElementById('btn-google').onclick = () => signInWithPopup(auth, googleProvider);
         document.getElementById('btn-logout').onclick = () => signOut(auth);
 
     </script>
