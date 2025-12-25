@@ -105,6 +105,46 @@
         /* Google Btn Animation */
         .google-btn-hover:hover { box-shadow: 0 0 20px rgba(255, 255, 255, 0.2); }
 
+        /* --- FIRE IN THE BANK STYLES --- */
+        .bank-stack-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+        .bank-layer-bottom {
+            font-size: 80px;
+            opacity: 0.5;
+            position: absolute;
+            z-index: 1;
+            filter: grayscale(0.5);
+        }
+        .bank-layer-fire {
+            font-size: 50px;
+            position: absolute;
+            z-index: 2;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -20%);
+            animation: firePulse 1.5s infinite alternate ease-in-out;
+            filter: drop-shadow(0 0 15px rgba(255, 77, 0, 0.8));
+        }
+        .bank-layer-top {
+            font-size: 80px;
+            opacity: 0.4;
+            position: absolute;
+            z-index: 3;
+            pointer-events: none;
+            mix-blend-mode: overlay;
+        }
+        @keyframes firePulse {
+            0% { transform: translate(-50%, -20%) scale(1); opacity: 0.8; }
+            100% { transform: translate(-50%, -25%) scale(1.15); opacity: 1; }
+        }
+
     </style>
 </head>
 <body class="overflow-hidden bg-black" oncontextmenu="return false;">
@@ -140,16 +180,14 @@
         <div id="view-auth" class="hidden flex-col h-full p-8 justify-center relative">
             <div class="absolute top-0 left-0 w-full h-1/2 gradient-bg opacity-[0.03] blur-3xl pointer-events-none"></div>
             
-            <!-- Индикатор реферала -->
-            <div id="auth-ref-badge" class="hidden absolute top-8 left-1/2 -translate-x-1/2 w-full px-8 text-center z-20 animate-bounce">
-                <div class="inline-flex items-center gap-2 bg-orange-500/10 border border-orange-500/30 px-4 py-2 rounded-full backdrop-blur-md">
-                    <span class="text-lg">🎁</span>
-                    <div class="text-left">
-                        <p class="text-[8px] font-bold text-orange-500 uppercase tracking-widest leading-none">Вас пригласил</p>
-                        <p id="auth-ref-email" class="text-[10px] font-bold text-white truncate max-w-[150px]">...</p>
-                    </div>
+            <!-- Индикатор реферала (Обновленный) -->
+            <button id="auth-ref-btn" onclick="openModal('invited-info')" class="hidden absolute top-6 left-6 z-30 group cursor-pointer">
+                <div class="w-12 h-12 glass-panel rounded-full flex items-center justify-center text-2xl relative border border-white/10 group-hover:bg-white/10 transition-colors">
+                    🎁
+                    <div class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
+                    <div class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-black"></div>
                 </div>
-            </div>
+            </button>
 
             <div class="text-center mb-12 relative z-10">
                 <span class="text-8xl font-black gradient-text inline-block mb-4 transform hover:scale-105 transition-transform duration-500">Đ</span>
@@ -206,6 +244,7 @@
             </header>
 
             <main class="flex-1 overflow-y-auto px-5 hide-scroll pb-32 z-10">
+                <!-- WALLET TAB -->
                 <div id="tab-wallet" class="tab-content active space-y-6">
                     <div class="dool-card rounded-[2.5rem] p-8 relative overflow-hidden group">
                         <div class="absolute inset-0 gradient-bg opacity-[0.03] group-hover:opacity-[0.05] transition-opacity duration-500"></div>
@@ -247,6 +286,7 @@
                     </div>
                 </div>
 
+                <!-- REFERRAL TAB -->
                 <div id="tab-referrals" class="tab-content space-y-6">
                     <div class="dool-card rounded-[2.5rem] p-8 relative overflow-hidden">
                         <div class="absolute top-0 right-0 w-32 h-32 gradient-bg blur-[60px] opacity-20"></div>
@@ -288,11 +328,59 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- BANK TAB (NEW) -->
+                <div id="tab-bank" class="tab-content space-y-6">
+                    <div class="text-center pt-4 pb-2">
+                        <h2 class="text-xl font-black uppercase tracking-widest text-neutral-400">Стейкинг</h2>
+                        <p class="text-[10px] text-orange-500 font-bold uppercase tracking-widest">+5% в неделю ⌛</p>
+                    </div>
+
+                    <div class="bank-stack-container">
+                        <span class="bank-layer-bottom">🏦</span>
+                        <span class="bank-layer-fire">🔥</span>
+                        <span class="bank-layer-top">🏦</span>
+                    </div>
+
+                    <div class="dool-card rounded-[2.5rem] p-8 text-center relative overflow-hidden">
+                        <div class="absolute inset-0 bg-orange-500/5"></div>
+                        
+                        <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-2 relative z-10">В банке</p>
+                        <div class="flex items-center justify-center gap-2 relative z-10">
+                            <h2 id="bank-balance-val" class="text-4xl font-black">0.00</h2>
+                            <span class="text-xl font-black text-orange-500">Đ</span>
+                        </div>
+
+                        <div class="h-[1px] bg-white/10 w-full my-6 relative z-10"></div>
+                        
+                        <div class="relative z-10">
+                             <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Накопленный доход</p>
+                             <p id="bank-profit-val" class="text-lg font-bold text-green-500">+0.00 Đ</p>
+                             <button id="btn-claim-interest" class="mt-2 text-[10px] bg-white/10 hover:bg-green-500/20 text-white px-3 py-1 rounded-full transition-colors disabled:opacity-50" onclick="claimInterest()">Забрать</button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="openModal('deposit')" class="h-20 glass-panel rounded-[2rem] flex flex-col items-center justify-center gap-1 hover:bg-white/10 transition-colors border border-white/10">
+                            <span class="text-lg">📥</span>
+                            <span class="text-[10px] font-bold uppercase tracking-widest">Вклад</span>
+                        </button>
+                        <button onclick="openModal('withdraw')" class="h-20 glass-panel rounded-[2rem] flex flex-col items-center justify-center gap-1 hover:bg-white/10 transition-colors border border-white/10">
+                            <span class="text-lg">📤</span>
+                            <span class="text-[10px] font-bold uppercase tracking-widest">Вывод</span>
+                        </button>
+                    </div>
+                </div>
+
             </main>
 
             <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[400px] h-16 bg-[#111]/90 backdrop-blur-xl border border-white/10 rounded-[2rem] flex items-center justify-around px-2 z-50 shadow-2xl">
                 <button onclick="switchTab('wallet')" id="nav-wallet" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-orange-500 cursor-pointer">
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                </button>
+                <button onclick="switchTab('bank')" id="nav-bank" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
+                     <!-- Bank Icon -->
+                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M3 21h18M5 21v-7M19 21v-7M4 10a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v3H4v-3zM12 3L2 14h20L12 3z"/></svg>
                 </button>
                 <button onclick="switchTab('referrals')" id="nav-referrals" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
@@ -316,6 +404,24 @@
                     </div>
                     <p id="profile-email" class="text-xs text-neutral-500 font-bold mb-6 truncate px-2">...</p>
                     <button onclick="closeModal('profile')" class="w-full h-12 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer">Закрыть</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модалка: Invited Info (New) -->
+        <div id="modal-invited-info" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col items-center justify-center p-8 opacity-0 transition-opacity duration-300">
+            <div class="w-full max-w-xs transform scale-90 transition-transform duration-300" id="modal-invited-info-content">
+                <div class="bg-[#111] border border-orange-500/30 p-8 rounded-[2.5rem] text-center shadow-[0_0_50px_rgba(255,77,0,0.2)]">
+                    <div class="w-16 h-16 bg-orange-500/10 rounded-full flex items-center justify-center text-4xl mx-auto mb-4 border border-orange-500/20">🎁</div>
+                    <h2 class="text-xl font-black mb-2 text-white">Вы приглашены!</h2>
+                    <p class="text-xs text-neutral-400 font-medium mb-6">Пользователь <span id="invited-by-email" class="text-orange-500 font-bold">...</span> пригласил вас.</p>
+                    
+                    <div class="bg-white/5 rounded-2xl p-4 mb-6">
+                        <p class="text-[10px] font-black uppercase text-neutral-500 mb-2">Ваш бонус</p>
+                        <p class="text-2xl font-black text-white">+10.00 Đ</p>
+                    </div>
+                    
+                    <button onclick="closeModal('invited-info')" class="w-full h-12 bg-white text-black rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-neutral-200 transition-colors cursor-pointer">Отлично</button>
                 </div>
             </div>
         </div>
@@ -401,6 +507,40 @@
                 <button onclick="closeModal('receive')" class="w-full mt-6 h-12 text-neutral-500 font-bold uppercase text-[10px] hover:text-white transition-colors cursor-pointer">Закрыть</button>
             </div>
         </div>
+        
+        <!-- Модалка: Bank Deposit -->
+        <div id="modal-deposit" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
+            <div class="bg-[#111] border-t border-white/10 rounded-t-[2.5rem] p-8 pb-10 transform translate-y-full transition-transform duration-300" id="modal-deposit-content">
+                <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-6"></div>
+                <h2 class="text-xl font-black mb-4">Пополнить Банк</h2>
+                <div class="bg-white/5 rounded-2xl p-4 border border-white/5 mb-4">
+                     <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Сумма</p>
+                     <div class="flex items-center gap-2">
+                         <input type="number" id="deposit-amt" placeholder="0.00" class="w-full bg-transparent outline-none font-black text-3xl placeholder:text-neutral-700">
+                         <span class="text-xl font-black text-orange-500">Đ</span>
+                     </div>
+                </div>
+                <button id="btn-do-deposit" class="w-full h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer">Пополнить</button>
+                <button onclick="closeModal('deposit')" class="w-full mt-2 h-10 text-neutral-500 font-bold text-[10px] uppercase cursor-pointer">Отмена</button>
+            </div>
+        </div>
+
+        <!-- Модалка: Bank Withdraw -->
+        <div id="modal-withdraw" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
+             <div class="bg-[#111] border-t border-white/10 rounded-t-[2.5rem] p-8 pb-10 transform translate-y-full transition-transform duration-300" id="modal-withdraw-content">
+                <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-6"></div>
+                <h2 class="text-xl font-black mb-4">Вывести из Банка</h2>
+                <div class="bg-white/5 rounded-2xl p-4 border border-white/5 mb-4">
+                     <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Сумма</p>
+                     <div class="flex items-center gap-2">
+                         <input type="number" id="withdraw-amt" placeholder="0.00" class="w-full bg-transparent outline-none font-black text-3xl placeholder:text-neutral-700">
+                         <span class="text-xl font-black text-orange-500">Đ</span>
+                     </div>
+                </div>
+                <button id="btn-do-withdraw" class="w-full h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer">Вывести</button>
+                <button onclick="closeModal('withdraw')" class="w-full mt-2 h-10 text-neutral-500 font-bold text-[10px] uppercase cursor-pointer">Отмена</button>
+            </div>
+        </div>
 
         <!-- Модалка: Сканер Pro Fixed -->
         <div id="modal-scan" class="hidden absolute inset-0 z-[120] bg-black flex flex-col opacity-0 transition-opacity duration-300">
@@ -449,38 +589,29 @@
         let lastBal = null;
         const userCache = {};
         let html5QrCode = null; 
-
+        
         // --- REFERRAL INIT LOGIC (IMMEDIATE) ---
-        // Сразу проверяем URL и сохраняем реферала, чтобы он не потерялся при редиректах
         try {
             const urlParams = new URLSearchParams(window.location.search);
             const refParam = urlParams.get('ref');
             if (refParam) {
-                // Очищаем URL от параметров, чтобы было красиво
                 window.history.replaceState({}, document.title, window.location.pathname);
                 localStorage.setItem('dool_ref', refParam.toLowerCase());
-                
-                // Показываем плашку
-                const authBadge = document.getElementById('auth-ref-badge');
-                const authEmail = document.getElementById('auth-ref-email');
-                if(authBadge && authEmail) {
-                    authBadge.classList.remove('hidden');
-                    authEmail.textContent = refParam;
-                }
+                showRefButton(refParam);
             } else {
-                // Если нет параметра, но есть в памяти - показываем
                 const savedRef = localStorage.getItem('dool_ref');
-                if (savedRef) {
-                    const authBadge = document.getElementById('auth-ref-badge');
-                    const authEmail = document.getElementById('auth-ref-email');
-                    if(authBadge && authEmail) {
-                        authBadge.classList.remove('hidden');
-                        authEmail.textContent = savedRef;
-                    }
-                }
+                if (savedRef) showRefButton(savedRef);
             }
         } catch(e) { console.log('Ref Init Err:', e); }
 
+        function showRefButton(email) {
+            const btn = document.getElementById('auth-ref-btn');
+            const infoText = document.getElementById('invited-by-email');
+            if(btn && infoText) {
+                btn.classList.remove('hidden');
+                infoText.textContent = email;
+            }
+        }
         
         // --- Helpers ---
         async function getUserInfo(email) {
@@ -502,10 +633,11 @@
         window.openModal = (n) => {
             const m = document.getElementById('modal-'+n);
             const c = document.getElementById(`modal-${n}-content`);
+            if(!m || !c) return;
             m.classList.remove('hidden');
             void m.offsetWidth;
             m.classList.remove('opacity-0');
-            if(n === 'send' || n === 'receive') c.classList.remove('translate-y-full');
+            if(n === 'send' || n === 'receive' || n === 'deposit' || n === 'withdraw') c.classList.remove('translate-y-full');
             else if(n !== 'scan') c.classList.remove('scale-90');
             if(n === 'receive') updateQR();
             if(n === 'scan') startScannerV2();
@@ -514,8 +646,9 @@
         window.closeModal = (n) => {
             const m = document.getElementById('modal-'+n);
             const c = document.getElementById(`modal-${n}-content`);
+            if(!m || !c) return;
             m.classList.add('opacity-0');
-            if(n === 'send' || n === 'receive') c.classList.add('translate-y-full');
+            if(n === 'send' || n === 'receive' || n === 'deposit' || n === 'withdraw') c.classList.add('translate-y-full');
             else if(n !== 'scan') c.classList.add('scale-90');
             if(n === 'scan') stopScannerV2();
             if(n === 'send') clearSendForm();
@@ -562,59 +695,54 @@
             document.getElementById('tab-'+tab).classList.add('active');
             const navW = document.getElementById('nav-wallet');
             const navR = document.getElementById('nav-referrals');
-            if(tab === 'wallet') { navW.classList.replace('text-neutral-600', 'text-orange-500'); navR.classList.replace('text-orange-500', 'text-neutral-600'); } 
-            else { navW.classList.replace('text-orange-500', 'text-neutral-600'); navR.classList.replace('text-neutral-600', 'text-orange-500'); }
+            const navB = document.getElementById('nav-bank');
+            
+            navW.classList.replace('text-orange-500', 'text-neutral-600');
+            navR.classList.replace('text-orange-500', 'text-neutral-600');
+            navB.classList.replace('text-orange-500', 'text-neutral-600');
+            
+            document.getElementById('nav-'+tab).classList.replace('text-neutral-600', 'text-orange-500');
         };
 
-        // --- AUTH & ROBUST REFERRAL SYSTEM ---
+        // --- AUTH ---
         
         onAuthStateChanged(auth, async (u) => {
             if (u) {
                 const userRef = doc(db, "users", u.uid);
                 const snap = await getDoc(userRef);
                 
-                // === ЛОГИКА СОЗДАНИЯ НОВОГО ПОЛЬЗОВАТЕЛЯ И РЕФЕРАЛОВ ===
                 if (!snap.exists()) {
                     const email = u.email;
                     const emailLower = u.email.toLowerCase();
 
-                    // 1. Создаем пользователя
+                    // Init data including Bank fields
                     await setDoc(userRef, {
                         email: email, 
                         lowercaseEmail: emailLower,
                         balance: 10.0, 
+                        bankBalance: 0,
+                        lastBankUpdate: Timestamp.now(),
                         avatar: u.photoURL || '', 
                         refCount: 0, 
                         refEarned: 0, 
                         createdAt: Timestamp.now()
                     });
 
-                    // 2. Достаем реферала из памяти (надежнее чем URL)
                     const refEmail = localStorage.getItem('dool_ref');
-
                     if (refEmail && refEmail !== emailLower) {
                         try {
-                            // Ищем реферера
                             const q = query(collection(db, "users"), where("lowercaseEmail", "==", refEmail));
                             const refSnap = await getDocs(q);
-                            
                             if (!refSnap.empty) {
                                 const referrerDoc = refSnap.docs[0];
-                                
-                                // Начисляем бонус рефереру
                                 await updateDoc(referrerDoc.ref, {
                                     balance: increment(10),
                                     refCount: increment(1),
                                     refEarned: increment(10)
                                 });
-                                
-                                console.log(`Реферал засчитан для: ${refEmail}`);
                             }
-                        } catch (err) {
-                            console.error("Ошибка реферальной системы:", err);
-                        }
+                        } catch (err) {}
                     }
-                    // Очищаем реферала после использования
                     localStorage.removeItem('dool_ref');
                 }
                 
@@ -626,30 +754,19 @@
             }
         });
 
-        // 1. Google Login Handler
         document.getElementById('btn-google').onclick = async () => {
-            try {
-                await signInWithPopup(auth, googleProvider);
-            } catch (error) {
-                if (error.code !== 'auth/popup-closed-by-user') {
-                    showT('Ошибка Google', error.message, '', null, true);
-                }
-            }
+            try { await signInWithPopup(auth, googleProvider); } catch (e) { if(e.code !== 'auth/popup-closed-by-user') showT('Ошибка', e.message, '', null, true); }
         };
 
-        // 2. Email Login
         document.getElementById('btn-login').onclick = async () => {
             try { await signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-password').value); } 
             catch { showT('Ошибка', 'Неверный логин или пароль', '', null, true); }
         };
 
-        // 3. Email Register
         document.getElementById('btn-register').onclick = async () => {
             const p = document.getElementById('auth-password').value;
             if (p.length < 6) return showT('Ошибка', 'Пароль слишком короткий', '', null, true);
-            try {
-                await createUserWithEmailAndPassword(auth, document.getElementById('auth-email').value, p);
-            } catch { showT('Ошибка', 'Не удалось создать аккаунт', '', null, true); }
+            try { await createUserWithEmailAndPassword(auth, document.getElementById('auth-email').value, p); } catch { showT('Ошибка', 'Ошибка создания', '', null, true); }
         };
 
         // --- App Logic ---
@@ -669,8 +786,6 @@
             document.getElementById('profile-email').textContent = u.email;
             document.getElementById('my-email-addr').textContent = u.email;
             
-            // --- FIXED LINK GENERATION ---
-            // Генерируем ссылку от корня текущего пути, а не origin, чтобы работало везде
             const cleanUrl = window.location.href.split('?')[0];
             const refLink = `${cleanUrl}?ref=${u.email}`;
             document.getElementById('ref-link').value = refLink;
@@ -678,6 +793,8 @@
             onSnapshot(doc(db, "users", u.uid), async (snap) => {
                 const d = snap.data();
                 if (!d) return;
+                
+                // Balance Update
                 if (lastBal !== null && d.balance > lastBal) {
                     const diff = d.balance - lastBal;
                     handleIncomingTransfer(u.email, diff);
@@ -688,6 +805,11 @@
                 const balEl = document.getElementById('balance-val');
                 balEl.textContent = balStr;
                 adjustBalanceSize(balStr);
+
+                // Bank Update
+                const bankBal = d.bankBalance || 0;
+                document.getElementById('bank-balance-val').textContent = bankBal.toFixed(2);
+                updateBankInterest(d);
 
                 document.getElementById('ref-count').textContent = d.refCount || 0;
                 document.getElementById('ref-earned').textContent = (d.refEarned || 0).toFixed(2);
@@ -724,18 +846,16 @@
 
         async function handleIncomingTransfer(myEmail, amountDiff) {
             try {
-                // Если разница ровно 10 и это не транзакция, возможно это реферальный бонус
                 const q = query(collection(db, "transactions"), where("to", "==", myEmail));
                 const snap = await getDocs(q);
                 if (!snap.empty) {
                     const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date);
-                    // Если сумма совпадает с последним переводом (с допуском) и он был недавно
                     if (Math.abs(docs[0].amount - amountDiff) < 0.01) { 
                         showT('Входящий перевод', docs[0].from, `+${amountDiff.toFixed(2)} Đ`, docs[0].from); 
                         return; 
                     }
                 }
-                showT('Пополнение', 'Система / Бонус', `+${amountDiff.toFixed(2)} Đ`);
+                showT('Пополнение', 'Система / Банк', `+${amountDiff.toFixed(2)} Đ`);
             } catch(e) {}
         }
 
@@ -748,6 +868,96 @@
                 catch { showT('Ошибка', 'Не удалось загрузить фото', '', null, true); }
             };
             reader.readAsDataURL(file);
+        };
+
+        // --- Bank Logic ---
+        
+        let pendingInterest = 0;
+        
+        function updateBankInterest(d) {
+            const bankBal = d.bankBalance || 0;
+            if (bankBal <= 0 || !d.lastBankUpdate) {
+                document.getElementById('bank-profit-val').textContent = "+0.00 Đ";
+                document.getElementById('btn-claim-interest').disabled = true;
+                return;
+            }
+
+            const lastUpdate = d.lastBankUpdate.toDate();
+            const now = new Date();
+            const diffMs = now - lastUpdate;
+            const diffWeeks = diffMs / (1000 * 60 * 60 * 24 * 7);
+            
+            // 5% per week
+            pendingInterest = bankBal * 0.05 * diffWeeks;
+            
+            document.getElementById('bank-profit-val').textContent = `+${pendingInterest.toFixed(4)} Đ`;
+            document.getElementById('btn-claim-interest').disabled = pendingInterest < 0.0001;
+            
+            // Auto-animate locally
+            requestAnimationFrame(() => updateBankInterest(d));
+        }
+
+        window.claimInterest = async () => {
+             if (pendingInterest < 0.0001) return;
+             const btn = document.getElementById('btn-claim-interest');
+             btn.disabled = true;
+             
+             try {
+                 const userRef = doc(db, "users", auth.currentUser.uid);
+                 await runTransaction(db, async (t) => {
+                     const uDoc = await t.get(userRef);
+                     const d = uDoc.data();
+                     // Recalculate strictly in transaction
+                     const lastUpdate = d.lastBankUpdate.toDate();
+                     const now = new Date();
+                     const diffWeeks = (now - lastUpdate) / (1000 * 60 * 60 * 24 * 7);
+                     const interest = (d.bankBalance || 0) * 0.05 * diffWeeks;
+                     
+                     t.update(userRef, {
+                         bankBalance: increment(interest),
+                         lastBankUpdate: Timestamp.now()
+                     });
+                 });
+                 showT('Банк', 'Проценты получены!', `+${pendingInterest.toFixed(2)} Đ`);
+             } catch(e) { console.error(e); }
+        };
+
+        document.getElementById('btn-do-deposit').onclick = async () => {
+            const amt = parseFloat(document.getElementById('deposit-amt').value);
+            if (!amt || amt < 0.01) return showT('Ошибка', 'Некорректная сумма', '', null, true);
+            if (amt > myData.balance) return showT('Ошибка', 'Недостаточно средств', '', null, true);
+            
+            try {
+                const userRef = doc(db, "users", auth.currentUser.uid);
+                await updateDoc(userRef, {
+                    balance: increment(-amt),
+                    bankBalance: increment(amt),
+                    lastBankUpdate: Timestamp.now() // Reset timer on deposit to simplify interest logic for demo
+                });
+                closeModal('deposit');
+                document.getElementById('deposit-amt').value = '';
+                showT('Банк', 'Депозит успешен');
+            } catch(e) { showT('Ошибка', e.message, '', null, true); }
+        };
+
+        document.getElementById('btn-do-withdraw').onclick = async () => {
+            const amt = parseFloat(document.getElementById('withdraw-amt').value);
+            const bankBal = myData.bankBalance || 0;
+            if (!amt || amt < 0.01) return showT('Ошибка', 'Некорректная сумма', '', null, true);
+            if (amt > bankBal) return showT('Ошибка', 'Недостаточно средств в банке', '', null, true);
+            
+            try {
+                const userRef = doc(db, "users", auth.currentUser.uid);
+                 // Claim interest first implicitly or just withdraw principal (simplifying: withdraw principal, keep timer)
+                 // For true bank simulation, usually interest is calculated daily. Here we just simple withdraw.
+                await updateDoc(userRef, {
+                    balance: increment(amt),
+                    bankBalance: increment(-amt)
+                });
+                closeModal('withdraw');
+                document.getElementById('withdraw-amt').value = '';
+                showT('Банк', 'Вывод успешен');
+            } catch(e) { showT('Ошибка', e.message, '', null, true); }
         };
 
         // --- Logic V2.2: Fixed Scanner & Premium QR ---
