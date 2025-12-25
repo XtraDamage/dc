@@ -959,19 +959,16 @@
             // Update Text
             document.getElementById('bank-balance-val').textContent = bankBal.toFixed(1); // Showing 1 decimal visual, but calc is precise
             
-            // Update Fire
+            // Update Fire: STRICT CHECK
             const fire = document.querySelector('.bank-layer-fire');
             if (fire) {
-                // Only show fire if we have significant amount (>0.1)
-                if (bankBal >= 0.1) fire.style.opacity = '0.9';
-                else fire.style.opacity = '0';
+                // ТЗ: Пока на счёту меньше 0.1, огонёк не горит
+                if (bankBal < 0.1) {
+                    fire.style.opacity = '0';
+                } else {
+                    fire.style.opacity = '0.9';
+                }
             }
-            
-            // Keep animating visually every frame for live effect if needed
-            // But since Firestore updates on snapshots, we rely on that mostly.
-            // For smoother look, we can recursively call this if we want "ticking" numbers.
-            // For now, static update on snapshot is safer for performance, 
-            // but let's add a slow interval to keep it "alive" if user stays on page.
         }
         
         // Interval to refresh Bank visuals (Live compounding effect)
