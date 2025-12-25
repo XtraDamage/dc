@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Doolcoin Wallet</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- QR Code Scanner Library (Core) -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <!-- QR Code Generator Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -29,10 +31,19 @@
         .hide-scroll::-webkit-scrollbar { display: none; }
         .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
 
-        /* --- Scanner Styles --- */
+        /* --- Scanner Styles Fixed --- */
         #modal-scan-content { position: relative; background: #000; }
         #reader { width: 100%; height: 100%; overflow: hidden; position: relative; }
-        #reader video { width: 100% !important; height: 100% !important; object-fit: cover !important; }
+        
+        #reader video { 
+            width: 100% !important; 
+            height: 100% !important; 
+            object-fit: cover !important; 
+            border-radius: 0 !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+        #reader * { border: none !important; box-shadow: none !important; }
         
         .scan-focus-area {
             position: absolute; top: 50%; left: 50%;
@@ -40,33 +51,60 @@
             transform: translate(-50%, -50%);
             box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.85);
             border-radius: 2rem;
-            z-index: 10; pointer-events: none;
+            z-index: 10;
+            pointer-events: none;
         }
+        
         .scan-border-glow {
-            position: absolute; inset: 0; border-radius: 2rem;
+            position: absolute; inset: 0;
+            border-radius: 2rem;
             border: 2px solid rgba(255, 77, 0, 0.5);
-            box-shadow: 0 0 20px rgba(255, 77, 0, 0.2);
+            box-shadow: 0 0 20px rgba(255, 77, 0, 0.2), inset 0 0 20px rgba(255, 77, 0, 0.1);
         }
+
         .scan-laser {
             position: absolute; width: 100%; height: 2px;
             background: linear-gradient(90deg, transparent, #FF4D00, transparent);
-            box-shadow: 0 0 10px #FF4D00; top: 50%;
+            box-shadow: 0 0 10px #FF4D00;
+            top: 50%;
             animation: scanAnim 2s infinite ease-in-out;
         }
-        @keyframes scanAnim { 0% { transform: translateY(-100px); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateY(100px); opacity: 0; } }
+        @keyframes scanAnim { 
+            0% { transform: translateY(-100px); opacity: 0; } 
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { transform: translateY(100px); opacity: 0; } 
+        }
         
-        /* --- Jar Fire Effect --- */
-        .jar-container { position: relative; width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; }
-        .jar-base { font-size: 80px; opacity: 0.5; filter: grayscale(100%); transition: all 0.5s; }
-        .jar-fire { position: absolute; font-size: 40px; bottom: 15px; opacity: 0; transform: scale(0.5); transition: all 0.5s; }
-        .jar-top { position: absolute; font-size: 80px; opacity: 0.3; z-index: 2; pointer-events: none; }
-        
-        .jar-active .jar-base { opacity: 0.6; filter: none; }
-        .jar-active .jar-fire { opacity: 1; transform: scale(1); animation: fireBurn 0.8s infinite alternate ease-in-out; }
-        
-        @keyframes fireBurn { from { transform: scale(1) translateY(0) rotate(-5deg); filter: brightness(100%); } to { transform: scale(1.1) translateY(-2px) rotate(5deg); filter: brightness(130%); } }
+        /* --- Premium Minimalist QR --- */
+        .qr-minimal-glass {
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 77, 0, 0.15);
+            border-radius: 32px;
+            padding: 24px;
+            position: relative;
+            box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.8);
+            display: inline-block;
+        }
 
+        #qrcode-container img { display: block; border-radius: 8px; }
+        
+        .qr-error-overlay {
+            position: absolute; inset: 0; background: rgba(0,0,0,0.95);
+            display: flex; flex-col; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+            z-index: 20; border-radius: 32px;
+            border: 1px solid rgba(255, 77, 0, 0.3);
+        }
+        .qr-error-overlay.active { opacity: 1; pointer-events: auto; }
+
+        #balance-val { transition: font-size 0.3s ease; }
+
+        /* Google Btn Animation */
         .google-btn-hover:hover { box-shadow: 0 0 20px rgba(255, 255, 255, 0.2); }
+
     </style>
 </head>
 <body class="overflow-hidden bg-black" oncontextmenu="return false;">
@@ -76,7 +114,7 @@
         <!-- Toast -->
         <div id="toast" class="fixed top-4 left-4 right-4 z-[200] glass-panel p-3 rounded-[2rem] flex items-center gap-3 shadow-2xl pointer-events-none border border-white/10">
             <div class="relative shrink-0">
-                <img id="toast-avatar" src="" class="w-12 h-12 rounded-full object-cover bg-neutral-800 border-2 border-white/10">
+                <img id="toast-avatar" src="" class="w-12 h-12 rounded-full object-cover bg-neutral-800 border-2 border-white/10" onerror="this.src='https://ui-avatars.com/api/?background=333&color=fff&size=128'">
                 <div id="toast-status" class="absolute -bottom-1 -right-1 bg-green-500 w-4 h-4 rounded-full border-2 border-black flex items-center justify-center">
                     <svg width="8" height="8" fill="none" stroke="black" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
                 </div>
@@ -92,9 +130,9 @@
 
         <!-- Загрузка -->
         <div id="view-loading" class="absolute inset-0 z-[100] bg-black flex items-center justify-center">
-            <div class="relative animate-pulse">
+            <div class="relative">
                 <div class="w-24 h-24 gradient-bg rounded-full blur-3xl opacity-20 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
-                <span class="text-8xl font-black gradient-text relative z-10">Đ</span>
+                <span class="text-8xl font-black gradient-text relative z-10 animate-pulse">Đ</span>
             </div>
         </div>
 
@@ -102,20 +140,33 @@
         <div id="view-auth" class="hidden flex-col h-full p-8 justify-center relative">
             <div class="absolute top-0 left-0 w-full h-1/2 gradient-bg opacity-[0.03] blur-3xl pointer-events-none"></div>
             
-            <!-- Кнопка реферала (исправленная) -->
-            <button id="auth-ref-btn" onclick="openModal('ref-info')" class="hidden absolute top-6 right-6 w-12 h-12 rounded-full glass-panel border border-orange-500/30 flex items-center justify-center text-2xl shadow-[0_0_20px_rgba(255,77,0,0.2)] animate-bounce z-50 hover:scale-110 transition-transform cursor-pointer">
-                🎁
-            </button>
+            <!-- Индикатор реферала -->
+            <div id="auth-ref-badge" class="hidden absolute top-8 left-1/2 -translate-x-1/2 w-full px-8 text-center z-20 animate-bounce">
+                <div class="inline-flex items-center gap-2 bg-orange-500/10 border border-orange-500/30 px-4 py-2 rounded-full backdrop-blur-md">
+                    <span class="text-lg">🎁</span>
+                    <div class="text-left">
+                        <p class="text-[8px] font-bold text-orange-500 uppercase tracking-widest leading-none">Вас пригласил</p>
+                        <p id="auth-ref-email" class="text-[10px] font-bold text-white truncate max-w-[150px]">...</p>
+                    </div>
+                </div>
+            </div>
 
             <div class="text-center mb-12 relative z-10">
-                <span class="text-8xl font-black gradient-text inline-block mb-4">Đ</span>
+                <span class="text-8xl font-black gradient-text inline-block mb-4 transform hover:scale-105 transition-transform duration-500">Đ</span>
                 <h1 class="text-4xl font-extrabold tracking-tight">Doolcoin</h1>
                 <p class="text-neutral-500 mt-2 text-sm font-medium">Кошелек будущего</p>
             </div>
             
             <div class="space-y-4 relative z-10">
+                <!-- Google Sign In Button -->
                 <button id="btn-google" class="w-full h-16 bg-white text-black rounded-2xl font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-3 transition-all active:scale-95 google-btn-hover cursor-pointer relative overflow-hidden group">
-                     <svg width="24" height="24" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.84.81-.81z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                    <div class="absolute inset-0 bg-neutral-200 opacity-0 group-hover:opacity-10 transition-opacity"></div>
+                    <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.84.81-.81z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
                     <span>Войти через Google</span>
                 </button>
 
@@ -156,13 +207,13 @@
 
             <main class="flex-1 overflow-y-auto px-5 hide-scroll pb-32 z-10">
                 <div id="tab-wallet" class="tab-content active space-y-6">
-                    <!-- Баланс -->
                     <div class="dool-card rounded-[2.5rem] p-8 relative overflow-hidden group">
                         <div class="absolute inset-0 gradient-bg opacity-[0.03] group-hover:opacity-[0.05] transition-opacity duration-500"></div>
                         <div class="absolute -right-12 -top-12 w-48 h-48 bg-[#FF4D00] rounded-full blur-[80px] opacity-20"></div>
                         
                         <div class="relative z-10 flex flex-col items-center justify-center py-6">
                             <span class="text-[10px] font-bold text-neutral-500 uppercase tracking-[0.2em] mb-2">Общий баланс</span>
+                            <!-- Контейнер для адаптивного баланса -->
                             <div class="w-full flex items-baseline justify-center gap-1 mb-2 px-2">
                                 <h2 id="balance-val" class="text-5xl font-black tracking-tighter leading-none whitespace-nowrap overflow-visible">0.00</h2>
                                 <span class="text-2xl font-black gradient-text leading-none mb-1 self-end pb-1">Đ</span>
@@ -170,28 +221,19 @@
                         </div>
 
                         <div class="flex gap-3 mt-4 relative z-10">
-                            <button onclick="openModal('send')" class="flex-1 h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 active:scale-95 transition-all shadow-lg shadow-white/5 cursor-pointer flex flex-col items-center justify-center">Отправить</button>
+                            <button onclick="openModal('send')" class="flex-1 h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 active:scale-95 transition-all shadow-lg shadow-white/5 cursor-pointer flex flex-col items-center justify-center">
+                                <span>Отправить</span>
+                            </button>
+                            <!-- Кнопка Сканирования -->
                             <button onclick="openModal('scan')" class="w-14 h-14 glass-panel text-white rounded-2xl flex items-center justify-center hover:bg-white/10 active:scale-95 transition-all cursor-pointer border border-white/10 group-hover:border-orange-500/50">
                                 <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
                             </button>
-                            <button onclick="openModal('receive')" class="flex-1 h-14 glass-panel text-white border border-white/10 rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-white/10 active:scale-95 transition-all cursor-pointer flex flex-col items-center justify-center">Получить</button>
+                            <button onclick="openModal('receive')" class="flex-1 h-14 glass-panel text-white border border-white/10 rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-white/10 active:scale-95 transition-all cursor-pointer flex flex-col items-center justify-center">
+                                <span>Получить</span>
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Стейкинг Карточка -->
-                    <div onclick="openModal('staking')" class="dool-card rounded-[2.5rem] p-6 relative overflow-hidden group cursor-pointer border-orange-500/20 active:scale-95 transition-transform">
-                        <div class="absolute top-0 right-0 w-32 h-32 bg-orange-500 rounded-full blur-[60px] opacity-10 group-hover:opacity-20 transition-opacity"></div>
-                        <div class="relative z-10 flex items-center justify-between">
-                            <div>
-                                <h3 class="text-xl font-black mb-1">Стейкинг Сейф</h3>
-                                <p class="text-[10px] text-neutral-500 font-bold uppercase tracking-wider mb-2">+5% в неделю ⌛</p>
-                                <p id="staking-preview" class="text-2xl font-black text-orange-500">0.00 Đ</p>
-                            </div>
-                            <div class="text-4xl filter drop-shadow-[0_0_10px_rgba(255,77,0,0.5)]">🫙</div>
-                        </div>
-                    </div>
-
-                    <!-- История -->
                     <div class="space-y-4">
                         <div class="flex items-center justify-between px-2">
                             <h3 class="text-[11px] font-black text-neutral-500 uppercase tracking-widest">История операций</h3>
@@ -199,6 +241,7 @@
                         <div id="tx-history" class="space-y-2 pb-10">
                             <div class="text-center py-10">
                                 <div class="w-8 h-8 border-2 border-white/10 border-t-orange-500 rounded-full animate-spin mx-auto mb-4"></div>
+                                <p class="text-[10px] font-bold text-neutral-600 uppercase tracking-widest">Загрузка...</p>
                             </div>
                         </div>
                     </div>
@@ -230,10 +273,16 @@
 
                     <div class="grid grid-cols-2 gap-3">
                         <div class="dool-card p-5 rounded-[2rem] flex flex-col items-center justify-center gap-1 aspect-square">
+                            <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center mb-2 text-neutral-400">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            </div>
                             <p id="ref-count" class="text-2xl font-black">0</p>
                             <p class="text-[9px] font-bold text-neutral-600 uppercase tracking-wider">Друзей</p>
                         </div>
                         <div class="dool-card p-5 rounded-[2rem] flex flex-col items-center justify-center gap-1 aspect-square">
+                            <div class="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center mb-2 text-orange-500">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                            </div>
                             <p id="ref-earned" class="text-2xl font-black">0</p>
                             <p class="text-[9px] font-bold text-neutral-600 uppercase tracking-wider">Заработано</p>
                         </div>
@@ -249,62 +298,6 @@
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
                 </button>
             </nav>
-        </div>
-
-        <!-- MODALS -->
-
-        <!-- Модалка: Реферальная Информация -->
-        <div id="modal-ref-info" class="hidden absolute inset-0 z-[120] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-8 opacity-0 transition-opacity duration-300">
-            <div class="w-full max-w-xs transform scale-90 transition-transform duration-300" id="modal-ref-info-content">
-                <div class="bg-[#111] border border-white/10 p-8 rounded-[2.5rem] text-center shadow-2xl relative overflow-hidden">
-                     <div class="absolute inset-0 bg-orange-500/5 blur-3xl"></div>
-                     <span class="text-6xl mb-4 block animate-bounce">🎁</span>
-                     <h2 class="text-xl font-black mb-2 relative z-10">Вас пригласили!</h2>
-                     <div class="bg-white/5 p-4 rounded-2xl mb-4 border border-white/5 relative z-10">
-                         <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Пригласитель</p>
-                         <p id="ref-inviter-email" class="text-xs font-bold text-white truncate">...</p>
-                     </div>
-                     <p class="text-xs text-neutral-400 font-medium mb-6 relative z-10">После регистрации вы получите <span class="text-orange-500 font-bold">10.00 Đ</span> на свой счет.</p>
-                     <button onclick="closeModal('ref-info')" class="w-full h-12 bg-white text-black rounded-xl font-black text-xs uppercase tracking-wider hover:scale-105 transition-transform cursor-pointer relative z-10">Понятно</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Модалка: Стейкинг -->
-        <div id="modal-staking" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
-            <div class="bg-[#0f0f0f] border-t border-white/10 rounded-t-[2.5rem] p-8 pb-10 transform translate-y-full transition-transform duration-300" id="modal-staking-content">
-                <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-8"></div>
-                
-                <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-2xl font-black">Стейкинг</h2>
-                    <div class="jar-container" id="staking-jar-visual">
-                        <span class="jar-base">🫙</span>
-                        <span class="jar-fire">🔥</span>
-                        <span class="jar-top">🫙</span>
-                    </div>
-                </div>
-
-                <div class="bg-white/5 rounded-2xl p-5 border border-white/5 mb-6">
-                     <div class="flex justify-between items-end mb-2">
-                         <p class="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">В банке</p>
-                         <p class="text-[10px] font-bold text-green-500 uppercase tracking-widest">+5% / Неделю</p>
-                     </div>
-                     <div class="flex items-baseline gap-2">
-                         <h3 id="staking-balance-val" class="text-4xl font-black text-white">0.00</h3>
-                         <span class="text-xl font-black text-orange-500">Đ</span>
-                     </div>
-                     <p class="text-[10px] text-neutral-600 mt-2 font-mono">Накоплено: <span id="staking-profit" class="text-green-500">+0.00</span></p>
-                </div>
-
-                <div class="space-y-3">
-                    <div class="flex gap-3">
-                        <input type="number" id="staking-amount" placeholder="Сумма" class="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 font-bold text-lg outline-none focus:border-orange-500/50 transition-colors text-white">
-                        <button onclick="stakeDeposit()" class="w-24 h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer">Положить</button>
-                    </div>
-                    <button onclick="stakeWithdraw()" class="w-full h-14 glass-panel border border-orange-500/20 text-orange-500 rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-orange-500/10 cursor-pointer">Вывести всё с процентами</button>
-                    <button onclick="closeModal('staking')" class="w-full h-12 text-neutral-500 font-bold uppercase text-[10px] cursor-pointer">Закрыть</button>
-                </div>
-            </div>
         </div>
 
         <!-- Модалка: Профиль -->
@@ -349,7 +342,7 @@
                         <input type="email" id="send-email" placeholder="email@example.com" class="w-full bg-transparent outline-none font-bold text-sm placeholder:text-neutral-700">
                     </div>
                     <div class="bg-white/5 rounded-2xl p-4 border border-white/5 focus-within:border-orange-500/50 transition-colors">
-                         <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Сумма</p>
+                         <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Сумма (Мин 0.01)</p>
                          <div class="flex items-center gap-2">
                              <input type="number" id="send-amt" placeholder="0.00" class="w-full bg-transparent outline-none font-black text-3xl placeholder:text-neutral-700">
                              <span class="text-xl font-black text-orange-500">Đ</span>
@@ -363,25 +356,39 @@
             </div>
         </div>
 
-        <!-- Модалка: Получить -->
+        <!-- Модалка: Получить (с Minimal Glass QR) -->
         <div id="modal-receive" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
             <div class="bg-[#111] border border-white/10 rounded-t-[2.5rem] p-8 pb-10 w-full transform translate-y-full transition-transform duration-300 shadow-2xl" id="modal-receive-content">
                 <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-6"></div>
+                
                 <div class="text-center mb-6">
                     <h2 class="text-2xl font-black mb-1">Получить</h2>
                     <p class="text-neutral-500 text-xs font-medium">Покажите этот код отправителю</p>
                 </div>
+
+                <!-- Minimalist QR Container -->
                 <div class="flex justify-center mb-6">
-                    <div class="bg-white p-4 rounded-3xl" id="qrcode-container"></div>
+                    <div class="qr-minimal-glass">
+                         <!-- Error Overlay -->
+                         <div id="qr-error" class="qr-error-overlay">
+                             <span class="text-3xl mb-2">⚠️</span>
+                             <p class="text-[10px] font-bold text-orange-500 uppercase tracking-widest text-center">Минимум<br>0.01 Đ</p>
+                        </div>
+                        
+                        <!-- QR Render Target -->
+                        <div id="qrcode-container"></div>
+                    </div>
                 </div>
+
                 <div class="space-y-4">
                     <div class="bg-white/5 p-4 rounded-2xl border border-white/5 flex items-center justify-between">
                         <div class="flex-1">
-                            <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Сумма (необязательно)</p>
-                            <input type="number" id="receive-amt-req" placeholder="0.00" class="w-full bg-transparent outline-none font-bold text-lg placeholder:text-neutral-700">
+                            <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Предложить сумму</p>
+                            <input type="number" id="receive-amt-req" placeholder="Укажите сумму..." class="w-full bg-transparent outline-none font-bold text-lg placeholder:text-neutral-700">
                         </div>
                         <span class="text-lg font-black text-orange-500 ml-3">Đ</span>
                     </div>
+
                     <div onclick="copyMyEmail()" class="bg-white/5 p-4 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-white/10 active:scale-95 transition-all">
                         <div class="flex-1 min-w-0 pr-2">
                              <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Ваш адрес</p>
@@ -390,20 +397,26 @@
                         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" class="text-neutral-500"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                     </div>
                 </div>
+                
                 <button onclick="closeModal('receive')" class="w-full mt-6 h-12 text-neutral-500 font-bold uppercase text-[10px] hover:text-white transition-colors cursor-pointer">Закрыть</button>
             </div>
         </div>
 
-        <!-- Модалка: Сканер -->
+        <!-- Модалка: Сканер Pro Fixed -->
         <div id="modal-scan" class="hidden absolute inset-0 z-[120] bg-black flex flex-col opacity-0 transition-opacity duration-300">
+            <!-- Header сканера -->
             <div class="absolute top-0 left-0 w-full p-6 z-20 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent">
                  <h2 class="text-xl font-black text-white drop-shadow-md">Сканирование</h2>
                  <button onclick="closeModal('scan')" class="w-10 h-10 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center text-white cursor-pointer hover:bg-white/20 transition-all border border-white/10">
                     <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
                 </button>
             </div>
+            
+            <!-- Область камеры -->
             <div class="w-full h-full relative" id="modal-scan-content">
                 <div id="reader"></div>
+                
+                <!-- Focus Overlay -->
                 <div class="scan-focus-area">
                     <div class="scan-border-glow"></div>
                     <div class="scan-laser"></div>
@@ -437,111 +450,62 @@
         const userCache = {};
         let html5QrCode = null; 
 
-        // --- Ref Logic ---
+        // --- REFERRAL INIT LOGIC (IMMEDIATE) ---
+        // Сразу проверяем URL и сохраняем реферала, чтобы он не потерялся при редиректах
         try {
             const urlParams = new URLSearchParams(window.location.search);
             const refParam = urlParams.get('ref');
             if (refParam) {
+                // Очищаем URL от параметров, чтобы было красиво
                 window.history.replaceState({}, document.title, window.location.pathname);
                 localStorage.setItem('dool_ref', refParam.toLowerCase());
-                updateRefUI(refParam);
-            } else {
-                const savedRef = localStorage.getItem('dool_ref');
-                if (savedRef) updateRefUI(savedRef);
-            }
-        } catch(e) {}
-
-        function updateRefUI(email) {
-            const btn = document.getElementById('auth-ref-btn');
-            const txt = document.getElementById('ref-inviter-email');
-            if(btn && txt) {
-                btn.classList.remove('hidden');
-                txt.textContent = email;
-            }
-        }
-
-        // --- Staking Logic ---
-        const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
-        const STAKE_RATE = 0.05; // 5%
-
-        function calculateStake(amount, startDate) {
-            if (!amount || amount <= 0 || !startDate) return 0;
-            const now = Date.now();
-            const start = startDate.toMillis();
-            const diffMs = now - start;
-            const weeks = diffMs / WEEK_MS;
-            // Simple interest for display logic: Principal + (Principal * Rate * Weeks)
-            // Or continuous: Principal * e^(Rate*Weeks) roughly. Let's use simple linear for clarity or compound?
-            // "5% в неделю" usually implies compound if reinvested, but simple if just holding.
-            // Let's do simple linear for stability in this demo: Profit = Amount * 0.05 * Weeks
-            return amount * STAKE_RATE * weeks;
-        }
-
-        window.stakeDeposit = async () => {
-            const amt = parseFloat(document.getElementById('staking-amount').value);
-            if (!amt || amt <= 0) return showT('Ошибка', 'Введите сумму');
-            if (amt > myData.balance) return showT('Ошибка', 'Недостаточно средств');
-
-            try {
-                // Если уже есть стейкинг, нужно сначала начислить проценты на старую сумму и перезапустить стейкинг с новой общей суммой
-                // Но для простоты UI: мы просто добавляем к телу, а дату старта "усредняем" или (лучше) выплачиваем текущий процент в баланс и создаем новый стейк.
-                // Самый честный вариант: вывести всё (с процентами) и задепозитить заново новую сумму.
                 
-                await runTransaction(db, async (t) => {
-                    const ref = doc(db, "users", auth.currentUser.uid);
-                    const d = (await t.get(ref)).data();
-                    
-                    let currentStake = d.stakingBalance || 0;
-                    let currentStart = d.stakingStart;
-                    let profit = 0;
-
-                    if (currentStake > 0 && currentStart) {
-                        profit = calculateStake(currentStake, currentStart);
+                // Показываем плашку
+                const authBadge = document.getElementById('auth-ref-badge');
+                const authEmail = document.getElementById('auth-ref-email');
+                if(authBadge && authEmail) {
+                    authBadge.classList.remove('hidden');
+                    authEmail.textContent = refParam;
+                }
+            } else {
+                // Если нет параметра, но есть в памяти - показываем
+                const savedRef = localStorage.getItem('dool_ref');
+                if (savedRef) {
+                    const authBadge = document.getElementById('auth-ref-badge');
+                    const authEmail = document.getElementById('auth-ref-email');
+                    if(authBadge && authEmail) {
+                        authBadge.classList.remove('hidden');
+                        authEmail.textContent = savedRef;
                     }
+                }
+            }
+        } catch(e) { console.log('Ref Init Err:', e); }
 
-                    const newTotal = currentStake + amt + profit; // Реинвестируем прибыль и старое тело + новое
-
-                    t.update(ref, {
-                        balance: increment(-amt), // Списываем только то, что добавляем с кошелька
-                        stakingBalance: newTotal,
-                        stakingStart: Timestamp.now() // Сбрасываем таймер на новую сумму
-                    });
-                });
-                document.getElementById('staking-amount').value = '';
-                showT('Стейкинг', `Депозит: ${amt.toFixed(2)} Đ`);
-            } catch (e) { showT('Ошибка', e.message, '', null, true); }
-        };
-
-        window.stakeWithdraw = async () => {
-             try {
-                await runTransaction(db, async (t) => {
-                    const ref = doc(db, "users", auth.currentUser.uid);
-                    const d = (await t.get(ref)).data();
-                    
-                    if (!d.stakingBalance || d.stakingBalance <= 0) throw new Error("Сейф пуст");
-
-                    const profit = calculateStake(d.stakingBalance, d.stakingStart);
-                    const total = d.stakingBalance + profit;
-
-                    t.update(ref, {
-                        balance: increment(total),
-                        stakingBalance: 0,
-                        stakingStart: null
-                    });
-                });
-                showT('Стейкинг', `Вывод успешен`);
-                closeModal('staking');
-            } catch (e) { showT('Ошибка', e.message, '', null, true); }
-        };
         
-        // --- UI Helpers ---
+        // --- Helpers ---
+        async function getUserInfo(email) {
+            if (userCache[email]) return userCache[email];
+            const defaultAv = `https://ui-avatars.com/api/?background=random&color=fff&name=${email.charAt(0).toUpperCase()}&size=128`;
+            let info = { avatar: defaultAv, email: email };
+            try {
+                const q = query(collection(db, "users"), where("email", "==", email));
+                const res = await getDocs(q);
+                if (!res.empty) {
+                    const d = res.docs[0].data();
+                    if (d.avatar) info.avatar = d.avatar;
+                }
+            } catch (e) { console.log('Err avatar', e); }
+            userCache[email] = info;
+            return info;
+        }
+
         window.openModal = (n) => {
             const m = document.getElementById('modal-'+n);
             const c = document.getElementById(`modal-${n}-content`);
             m.classList.remove('hidden');
             void m.offsetWidth;
             m.classList.remove('opacity-0');
-            if(n === 'send' || n === 'receive' || n === 'staking') c.classList.remove('translate-y-full');
+            if(n === 'send' || n === 'receive') c.classList.remove('translate-y-full');
             else if(n !== 'scan') c.classList.remove('scale-90');
             if(n === 'receive') updateQR();
             if(n === 'scan') startScannerV2();
@@ -551,7 +515,7 @@
             const m = document.getElementById('modal-'+n);
             const c = document.getElementById(`modal-${n}-content`);
             m.classList.add('opacity-0');
-            if(n === 'send' || n === 'receive' || n === 'staking') c.classList.add('translate-y-full');
+            if(n === 'send' || n === 'receive') c.classList.add('translate-y-full');
             else if(n !== 'scan') c.classList.add('scale-90');
             if(n === 'scan') stopScannerV2();
             if(n === 'send') clearSendForm();
@@ -569,7 +533,7 @@
              }, 300);
         }
 
-        window.showT = (title, msg, amountStr = '', senderEmail = null, isError = false) => {
+        window.showT = async (title, msg, amountStr = '', senderEmail = null, isError = false) => {
             const t = document.getElementById('toast');
             const status = document.getElementById('toast-status');
             const amtEl = document.getElementById('toast-amount');
@@ -586,7 +550,7 @@
             } else {
                 status.classList.replace('bg-red-500', 'bg-green-500');
                 status.innerHTML = '<svg width="8" height="8" fill="none" stroke="black" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>';
-                if (senderEmail) { img.src = `https://ui-avatars.com/api/?background=random&color=fff&name=${senderEmail.charAt(0)}`; } 
+                if (senderEmail) { const u = await getUserInfo(senderEmail); img.src = u.avatar; } 
                 else { img.src = `https://ui-avatars.com/api/?background=333&color=fff&name=S`; }
             }
             t.classList.add('active');
@@ -602,35 +566,58 @@
             else { navW.classList.replace('text-orange-500', 'text-neutral-600'); navR.classList.replace('text-neutral-600', 'text-orange-500'); }
         };
 
-        // --- AUTH ---
+        // --- AUTH & ROBUST REFERRAL SYSTEM ---
+        
         onAuthStateChanged(auth, async (u) => {
             if (u) {
                 const userRef = doc(db, "users", u.uid);
                 const snap = await getDoc(userRef);
                 
+                // === ЛОГИКА СОЗДАНИЯ НОВОГО ПОЛЬЗОВАТЕЛЯ И РЕФЕРАЛОВ ===
                 if (!snap.exists()) {
                     const email = u.email;
                     const emailLower = u.email.toLowerCase();
+
+                    // 1. Создаем пользователя
                     await setDoc(userRef, {
-                        email: email, lowercaseEmail: emailLower, balance: 10.0, avatar: u.photoURL || '', 
-                        refCount: 0, refEarned: 0, createdAt: Timestamp.now(),
-                        stakingBalance: 0, stakingStart: null
+                        email: email, 
+                        lowercaseEmail: emailLower,
+                        balance: 10.0, 
+                        avatar: u.photoURL || '', 
+                        refCount: 0, 
+                        refEarned: 0, 
+                        createdAt: Timestamp.now()
                     });
 
+                    // 2. Достаем реферала из памяти (надежнее чем URL)
                     const refEmail = localStorage.getItem('dool_ref');
+
                     if (refEmail && refEmail !== emailLower) {
                         try {
+                            // Ищем реферера
                             const q = query(collection(db, "users"), where("lowercaseEmail", "==", refEmail));
                             const refSnap = await getDocs(q);
+                            
                             if (!refSnap.empty) {
-                                await updateDoc(refSnap.docs[0].ref, {
-                                    balance: increment(10), refCount: increment(1), refEarned: increment(10)
+                                const referrerDoc = refSnap.docs[0];
+                                
+                                // Начисляем бонус рефереру
+                                await updateDoc(referrerDoc.ref, {
+                                    balance: increment(10),
+                                    refCount: increment(1),
+                                    refEarned: increment(10)
                                 });
+                                
+                                console.log(`Реферал засчитан для: ${refEmail}`);
                             }
-                        } catch (err) { console.error(err); }
+                        } catch (err) {
+                            console.error("Ошибка реферальной системы:", err);
+                        }
                     }
+                    // Очищаем реферала после использования
                     localStorage.removeItem('dool_ref');
                 }
+                
                 startApp(u);
             } else {
                 document.getElementById('view-loading').classList.add('hidden');
@@ -639,15 +626,42 @@
             }
         });
 
-        document.getElementById('btn-google').onclick = async () => { try { await signInWithPopup(auth, googleProvider); } catch (e) { showT('Ошибка', e.message, '', null, true); } };
-        document.getElementById('btn-login').onclick = async () => { try { await signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-password').value); } catch { showT('Ошибка', 'Неверный вход', '', null, true); } };
-        document.getElementById('btn-register').onclick = async () => { try { await createUserWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-password').value); } catch { showT('Ошибка', 'Ошибка регистрации', '', null, true); } };
+        // 1. Google Login Handler
+        document.getElementById('btn-google').onclick = async () => {
+            try {
+                await signInWithPopup(auth, googleProvider);
+            } catch (error) {
+                if (error.code !== 'auth/popup-closed-by-user') {
+                    showT('Ошибка Google', error.message, '', null, true);
+                }
+            }
+        };
+
+        // 2. Email Login
+        document.getElementById('btn-login').onclick = async () => {
+            try { await signInWithEmailAndPassword(auth, document.getElementById('auth-email').value, document.getElementById('auth-password').value); } 
+            catch { showT('Ошибка', 'Неверный логин или пароль', '', null, true); }
+        };
+
+        // 3. Email Register
+        document.getElementById('btn-register').onclick = async () => {
+            const p = document.getElementById('auth-password').value;
+            if (p.length < 6) return showT('Ошибка', 'Пароль слишком короткий', '', null, true);
+            try {
+                await createUserWithEmailAndPassword(auth, document.getElementById('auth-email').value, p);
+            } catch { showT('Ошибка', 'Не удалось создать аккаунт', '', null, true); }
+        };
+
+        // --- App Logic ---
 
         function adjustBalanceSize(amountStr) {
             const el = document.getElementById('balance-val');
             const len = amountStr.length;
             el.classList.remove('text-5xl', 'text-4xl', 'text-3xl', 'text-2xl', 'text-xl');
-            if (len > 12) el.classList.add('text-2xl'); else if (len > 9) el.classList.add('text-3xl'); else if (len > 7) el.classList.add('text-4xl'); else el.classList.add('text-5xl');
+            if (len > 12) el.classList.add('text-2xl');
+            else if (len > 9) el.classList.add('text-3xl');
+            else if (len > 7) el.classList.add('text-4xl');
+            else el.classList.add('text-5xl');
         }
 
         function startApp(u) {
@@ -655,55 +669,38 @@
             document.getElementById('profile-email').textContent = u.email;
             document.getElementById('my-email-addr').textContent = u.email;
             
+            // --- FIXED LINK GENERATION ---
+            // Генерируем ссылку от корня текущего пути, а не origin, чтобы работало везде
             const cleanUrl = window.location.href.split('?')[0];
-            document.getElementById('ref-link').value = `${cleanUrl}?ref=${u.email}`;
-
-            // Real-time staking update loop
-            setInterval(() => {
-                if (myData && myData.stakingBalance > 0) {
-                    const profit = calculateStake(myData.stakingBalance, myData.stakingStart);
-                    document.getElementById('staking-profit').textContent = `+${profit.toFixed(4)}`;
-                }
-            }, 1000);
+            const refLink = `${cleanUrl}?ref=${u.email}`;
+            document.getElementById('ref-link').value = refLink;
 
             onSnapshot(doc(db, "users", u.uid), async (snap) => {
                 const d = snap.data();
                 if (!d) return;
-                
-                // Balance check
                 if (lastBal !== null && d.balance > lastBal) {
-                    // Logic to show notification
+                    const diff = d.balance - lastBal;
+                    handleIncomingTransfer(u.email, diff);
                 }
                 myData = d; lastBal = d.balance;
                 
                 const balStr = d.balance.toFixed(2);
-                document.getElementById('balance-val').textContent = balStr;
+                const balEl = document.getElementById('balance-val');
+                balEl.textContent = balStr;
                 adjustBalanceSize(balStr);
-
-                // Update Staking UI
-                const sBal = d.stakingBalance || 0;
-                document.getElementById('staking-balance-val').textContent = sBal.toFixed(2);
-                document.getElementById('staking-preview').textContent = sBal.toFixed(2) + ' Đ';
-                
-                // Jar Visuals
-                const jar = document.getElementById('staking-jar-visual');
-                if (sBal > 0) jar.classList.add('jar-active');
-                else jar.classList.remove('jar-active');
 
                 document.getElementById('ref-count').textContent = d.refCount || 0;
                 document.getElementById('ref-earned').textContent = (d.refEarned || 0).toFixed(2);
-                
                 const av = d.avatar || `https://ui-avatars.com/api/?background=random&color=fff&name=${u.email.charAt(0)}`;
                 document.getElementById('main-avatar').src = av;
                 document.getElementById('edit-avatar-img').src = av;
-
                 document.getElementById('view-auth').classList.add('hidden');
                 document.getElementById('view-loading').classList.add('hidden');
                 document.getElementById('view-main').classList.replace('hidden', 'flex');
             });
 
             const qTx = query(collection(db, "transactions"), where("parties", "array-contains", u.email));
-            onSnapshot(qTx, (snap) => {
+            onSnapshot(qTx, async (snap) => {
                 const list = document.getElementById('tx-history');
                 if (snap.empty) { list.innerHTML = '<p class="text-center text-neutral-800 text-[10px] uppercase font-bold py-4">История пуста</p>'; return; }
                 const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date);
@@ -711,53 +708,92 @@
                 for (const tx of docs) {
                     const isSent = tx.from === u.email;
                     const partner = isSent ? tx.to : tx.from;
+                    const dateStr = tx.date ? new Date(tx.date.toMillis()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
                     html += `<div class="flex items-center justify-between p-4 rounded-[1.5rem] bg-white/[0.03] border border-white/5">
                         <div class="flex items-center gap-3 overflow-hidden">
-                            <img src="https://ui-avatars.com/api/?background=222&color=666&name=${partner.charAt(0)}" class="w-10 h-10 rounded-full bg-neutral-800 object-cover border border-white/5 shrink-0">
+                            <img id="av-${tx.date ? tx.date.toMillis() : ''}" src="https://ui-avatars.com/api/?background=222&color=666&name=${partner.charAt(0)}" class="w-10 h-10 rounded-full bg-neutral-800 object-cover border border-white/5 shrink-0">
                             <div class="min-w-0"><p class="text-[9px] font-black uppercase ${isSent ? 'text-neutral-500' : 'text-[#FF4D00]'} tracking-widest mb-0.5">${isSent ? 'Кому:' : 'От:'}</p><p class="text-[11px] font-bold text-white truncate w-32 leading-tight">${partner}</p></div>
                         </div>
-                        <div class="text-right"><p class="text-sm font-black ${isSent ? 'text-white' : 'text-[#FF4D00]'}">${isSent ? '-' : '+'}${tx.amount.toFixed(2)}</p></div>
+                        <div class="text-right"><p class="text-sm font-black ${isSent ? 'text-white' : 'text-[#FF4D00]'}">${isSent ? '-' : '+'}${tx.amount.toFixed(2)}</p><p class="text-[9px] text-neutral-600 font-bold uppercase">${dateStr}</p></div>
                     </div>`;
+                    getUserInfo(partner).then(inf => { const el = document.getElementById(`av-${tx.date.toMillis()}`); if(el) el.src = inf.avatar; });
                 }
                 list.innerHTML = html;
             });
+        }
+
+        async function handleIncomingTransfer(myEmail, amountDiff) {
+            try {
+                // Если разница ровно 10 и это не транзакция, возможно это реферальный бонус
+                const q = query(collection(db, "transactions"), where("to", "==", myEmail));
+                const snap = await getDocs(q);
+                if (!snap.empty) {
+                    const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date);
+                    // Если сумма совпадает с последним переводом (с допуском) и он был недавно
+                    if (Math.abs(docs[0].amount - amountDiff) < 0.01) { 
+                        showT('Входящий перевод', docs[0].from, `+${amountDiff.toFixed(2)} Đ`, docs[0].from); 
+                        return; 
+                    }
+                }
+                showT('Пополнение', 'Система / Бонус', `+${amountDiff.toFixed(2)} Đ`);
+            } catch(e) {}
         }
 
         document.getElementById('avatar-input').onchange = (e) => {
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = async (ev) => { try { await updateDoc(doc(db, "users", auth.currentUser.uid), { avatar: ev.target.result }); showT('Профиль', 'Обновлено'); } catch { showT('Ошибка', 'Сбой загрузки', '', null, true); } };
+            reader.onload = async (ev) => {
+                try { await updateDoc(doc(db, "users", auth.currentUser.uid), { avatar: ev.target.result }); showT('Профиль', 'Аватар обновлен'); } 
+                catch { showT('Ошибка', 'Не удалось загрузить фото', '', null, true); }
+            };
             reader.readAsDataURL(file);
         };
 
+        // --- Logic V2.2: Fixed Scanner & Premium QR ---
+        
         window.updateQR = () => {
             const email = auth.currentUser.email;
             let amt = parseFloat(document.getElementById('receive-amt-req').value);
+            const errOverlay = document.getElementById('qr-error');
+            const container = document.getElementById('qrcode-container');
             if(isNaN(amt)) amt = 0;
+            if (amt > 0 && amt < 0.01) { errOverlay.classList.add('active'); return; } else { errOverlay.classList.remove('active'); }
             const data = JSON.stringify({ t: "req", e: email, a: amt });
-            document.getElementById('qrcode-container').innerHTML = '';
-            new QRCode(document.getElementById('qrcode-container'), { text: data, width: 180, height: 180, colorDark : "#000", colorLight : "#fff" });
+            container.innerHTML = '';
+            new QRCode(container, { text: data, width: 200, height: 200, colorDark : "#FF4D00", colorLight : "#0a0a0a", correctLevel : QRCode.CorrectLevel.M });
         };
+        
         document.getElementById('receive-amt-req').oninput = updateQR;
 
         window.startScannerV2 = () => {
              if (html5QrCode) return; 
              html5QrCode = new Html5Qrcode("reader");
-             html5QrCode.start({ facingMode: "environment" }, { fps: 15 }, onScanSuccess).catch(() => {
-                 showT('Ошибка', 'Камера недоступна', '', null, true); closeModal('scan');
+             const config = { fps: 15, aspectRatio: window.innerHeight / window.innerWidth };
+             html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, onScanError).catch(err => {
+                 console.error("Camera start failed", err);
+                 showT('Ошибка камеры', 'Разрешите доступ к камере', '', null, true);
+                 closeModal('scan');
              });
         };
-        const onScanSuccess = (decodedText) => {
+
+        const onScanSuccess = (decodedText, decodedResult) => {
              closeModal('scan');
              try {
                  const data = JSON.parse(decodedText);
-                 if(data.t === 'req') openProposalModal(data);
-             } catch {
-                 if(decodedText.includes('@')) openProposalModal({e: decodedText, a: 0});
+                 if(data.t === 'req' && data.e) { openProposalModal(data); } 
+                 else { showT('Ошибка', 'Неверный формат QR', '', null, true); }
+             } catch (e) {
+                 if(decodedText.includes('@')) { openProposalModal({e: decodedText, a: 0}); } 
+                 else { showT('Ошибка', 'Не удалось распознать', '', null, true); }
              }
         };
-        window.stopScannerV2 = () => { if (html5QrCode) { html5QrCode.stop().then(() => { html5QrCode.clear(); html5QrCode = null; }); } };
+
+        const onScanError = (errorMessage) => {};
+
+        window.stopScannerV2 = () => {
+            if (html5QrCode) { html5QrCode.stop().then(() => { html5QrCode.clear(); html5QrCode = null; }).catch(err => console.log(err)); }
+        };
 
         function openProposalModal(data) {
             openModal('send');
@@ -767,40 +803,75 @@
                 document.getElementById('send-amt').readOnly = true;
                 document.getElementById('send-email').readOnly = true;
                 document.getElementById('proposal-notice').classList.remove('hidden');
-                document.getElementById('btn-do-send').textContent = "Подтвердить";
+                document.getElementById('btn-do-send').textContent = "Подтвердить перевод";
             }
         }
 
         document.getElementById('btn-do-send').onclick = async () => {
             const to = document.getElementById('send-email').value.trim().toLowerCase();
-            const amt = parseFloat(document.getElementById('send-amt').value);
+            const amtStr = document.getElementById('send-amt').value;
+            const amt = parseFloat(amtStr);
             const myEmail = auth.currentUser.email;
-            if (to === myEmail || !amt || amt < 0.01 || amt > myData.balance) return showT('Ошибка', 'Некорректные данные', '', null, true);
+
+            if (amtStr.includes('.')) {
+                const decimalPart = amtStr.split('.')[1];
+                if (decimalPart && decimalPart.length > 2) return showT('Ошибка', 'Максимум 2 знака после запятой', '', null, true);
+            }
+
+            if (to === myEmail) return showT('Ошибка', 'Нельзя отправить себе', '', null, true);
+            if (!amt || amt < 0.01) return showT('Ошибка', 'Минимум 0.01 Đ', '', null, true);
+            if (amt > myData.balance) return showT('Ошибка', 'Недостаточно средств', '', null, true);
 
             const btn = document.getElementById('btn-do-send');
-            btn.disabled = true;
+            btn.disabled = true; btn.textContent = '...';
+
             try {
                 const q = query(collection(db, "users"), where("email", "==", to));
                 const res = await getDocs(q);
                 if (res.empty) throw new Error("Пользователь не найден");
+                const receiverRef = res.docs[0].ref;
 
                 await runTransaction(db, async (t) => {
                     const senderRef = doc(db, "users", auth.currentUser.uid);
                     const sDoc = await t.get(senderRef);
-                    if (sDoc.data().balance < amt) throw new Error("Мало средств");
+                    if (sDoc.data().balance < amt) throw new Error("Недостаточно средств");
+
                     t.update(senderRef, { balance: increment(-amt) });
-                    t.update(res.docs[0].ref, { balance: increment(amt) });
-                    t.set(doc(collection(db, "transactions")), { from: myEmail, to: to, amount: amt, date: Timestamp.now(), parties: [myEmail, to] });
+                    t.update(receiverRef, { balance: increment(amt) });
+                    
+                    const txRef = doc(collection(db, "transactions"));
+                    t.set(txRef, { from: myEmail, to: to, amount: amt, date: Timestamp.now(), parties: [myEmail, to] });
                 });
+                
                 closeModal('send');
-                showT('Успешно', `Отправлено ${to}`);
+                showT('Успешно', `Перевод для ${to}`, `-${amt.toFixed(2)} Đ`);
             } catch (e) { showT('Ошибка', e.message, '', null, true); }
-            finally { btn.disabled = false; }
+            finally { btn.disabled = false; btn.textContent = 'Отправить'; }
         };
 
-        window.copyRef = () => { navigator.clipboard.writeText(document.getElementById('ref-link').value); showT('Успешно', 'Скопировано'); };
-        window.shareRef = async () => { try { await navigator.share({ title: 'Doolcoin', url: document.getElementById('ref-link').value }); } catch { copyRef(); } };
+        window.copyRef = () => { 
+            const link = document.getElementById('ref-link').value;
+            navigator.clipboard.writeText(link); 
+            showT('Успешно', 'Ссылка скопирована'); 
+        };
+        
+        window.shareRef = async () => {
+            const link = document.getElementById('ref-link').value;
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Doolcoin Wallet',
+                        text: 'Зарегистрируйся и получи бонус!',
+                        url: link
+                    });
+                } catch (err) { console.log('Share canceled'); }
+            } else {
+                copyRef();
+            }
+        };
+
         document.getElementById('btn-logout').onclick = () => signOut(auth);
+
     </script>
 </body>
 </html>
