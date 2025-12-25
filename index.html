@@ -135,8 +135,8 @@
             transform: translateX(-50%);
             animation: firePulse 2s infinite alternate ease-in-out;
             filter: drop-shadow(0 0 10px #FF4D00);
-            opacity: 0.9;
-            transition: opacity 0.5s ease; /* Плавное исчезновение */
+            opacity: 0; /* Default hidden */
+            transition: opacity 1s ease; /* Плавное исчезновение */
         }
 
         /* 3. Передняя стенка банки (полупрозрачное стекло поверх огня) */
@@ -339,7 +339,7 @@
                     </div>
                 </div>
 
-                <!-- BANK TAB (NEW) -->
+                <!-- BANK TAB (AUTO COMPOUND) -->
                 <div id="tab-bank" class="tab-content space-y-6">
                     <div class="text-center pt-4 pb-2">
                         <h2 class="text-xl font-black uppercase tracking-widest text-neutral-400">Стейкинг</h2>
@@ -367,20 +367,18 @@
                         <div class="h-[1px] bg-white/10 w-full my-6 relative z-10"></div>
                         
                         <div class="relative z-10">
-                             <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Накоплено</p>
-                             <p id="bank-profit-val" class="text-lg font-bold text-green-500">+0.0 Đ</p>
-                             <button id="btn-claim-interest" class="mt-2 text-[10px] bg-white/10 hover:bg-green-500/20 disabled:opacity-30 disabled:hover:bg-white/10 text-white px-4 py-2 rounded-full transition-colors font-bold uppercase tracking-wider" onclick="claimInterest()">Собрать</button>
+                             <p class="text-[10px] text-neutral-400 font-bold uppercase tracking-wide">Проценты копятся автоматически</p>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
                         <button onclick="openModal('deposit')" class="h-20 glass-panel rounded-[2rem] flex flex-col items-center justify-center gap-1 hover:bg-white/10 transition-colors border border-white/10">
                             <span class="text-lg">📥</span>
-                            <span class="text-[10px] font-bold uppercase tracking-widest">Вклад</span>
+                            <span class="text-[10px] font-bold uppercase tracking-widest">Положить в банку</span>
                         </button>
                         <button onclick="openModal('withdraw')" class="h-20 glass-panel rounded-[2rem] flex flex-col items-center justify-center gap-1 hover:bg-white/10 transition-colors border border-white/10">
                             <span class="text-lg">📤</span>
-                            <span class="text-[10px] font-bold uppercase tracking-widest">Вывод</span>
+                            <span class="text-[10px] font-bold uppercase tracking-widest">Достать из банки</span>
                         </button>
                     </div>
                 </div>
@@ -530,7 +528,7 @@
         <div id="modal-deposit" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
             <div class="bg-[#111] border-t border-white/10 rounded-t-[2.5rem] p-8 pb-10 transform translate-y-full transition-transform duration-300" id="modal-deposit-content">
                 <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-6"></div>
-                <h2 class="text-xl font-black mb-4">Пополнить Банк</h2>
+                <h2 class="text-xl font-black mb-4">Положить в банку</h2>
                 <div class="bg-white/5 rounded-2xl p-4 border border-white/5 mb-4">
                      <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Сумма</p>
                      <div class="flex items-center gap-2">
@@ -538,7 +536,7 @@
                          <span class="text-xl font-black text-orange-500">Đ</span>
                      </div>
                 </div>
-                <button id="btn-do-deposit" class="w-full h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer">Пополнить</button>
+                <button id="btn-do-deposit" class="w-full h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer">Положить</button>
                 <button onclick="closeModal('deposit')" class="w-full mt-2 h-10 text-neutral-500 font-bold text-[10px] uppercase cursor-pointer">Отмена</button>
             </div>
         </div>
@@ -547,7 +545,7 @@
         <div id="modal-withdraw" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
              <div class="bg-[#111] border-t border-white/10 rounded-t-[2.5rem] p-8 pb-10 transform translate-y-full transition-transform duration-300" id="modal-withdraw-content">
                 <div class="w-12 h-1 bg-white/10 rounded-full mx-auto mb-6"></div>
-                <h2 class="text-xl font-black mb-4">Вывести из Банка</h2>
+                <h2 class="text-xl font-black mb-4">Достать из банки</h2>
                 <div class="bg-white/5 rounded-2xl p-4 border border-white/5 mb-4">
                      <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Сумма</p>
                      <div class="flex items-center gap-2">
@@ -555,7 +553,7 @@
                          <span class="text-xl font-black text-orange-500">Đ</span>
                      </div>
                 </div>
-                <button id="btn-do-withdraw" class="w-full h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer">Вывести</button>
+                <button id="btn-do-withdraw" class="w-full h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer">Достать</button>
                 <button onclick="closeModal('withdraw')" class="w-full mt-2 h-10 text-neutral-500 font-bold text-[10px] uppercase cursor-pointer">Отмена</button>
             </div>
         </div>
@@ -587,7 +585,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, query, where, runTransaction, Timestamp, increment, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, query, where, runTransaction, Timestamp, increment, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyBoFuGY-SSmcGHPGzuWZbdGFeI9_aaAKs8",
@@ -733,28 +731,24 @@
                     const email = u.email;
                     const emailLower = u.email.toLowerCase();
 
-                    // Init data including Bank fields
                     await setDoc(userRef, {
                         email: email, 
                         lowercaseEmail: emailLower,
                         balance: 10.0, 
                         bankBalance: 0,
-                        lastBankUpdate: Timestamp.now(),
+                        lastBankUpdate: Timestamp.now(), // Important for auto-compound
                         avatar: u.photoURL || '', 
                         refCount: 0, 
                         refEarned: 0, 
                         createdAt: Timestamp.now()
                     });
 
-                    // --- REFERRAL LOGIC FIX (DOUBLE SEARCH & HISTORY) ---
+                    // --- REFERRAL LOGIC ---
                     const refEmail = localStorage.getItem('dool_ref');
                     if (refEmail && refEmail !== emailLower) {
                         try {
-                            // 1. Try search by lowercaseEmail (New standard)
                             let q = query(collection(db, "users"), where("lowercaseEmail", "==", refEmail));
                             let refSnap = await getDocs(q);
-                            
-                            // 2. Fallback: search by email (Legacy support)
                             if (refSnap.empty) {
                                 q = query(collection(db, "users"), where("email", "==", refEmail));
                                 refSnap = await getDocs(q);
@@ -763,21 +757,18 @@
                             if (!refSnap.empty) {
                                 const referrerDoc = refSnap.docs[0];
                                 const referrerData = referrerDoc.data();
-                                const referrerRealEmail = referrerData.email || refEmail; // Use stored email for correct case in history
+                                const referrerRealEmail = referrerData.email || refEmail;
                                 
-                                // Use Transaction for safety
                                 await runTransaction(db, async (t) => {
                                     const rDoc = await t.get(referrerDoc.ref);
                                     if(!rDoc.exists()) return;
 
-                                    // Update referrer stats
                                     t.update(referrerDoc.ref, {
                                         balance: increment(10),
                                         refCount: increment(1),
                                         refEarned: increment(10)
                                     });
                                     
-                                    // Create HISTORY record for Referrer (So they see it)
                                     const txRef = doc(collection(db, "transactions"));
                                     t.set(txRef, { 
                                         from: 'System (Ref)', 
@@ -806,18 +797,14 @@
             try { await signInWithPopup(auth, googleProvider); } catch (e) { if(e.code !== 'auth/popup-closed-by-user') showT('Ошибка', e.message, '', null, true); }
         };
 
-        // Login Logic with Double-Click Protection
         document.getElementById('btn-login').onclick = async () => {
             const btn = document.getElementById('btn-login');
             const email = document.getElementById('auth-email').value;
             const pass = document.getElementById('auth-password').value;
-            
             if(!email || !pass) return showT('Ошибка', 'Заполните поля', '', null, true);
-
             btn.disabled = true;
-            try { 
-                await signInWithEmailAndPassword(auth, email, pass); 
-            } catch(e) { 
+            try { await signInWithEmailAndPassword(auth, email, pass); } 
+            catch(e) { 
                 btn.disabled = false;
                 let msg = 'Неверный логин/пароль';
                 if(e.code === 'auth/user-not-found') msg = 'Пользователь не найден';
@@ -827,18 +814,14 @@
             }
         };
 
-        // Register Logic with Double-Click Protection
         document.getElementById('btn-register').onclick = async () => {
             const btn = document.getElementById('btn-register');
             const email = document.getElementById('auth-email').value;
             const pass = document.getElementById('auth-password').value;
-            
             if (pass.length < 6) return showT('Ошибка', 'Пароль < 6 символов', '', null, true);
-            
             btn.disabled = true;
-            try { 
-                await createUserWithEmailAndPassword(auth, email, pass); 
-            } catch(e) { 
+            try { await createUserWithEmailAndPassword(auth, email, pass); } 
+            catch(e) { 
                 btn.disabled = false;
                 let msg = 'Ошибка создания';
                 if(e.code === 'auth/email-already-in-use') msg = 'Email уже занят';
@@ -872,7 +855,6 @@
                 const d = snap.data();
                 if (!d) return;
                 
-                // Balance Update
                 if (lastBal !== null && d.balance > lastBal) {
                     const diff = d.balance - lastBal;
                     handleIncomingTransfer(u.email, diff);
@@ -884,10 +866,8 @@
                 balEl.textContent = balStr;
                 adjustBalanceSize(balStr);
 
-                // Bank Update
-                const bankBal = d.bankBalance || 0;
-                document.getElementById('bank-balance-val').textContent = bankBal.toFixed(1);
-                updateBankInterest(d);
+                // Initialize Bank Visuals
+                updateBankVisuals(d);
 
                 document.getElementById('ref-count').textContent = d.refCount || 0;
                 document.getElementById('ref-earned').textContent = (d.refEarned || 0).toFixed(1);
@@ -898,7 +878,6 @@
                 document.getElementById('view-loading').classList.add('hidden');
                 document.getElementById('view-main').classList.replace('hidden', 'flex');
                 
-                // Re-enable auth buttons if we came from auth view
                 document.getElementById('btn-login').disabled = false;
                 document.getElementById('btn-register').disabled = false;
             });
@@ -911,9 +890,7 @@
                 let html = '';
                 for (const tx of docs) {
                     const isSent = tx.from === u.email;
-                    // If system/referral, partner name logic slightly different
                     let partner = isSent ? tx.to : tx.from;
-                    
                     const dateStr = tx.date ? new Date(tx.date.toMillis()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
                     html += `<div class="flex items-center justify-between p-4 rounded-[1.5rem] bg-white/[0.03] border border-white/5">
                         <div class="flex items-center gap-3 overflow-hidden">
@@ -922,8 +899,6 @@
                         </div>
                         <div class="text-right"><p class="text-sm font-black ${isSent ? 'text-white' : 'text-[#FF4D00]'}">${isSent ? '-' : '+'}${tx.amount.toFixed(1)}</p><p class="text-[9px] text-neutral-600 font-bold uppercase">${dateStr}</p></div>
                     </div>`;
-                    
-                    // Only fetch avatar if it's a real user (contains @), otherwise leave system default
                     if(partner.includes('@')) {
                          getUserInfo(partner).then(inf => { const el = document.getElementById(`av-${tx.date.toMillis()}`); if(el) el.src = inf.avatar; });
                     }
@@ -938,9 +913,7 @@
                 const snap = await getDocs(q);
                 if (!snap.empty) {
                     const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date);
-                    // Check if recent transaction matches amount
                     if (Math.abs(docs[0].amount - amountDiff) < 0.01) { 
-                        // If type is referral, show special toast
                         if (docs[0].type === 'referral_bonus') {
                              showT('Реферальная программа', 'Бонус за приглашение', `+${amountDiff.toFixed(1)} Đ`);
                         } else {
@@ -964,84 +937,47 @@
             reader.readAsDataURL(file);
         };
 
-        // --- Bank Logic Revised (Strict 0.1 rounding) ---
+        // --- NEW AUTO-COMPOUND BANK LOGIC ---
         
-        let pendingInterest = 0;
-        
-        function updateBankInterest(d) {
-            const bankBal = d.bankBalance || 0;
-
-            // --- FIRE ANIMATION LOGIC ---
-            const fire = document.querySelector('.bank-layer-fire');
-            if (fire) {
-                if (bankBal > 0) fire.style.opacity = '0.9';
-                else fire.style.opacity = '0';
-            }
-            // ----------------------------
-
-            if (bankBal <= 0 || !d.lastBankUpdate) {
-                document.getElementById('bank-profit-val').textContent = "+0.0 Đ";
-                const btn = document.getElementById('btn-claim-interest');
-                btn.disabled = true;
-                btn.textContent = "Копим...";
-                return;
-            }
-
-            const lastUpdate = d.lastBankUpdate.toDate();
+        // This function calculates the current theoretical balance based on time
+        function calculateCompoundBalance(storedBalance, lastUpdateTimestamp) {
+            if (!storedBalance || storedBalance <= 0 || !lastUpdateTimestamp) return storedBalance || 0;
+            const lastUpdate = lastUpdateTimestamp.toDate();
             const now = new Date();
             const diffMs = now - lastUpdate;
-            const diffWeeks = diffMs / (1000 * 60 * 60 * 24 * 7);
+            const diffWeeks = diffMs / (1000 * 60 * 60 * 24 * 7); // fraction of weeks
             
-            // Raw interest
-            let rawInterest = bankBal * 0.05 * diffWeeks;
-            
-            // STRICT DISPLAY ROUNDING: Floor to 0.1
-            // This ensures user only sees what they can claim (e.g. 0.1, 0.2)
-            pendingInterest = Math.floor(rawInterest * 10) / 10;
-            
-            document.getElementById('bank-profit-val').textContent = `+${pendingInterest.toFixed(1)} Đ`;
-            
-            const btn = document.getElementById('btn-claim-interest');
-            if (pendingInterest >= 0.1) {
-                btn.disabled = false;
-                btn.textContent = "Забрать";
-                btn.classList.remove('opacity-50');
-            } else {
-                btn.disabled = true;
-                btn.textContent = "Копим...";
-                btn.classList.add('opacity-50');
-            }
-            
-            requestAnimationFrame(() => updateBankInterest(d));
+            // Formula: Principal * (1 + rate)^time
+            // Rate = 0.05 (5%)
+            const compoundBal = storedBalance * Math.pow(1.05, diffWeeks);
+            return compoundBal;
         }
 
-        window.claimInterest = async () => {
-             if (pendingInterest < 0.1) return;
-             const btn = document.getElementById('btn-claim-interest');
-             btn.disabled = true;
-             
-             try {
-                 const userRef = doc(db, "users", auth.currentUser.uid);
-                 await runTransaction(db, async (t) => {
-                     const uDoc = await t.get(userRef);
-                     const d = uDoc.data();
-                     // Recalculate strictly inside transaction
-                     const lastUpdate = d.lastBankUpdate.toDate();
-                     const now = new Date();
-                     const diffWeeks = (now - lastUpdate) / (1000 * 60 * 60 * 24 * 7);
-                     const rawInterest = (d.bankBalance || 0) * 0.05 * diffWeeks;
-                     const flooredInterest = Math.floor(rawInterest * 10) / 10;
-                     
-                     if (flooredInterest < 0.1) throw "Мало накоплено";
+        function updateBankVisuals(d) {
+            const bankBal = calculateCompoundBalance(d.bankBalance, d.lastBankUpdate);
 
-                     t.update(userRef, {
-                         balance: increment(flooredInterest),
-                         lastBankUpdate: Timestamp.now()
-                     });
-                 });
-                 showT('Банк', 'Доход собран!', `+${pendingInterest.toFixed(1)} Đ`);
-             } catch(e) { console.error(e); }
-        };
+            // Update Text
+            document.getElementById('bank-balance-val').textContent = bankBal.toFixed(1); // Showing 1 decimal visual, but calc is precise
+            
+            // Update Fire
+            const fire = document.querySelector('.bank-layer-fire');
+            if (fire) {
+                // Only show fire if we have significant amount (>0.1)
+                if (bankBal >= 0.1) fire.style.opacity = '0.9';
+                else fire.style.opacity = '0';
+            }
+            
+            // Keep animating visually every frame for live effect if needed
+            // But since Firestore updates on snapshots, we rely on that mostly.
+            // For smoother look, we can recursively call this if we want "ticking" numbers.
+            // For now, static update on snapshot is safer for performance, 
+            // but let's add a slow interval to keep it "alive" if user stays on page.
+        }
+        
+        // Interval to refresh Bank visuals (Live compounding effect)
+        setInterval(() => {
+            if(myData) updateBankVisuals(myData);
+        }, 1000); // Update every second
 
         document.getElementById('btn-do-deposit').onclick = async () => {
             const amt = parseFloat(document.getElementById('deposit-amt').value);
@@ -1050,33 +986,65 @@
             
             try {
                 const userRef = doc(db, "users", auth.currentUser.uid);
-                await updateDoc(userRef, {
-                    balance: increment(-amt),
-                    bankBalance: increment(amt),
-                    lastBankUpdate: Timestamp.now() 
+                await runTransaction(db, async (t) => {
+                    const uDoc = await t.get(userRef);
+                    const d = uDoc.data();
+                    
+                    // 1. Calculate accrued interest UP TO NOW
+                    const currentRealBankBal = calculateCompoundBalance(d.bankBalance, d.lastBankUpdate);
+                    
+                    // 2. Add new deposit
+                    const newBankBal = currentRealBankBal + amt;
+                    const newWalletBal = d.balance - amt;
+
+                    if(newWalletBal < 0) throw "Недостаточно средств";
+
+                    // 3. Save "crystallized" balance and reset timer
+                    t.update(userRef, {
+                        balance: newWalletBal,
+                        bankBalance: newBankBal,
+                        lastBankUpdate: serverTimestamp() 
+                    });
                 });
+
                 closeModal('deposit');
                 document.getElementById('deposit-amt').value = '';
                 showT('Банк', 'Депозит успешен');
-            } catch(e) { showT('Ошибка', e.message, '', null, true); }
+            } catch(e) { showT('Ошибка', e.message || e, '', null, true); }
         };
 
         document.getElementById('btn-do-withdraw').onclick = async () => {
             const amt = parseFloat(document.getElementById('withdraw-amt').value);
-            const bankBal = myData.bankBalance || 0;
             if (!amt || amt < 0.1) return showT('Ошибка', 'Минимум 0.1 Đ', '', null, true);
-            if (amt > bankBal) return showT('Ошибка', 'Недостаточно средств в банке', '', null, true);
             
             try {
                 const userRef = doc(db, "users", auth.currentUser.uid);
-                await updateDoc(userRef, {
-                    balance: increment(amt),
-                    bankBalance: increment(-amt)
+                await runTransaction(db, async (t) => {
+                    const uDoc = await t.get(userRef);
+                    const d = uDoc.data();
+                    
+                    // 1. Calculate accrued interest UP TO NOW
+                    const currentRealBankBal = calculateCompoundBalance(d.bankBalance, d.lastBankUpdate);
+                    
+                    // 2. Check funds
+                    if (amt > currentRealBankBal) throw "Недостаточно средств в банке";
+
+                    // 3. Subtract withdraw
+                    const newBankBal = currentRealBankBal - amt;
+                    const newWalletBal = d.balance + amt;
+
+                    // 4. Save "crystallized" balance and reset timer
+                    t.update(userRef, {
+                        balance: newWalletBal,
+                        bankBalance: newBankBal,
+                        lastBankUpdate: serverTimestamp()
+                    });
                 });
+
                 closeModal('withdraw');
                 document.getElementById('withdraw-amt').value = '';
                 showT('Банк', 'Вывод успешен');
-            } catch(e) { showT('Ошибка', e.message, '', null, true); }
+            } catch(e) { showT('Ошибка', e.message || e, '', null, true); }
         };
 
         // --- Logic V2.2: Fixed Scanner & Premium QR ---
