@@ -116,10 +116,9 @@
             margin: 0 auto;
         }
         
-        /* 1. Задняя стенка банки (темная) */
+/* 1. Задняя стенка банки */
         .bank-layer-bottom {
-            font-size: 100px;
-            opacity: 1;
+            width: 120px; /* Размер банки */
             position: absolute;
             z-index: 10;
             filter: brightness(0.6) sepia(0.2);
@@ -127,28 +126,27 @@
 
         /* 2. Огонь (внутри) */
         .bank-layer-fire {
-            font-size: 45px;
+            width: 50px; /* Размер огня */
             position: absolute;
             z-index: 20;
-            bottom: 25px;
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            /* Убрали opacity из keyframes, теперь opacity полностью управляется JS */
             animation: firePulse 2s infinite alternate ease-in-out;
             filter: drop-shadow(0 0 10px #FF4D00);
-            opacity: 0; /* Default hidden */
+            opacity: 0; 
             transition: opacity 0.5s ease;
         }
 
-        /* 3. Передняя стенка банки (полупрозрачное стекло поверх огня) */
+        /* 3. Передняя стенка банки (стекло) */
         .bank-layer-top {
-            font-size: 100px;
-            opacity: 0.35;
+            width: 120px;
             position: absolute;
             z-index: 30;
             pointer-events: none;
             mix-blend-mode: overlay;
             filter: brightness(1.2);
+            opacity: 0.4;
         }
         
         @keyframes firePulse {
@@ -348,13 +346,12 @@
                         <p class="text-[10px] text-orange-500 font-bold uppercase tracking-widest">+5% в неделю ⌛</p>
                     </div>
 
-                    <div class="bank-stack-container">
-                        <!-- Bottom Layer: Jar Back -->
-                        <span class="bank-layer-bottom">🫙</span>
-                        <!-- Middle Layer: Fire Inside -->
-                        <span class="bank-layer-fire">🔥</span>
-                        <!-- Top Layer: Jar Front (Glass) -->
-                        <span class="bank-layer-top">🫙</span>
+                   <div class="bank-stack-container">
+                        <img src="https://emojigraph.org/media/google/jar_1fad9.png" class="bank-layer-bottom">
+                        
+                        <img src="https://emojigraph.org/media/google/fire_1f525.png" class="bank-layer-fire">
+                        
+                        <img src="https://emojigraph.org/media/google/jar_1fad9.png" class="bank-layer-top">
                     </div>
 
                     <div class="dool-card rounded-[2.5rem] p-8 text-center relative overflow-hidden">
