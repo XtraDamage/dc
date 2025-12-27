@@ -691,13 +691,18 @@
             const icon = document.getElementById('toast-icon-sys');
             const avImg = document.getElementById('toast-avatar');
             const amtEl = document.getElementById('toast-amount');
+            const titleEl = document.getElementById('toast-title');
             
             // Reset
             clearTimeout(toastTimeout);
             t.classList.remove('active');
             
             setTimeout(async () => {
-                document.getElementById('toast-title').textContent = title;
+                // 1. Title Override (Банк -> Банка)
+                let displayTitle = title;
+                if (displayTitle === 'Банк') displayTitle = 'Банка';
+                
+                titleEl.textContent = displayTitle;
                 document.getElementById('toast-msg').textContent = msg;
                 
                 if (amountStr) { 
@@ -707,20 +712,41 @@
                     amtEl.classList.add('hidden'); 
                 }
                 
+                // Image Resources
+                const imgBank = "https://emojigraph.org/media/google/jar_1fad9.png";
+                const imgWarn = "https://emojigraph.org/media/facebook/warning_26a0-fe0f.png";
+                const imgOk = "https://emojigraph.org/media/apple/large-green-circle_1f7e2.png";
+
+                // Reset Image Classes
+                avImg.className = "w-full h-full hidden";
+
                 if (senderEmail) {
-                    // User message
+                    // User message (Avatar)
                     icon.classList.add('hidden');
                     avImg.classList.remove('hidden');
+                    avImg.classList.add('object-cover'); // Avatars fill
                     const u = await getUserInfo(senderEmail);
                     avImg.src = u.avatar;
                 } else {
                     // System message
-                    avImg.classList.add('hidden');
-                    icon.classList.remove('hidden');
-                    if(isError) icon.textContent = '⚠️';
-                    else if(title.includes('Банк')) icon.textContent = '🏦';
-                    else if(title.includes('Успешно')) icon.textContent = '✅';
-                    else icon.textContent = '🔔';
+                    let sysImg = null;
+                    
+                    if (isError) sysImg = imgWarn;
+                    else if (displayTitle.includes('Банка')) sysImg = imgBank;
+                    else if (displayTitle.includes('Успешно')) sysImg = imgOk;
+
+                    if (sysImg) {
+                        // Use Image Icon
+                        icon.classList.add('hidden');
+                        avImg.classList.remove('hidden');
+                        avImg.classList.add('object-contain', 'p-1.5'); // Icons fit inside
+                        avImg.src = sysImg;
+                    } else {
+                        // Default Text Emoji (Bell)
+                        avImg.classList.add('hidden');
+                        icon.classList.remove('hidden');
+                        icon.textContent = '🔔';
+                    }
                 }
 
                 t.classList.add('active');
