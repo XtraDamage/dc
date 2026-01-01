@@ -124,7 +124,7 @@
 <body oncontextmenu="return false;">
 
     <!-- APP CONTAINER - Scalable and Centered -->
-    <!-- Обновлено: h-[100dvh] для корректного отображения на мобильных, убраны конфликты скролла -->
+    <!-- h-[100dvh] для мобильных -->
     <div id="app" class="w-full h-[100dvh] sm:h-[95vh] sm:max-h-[850px] sm:max-w-[420px] sm:rounded-[3rem] relative bg-black shadow-2xl overflow-hidden border-0 sm:border border-white/10 flex flex-col">
         
         <!-- NEW TOAST NOTIFICATION (Absolute positioning inside App) -->
@@ -206,8 +206,8 @@
                     </div>
                 </div>
                 <button id="btn-logout" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer">
-                    <!-- ICON: Logout -->
-                    <img src="https://img.icons8.com/?size=100&id=5HW1YsFkzHio&format=png&color=000000" class="w-5 h-5 invert opacity-80" alt="Logout">
+                    <!-- ICON: Logout (White) -->
+                    <img src="https://img.icons8.com/?size=100&id=5HW1YsFkzHio&format=png&color=ffffff" class="w-5 h-5 opacity-80" alt="Logout">
                 </button>
             </header>
 
@@ -231,8 +231,8 @@
                                 <span>Отправить</span>
                             </button>
                             <button onclick="openModal('scan')" class="w-14 h-14 glass-panel text-white rounded-2xl flex items-center justify-center hover:bg-white/10 active:scale-95 transition-all cursor-pointer border border-white/10 hover:border-orange-500/50">
-                                <!-- ICON: QR Code -->
-                                <img src="https://img.icons8.com/?size=100&id=XdgEzmYg0J8k&format=png&color=000000" class="w-6 h-6 invert" alt="Scan">
+                                <!-- ICON: QR Code (White) -->
+                                <img src="https://img.icons8.com/?size=100&id=XdgEzmYg0J8k&format=png&color=ffffff" class="w-6 h-6" alt="Scan">
                             </button>
                             <button onclick="openModal('receive')" class="flex-1 h-14 glass-panel text-white border border-white/10 rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-white/10 active:scale-95 transition-all cursor-pointer flex flex-col items-center justify-center">
                                 <span>Получить</span>
@@ -268,11 +268,11 @@
                                 </div>
                                 <div class="flex gap-2">
                                     <button onclick="shareRef()" class="w-10 h-10 flex items-center justify-center bg-white/10 text-white rounded-xl hover:bg-white/20 transition-transform cursor-pointer">
-                                        <!-- ICON: Share -->
-                                        <img src="https://img.icons8.com/?size=100&id=PuZtTk7UXaiT&format=png&color=000000" class="w-4 h-4 invert" alt="Share">
+                                        <!-- ICON: Share (White) -->
+                                        <img src="https://img.icons8.com/?size=100&id=PuZtTk7UXaiT&format=png&color=ffffff" class="w-4 h-4" alt="Share">
                                     </button>
                                     <button onclick="copyRef()" class="w-10 h-10 flex items-center justify-center bg-white text-black rounded-xl hover:scale-105 transition-transform cursor-pointer">
-                                        <!-- ICON: Copy -->
+                                        <!-- ICON: Copy (Black - because button is white) -->
                                         <img src="https://img.icons8.com/?size=100&id=uMQlJNpNjHdh&format=png&color=000000" class="w-4 h-4" alt="Copy">
                                     </button>
                                 </div>
@@ -283,16 +283,17 @@
                     <div class="grid grid-cols-2 gap-3">
                         <div class="dool-card p-5 rounded-[2rem] flex flex-col items-center justify-center gap-1 aspect-square">
                             <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center mb-2 text-neutral-400">
-                                <!-- ICON: Friend (Ref count) -->
-                                <img src="https://img.icons8.com/?size=100&id=N9EwPosvU1Rm&format=png&color=000000" class="w-5 h-5 invert opacity-70" alt="Friends">
+                                <!-- ICON: Friend (Ref count) (White) -->
+                                <img src="https://img.icons8.com/?size=100&id=N9EwPosvU1Rm&format=png&color=ffffff" class="w-5 h-5 opacity-70" alt="Friends">
                             </div>
                             <p id="ref-count" class="text-2xl font-black">0</p>
                             <p class="text-[9px] font-bold text-neutral-600 uppercase tracking-wider">Друзей</p>
                         </div>
                         <div class="dool-card p-5 rounded-[2rem] flex flex-col items-center justify-center gap-1 aspect-square">
                             <div class="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center mb-2 text-orange-500">
-                                <!-- ICON: Earned (Coin/Money) -->
-                                <img src="https://img.icons8.com/?size=100&id=djfFWeKjwcd3&format=png&color=000000" class="w-5 h-5 invert" style="filter: brightness(0) saturate(100%) invert(48%) sepia(99%) saturate(4644%) hue-rotate(3deg) brightness(101%) contrast(105%);" alt="Earned">
+                                <!-- ICON: Earned (White -> colored by container text color via currentColor? No, image src. Used filter previously) -->
+                                <!-- Using White icon and applying CSS Filter to make it ORANGE -->
+                                <img src="https://img.icons8.com/?size=100&id=djfFWeKjwcd3&format=png&color=ffffff" class="w-5 h-5" style="filter: brightness(0) saturate(100%) invert(32%) sepia(98%) saturate(2329%) hue-rotate(358deg) brightness(101%) contrast(106%);" alt="Earned">
                             </div>
                             <p id="ref-earned" class="text-2xl font-black">0</p>
                             <p class="text-[9px] font-bold text-neutral-600 uppercase tracking-wider">Заработано</p>
@@ -326,12 +327,12 @@
 
                     <div class="grid grid-cols-2 gap-3">
                         <button onclick="openModal('deposit')" class="h-20 glass-panel rounded-[2rem] flex flex-col items-center justify-center gap-1 hover:bg-white/10 transition-colors border border-white/10">
-                            <!-- ICON: Deposit (Down/In Arrow -> replaced with provided "Down" icon) -->
-                            <img src="https://img.icons8.com/?size=100&id=JorABJDLA8vZ&format=png&color=000000" class="w-6 h-6 invert" alt="Deposit">
+                            <!-- ICON: Deposit (Up/In) - Increased size w-12 h-12, White -->
+                            <img src="https://img.icons8.com/?size=100&id=ujCgU2cJLETx&format=png&color=ffffff" class="w-12 h-12" alt="Deposit">
                         </button>
                         <button onclick="openModal('withdraw')" class="h-20 glass-panel rounded-[2rem] flex flex-col items-center justify-center gap-1 hover:bg-white/10 transition-colors border border-white/10">
-                             <!-- ICON: Withdraw (Up/Out Arrow -> replaced with provided "Up" icon) -->
-                             <img src="https://img.icons8.com/?size=100&id=ujCgU2cJLETx&format=png&color=000000" class="w-6 h-6 invert" alt="Withdraw">
+                             <!-- ICON: Withdraw (Down/Out) - Increased size w-12 h-12, White -->
+                             <img src="https://img.icons8.com/?size=100&id=JorABJDLA8vZ&format=png&color=ffffff" class="w-12 h-12" alt="Withdraw">
                         </button>
                     </div>
                 </div>
@@ -340,16 +341,16 @@
             <!-- Navigation: Absolute positioned within App container -->
             <nav class="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[360px] h-16 bg-[#111]/90 backdrop-blur-xl border border-white/10 rounded-[2rem] flex items-center justify-around px-2 z-50 shadow-2xl">
                 <button onclick="switchTab('wallet')" id="nav-wallet" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-orange-500 cursor-pointer">
-                    <!-- ICON: Wallet -->
-                    <img src="https://img.icons8.com/?size=100&id=Pv8alVtwvuFB&format=png&color=000000" class="w-5 h-5 nav-icon" alt="Wallet">
+                    <!-- ICON: Wallet (White) - Increased size w-9 h-9 -->
+                    <img src="https://img.icons8.com/?size=100&id=Pv8alVtwvuFB&format=png&color=ffffff" class="w-9 h-9 nav-icon" alt="Wallet">
                 </button>
                 <button onclick="switchTab('bank')" id="nav-bank" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
-                     <!-- ICON: Bank -->
-                     <img src="https://img.icons8.com/?size=100&id=MRDxs37r5Fp9&format=png&color=000000" class="w-6 h-6 nav-icon" alt="Bank">
+                     <!-- ICON: Bank (White) - Increased size w-9 h-9 -->
+                     <img src="https://img.icons8.com/?size=100&id=MRDxs37r5Fp9&format=png&color=ffffff" class="w-9 h-9 nav-icon" alt="Bank">
                 </button>
                 <button onclick="switchTab('referrals')" id="nav-referrals" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
-                    <!-- ICON: Referrals (Using Friend Icon as specified for Nav) -->
-                    <img src="https://img.icons8.com/?size=100&id=N9EwPosvU1Rm&format=png&color=000000" class="w-5 h-5 nav-icon" alt="Referrals">
+                    <!-- ICON: Referrals (White) - Increased size w-9 h-9 -->
+                    <img src="https://img.icons8.com/?size=100&id=N9EwPosvU1Rm&format=png&color=ffffff" class="w-9 h-9 nav-icon" alt="Referrals">
                 </button>
             </nav>
         </div>
@@ -725,39 +726,30 @@
                     amtEl.classList.add('hidden'); 
                 }
                 
-                // Image Resources (Updated)
+                // Image Resources (Updated to White/Colored versions)
                 const imgBank = "https://emojigraph.org/media/google/jar_1fad9.png";
-                // New Icon URLs for system messages
-                const imgWarn = "https://img.icons8.com/?size=100&id=5PexHbhSpPcd&format=png&color=000000";
-                const imgOk = "https://img.icons8.com/?size=100&id=ThDU3IFKpFui&format=png&color=000000";
+                // White versions of icons for Toast
+                const imgWarn = "https://img.icons8.com/?size=100&id=5PexHbhSpPcd&format=png&color=ffffff";
+                const imgOk = "https://img.icons8.com/?size=100&id=ThDU3IFKpFui&format=png&color=ffffff";
 
                 // Reset Image Classes
                 avImg.className = "w-full h-full hidden";
+                avImg.style.filter = ''; // Reset filter
 
                 if (senderEmail) {
                     // User message (Avatar)
                     icon.classList.add('hidden');
                     avImg.classList.remove('hidden');
                     avImg.classList.add('object-cover'); // Avatars fill
-                    avImg.style.filter = ''; // No invert for user photos
                     const u = await getUserInfo(senderEmail);
                     avImg.src = u.avatar;
                 } else {
                     // System message
                     let sysImg = null;
-                    let shouldInvert = false;
                     
-                    if (isError) {
-                        sysImg = imgWarn;
-                        shouldInvert = true; // Black icon on dark bg needs invert
-                    }
-                    else if (displayTitle.includes('Банка')) {
-                        sysImg = imgBank; // This is a colored emoji PNG, no invert
-                    }
-                    else if (displayTitle.includes('Успешно')) {
-                        sysImg = imgOk;
-                        shouldInvert = true; // Black icon on dark bg needs invert
-                    }
+                    if (isError) sysImg = imgWarn;
+                    else if (displayTitle.includes('Банка')) sysImg = imgBank;
+                    else if (displayTitle.includes('Успешно')) sysImg = imgOk;
 
                     if (sysImg) {
                         // Use Image Icon
@@ -765,8 +757,7 @@
                         avImg.classList.remove('hidden');
                         avImg.classList.add('object-contain', 'p-1.5'); // Icons fit inside
                         avImg.src = sysImg;
-                        if(shouldInvert) avImg.style.filter = 'invert(1)';
-                        else avImg.style.filter = '';
+                        // No invert needed if we fetched white icons
                     } else {
                         // Default Text Emoji (Bell)
                         avImg.classList.add('hidden');
@@ -787,23 +778,26 @@
             const navR = document.getElementById('nav-referrals');
             const navB = document.getElementById('nav-bank');
             
-            // Remove text color (orange) from icons
+            // Reset text colors
             navW.classList.replace('text-orange-500', 'text-neutral-600');
             navR.classList.replace('text-orange-500', 'text-neutral-600');
             navB.classList.replace('text-orange-500', 'text-neutral-600');
             
-            // Reset filters for all icons to default (grayish/dim)
+            // Reset opacity for all nav icons (Inactive state)
             document.querySelectorAll('.nav-icon').forEach(img => {
-                img.style.filter = 'invert(1) opacity(0.4)';
+                img.style.filter = ''; // Reset Orange filter
+                img.style.opacity = '0.5'; // Dim inactive
             });
 
-            // Highlight active tab icon
+            // Highlight active tab
             const activeBtn = document.getElementById('nav-'+tab);
             activeBtn.classList.replace('text-neutral-600', 'text-orange-500');
             const activeImg = activeBtn.querySelector('img');
-            // Orange filter calculation for black icon -> Orange #FF4D00
-            // Approximately: invert(1) sepia(1) saturate(5000%) hue-rotate(10deg)
-            activeImg.style.filter = 'brightness(0) saturate(100%) invert(48%) sepia(99%) saturate(4644%) hue-rotate(3deg) brightness(101%) contrast(105%)';
+            
+            // Active state: Full opacity + Orange Filter
+            activeImg.style.opacity = '1';
+            // Filter to turn White (#FFFFFF) to Orange (#FF4D00)
+            activeImg.style.filter = 'brightness(0) saturate(100%) invert(32%) sepia(98%) saturate(2329%) hue-rotate(358deg) brightness(101%) contrast(106%)';
         };
 
         // --- AUTH ---
