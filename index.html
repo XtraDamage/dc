@@ -15,7 +15,8 @@
         * { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; -webkit-touch-callout: none; box-sizing: border-box; }
         input { -webkit-user-select: text !important; -moz-user-select: text !important; -ms-user-select: text !important; user-select: text !important; }
         img { -webkit-user-drag: none; user-drag: none; pointer-events: none; }
-        body { background-color: #050505; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; height: 100vh; display: flex; justify-content: center; align-items: center; }
+        /* Исправление высоты для мобильных устройств (100dvh) */
+        body { background-color: #050505; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; height: 100dvh; display: flex; justify-content: center; align-items: center; overflow: hidden; }
         
         /* UI Components */
         .dool-card { background: #0a0a0a; border: 1px solid rgba(255,255,255,0.05); }
@@ -123,7 +124,8 @@
 <body oncontextmenu="return false;">
 
     <!-- APP CONTAINER - Scalable and Centered -->
-    <div id="app" class="w-full h-full sm:h-[95vh] sm:max-h-[850px] sm:max-w-[420px] sm:rounded-[3rem] relative bg-black shadow-2xl overflow-hidden border-0 sm:border border-white/10 flex flex-col">
+    <!-- Обновлено: h-[100dvh] для корректного отображения на мобильных, убраны конфликты скролла -->
+    <div id="app" class="w-full h-[100dvh] sm:h-[95vh] sm:max-h-[850px] sm:max-w-[420px] sm:rounded-[3rem] relative bg-black shadow-2xl overflow-hidden border-0 sm:border border-white/10 flex flex-col">
         
         <!-- NEW TOAST NOTIFICATION (Absolute positioning inside App) -->
         <div id="toast">
@@ -204,7 +206,8 @@
                     </div>
                 </div>
                 <button id="btn-logout" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer">
-                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                    <!-- ICON: Logout -->
+                    <img src="https://img.icons8.com/?size=100&id=5HW1YsFkzHio&format=png&color=000000" class="w-5 h-5 invert opacity-80" alt="Logout">
                 </button>
             </header>
 
@@ -228,7 +231,8 @@
                                 <span>Отправить</span>
                             </button>
                             <button onclick="openModal('scan')" class="w-14 h-14 glass-panel text-white rounded-2xl flex items-center justify-center hover:bg-white/10 active:scale-95 transition-all cursor-pointer border border-white/10 hover:border-orange-500/50">
-                                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
+                                <!-- ICON: QR Code -->
+                                <img src="https://img.icons8.com/?size=100&id=XdgEzmYg0J8k&format=png&color=000000" class="w-6 h-6 invert" alt="Scan">
                             </button>
                             <button onclick="openModal('receive')" class="flex-1 h-14 glass-panel text-white border border-white/10 rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-white/10 active:scale-95 transition-all cursor-pointer flex flex-col items-center justify-center">
                                 <span>Получить</span>
@@ -264,10 +268,12 @@
                                 </div>
                                 <div class="flex gap-2">
                                     <button onclick="shareRef()" class="w-10 h-10 flex items-center justify-center bg-white/10 text-white rounded-xl hover:bg-white/20 transition-transform cursor-pointer">
-                                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                                        <!-- ICON: Share -->
+                                        <img src="https://img.icons8.com/?size=100&id=PuZtTk7UXaiT&format=png&color=000000" class="w-4 h-4 invert" alt="Share">
                                     </button>
                                     <button onclick="copyRef()" class="w-10 h-10 flex items-center justify-center bg-white text-black rounded-xl hover:scale-105 transition-transform cursor-pointer">
-                                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                        <!-- ICON: Copy -->
+                                        <img src="https://img.icons8.com/?size=100&id=uMQlJNpNjHdh&format=png&color=000000" class="w-4 h-4" alt="Copy">
                                     </button>
                                 </div>
                             </div>
@@ -277,14 +283,16 @@
                     <div class="grid grid-cols-2 gap-3">
                         <div class="dool-card p-5 rounded-[2rem] flex flex-col items-center justify-center gap-1 aspect-square">
                             <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center mb-2 text-neutral-400">
-                                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                <!-- ICON: Friend (Ref count) -->
+                                <img src="https://img.icons8.com/?size=100&id=N9EwPosvU1Rm&format=png&color=000000" class="w-5 h-5 invert opacity-70" alt="Friends">
                             </div>
                             <p id="ref-count" class="text-2xl font-black">0</p>
                             <p class="text-[9px] font-bold text-neutral-600 uppercase tracking-wider">Друзей</p>
                         </div>
                         <div class="dool-card p-5 rounded-[2rem] flex flex-col items-center justify-center gap-1 aspect-square">
                             <div class="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center mb-2 text-orange-500">
-                                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                                <!-- ICON: Earned (Coin/Money) -->
+                                <img src="https://img.icons8.com/?size=100&id=djfFWeKjwcd3&format=png&color=000000" class="w-5 h-5 invert" style="filter: brightness(0) saturate(100%) invert(48%) sepia(99%) saturate(4644%) hue-rotate(3deg) brightness(101%) contrast(105%);" alt="Earned">
                             </div>
                             <p id="ref-earned" class="text-2xl font-black">0</p>
                             <p class="text-[9px] font-bold text-neutral-600 uppercase tracking-wider">Заработано</p>
@@ -318,10 +326,12 @@
 
                     <div class="grid grid-cols-2 gap-3">
                         <button onclick="openModal('deposit')" class="h-20 glass-panel rounded-[2rem] flex flex-col items-center justify-center gap-1 hover:bg-white/10 transition-colors border border-white/10">
-                            <span class="text-lg">⏷</span>
+                            <!-- ICON: Deposit (Down/In Arrow -> replaced with provided "Down" icon) -->
+                            <img src="https://img.icons8.com/?size=100&id=JorABJDLA8vZ&format=png&color=000000" class="w-6 h-6 invert" alt="Deposit">
                         </button>
                         <button onclick="openModal('withdraw')" class="h-20 glass-panel rounded-[2rem] flex flex-col items-center justify-center gap-1 hover:bg-white/10 transition-colors border border-white/10">
-                            <span class="text-lg">⏶</span>
+                             <!-- ICON: Withdraw (Up/Out Arrow -> replaced with provided "Up" icon) -->
+                             <img src="https://img.icons8.com/?size=100&id=ujCgU2cJLETx&format=png&color=000000" class="w-6 h-6 invert" alt="Withdraw">
                         </button>
                     </div>
                 </div>
@@ -330,13 +340,16 @@
             <!-- Navigation: Absolute positioned within App container -->
             <nav class="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[360px] h-16 bg-[#111]/90 backdrop-blur-xl border border-white/10 rounded-[2rem] flex items-center justify-around px-2 z-50 shadow-2xl">
                 <button onclick="switchTab('wallet')" id="nav-wallet" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-orange-500 cursor-pointer">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                    <!-- ICON: Wallet -->
+                    <img src="https://img.icons8.com/?size=100&id=Pv8alVtwvuFB&format=png&color=000000" class="w-5 h-5 nav-icon" alt="Wallet">
                 </button>
                 <button onclick="switchTab('bank')" id="nav-bank" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
-                     <svg width="24" height="24" viewBox="0 0 512.000000 512.000000" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"><g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)" fill="currentColor" stroke="none"><path d="M1295 5104 c-129 -67 -137 -234 -14 -303 36 -21 45 -21 1279 -21 1234 0 1243 0 1279 21 109 61 117 208 15 285 l-37 29 -1246 3 c-1115 2 -1249 0 -1276 -14z"/><path d="M1520 4470 c-197 -28 -379 -160 -555 -405 -65 -91 -173 -307 -204 -407 -53 -174 -51 -127 -51 -1577 0 -882 4 -1368 11 -1410 53 -331 310 -592 644 -656 115 -22 2275 -22 2390 0 334 64 591 325 644 656 7 42 11 528 11 1410 0 1174 -2 1357 -15 1428 -25 128 -51 205 -120 346 -99 204 -227 369 -368 476 -90 68 -125 87 -217 120 l-65 24 -1025 1 c-564 1 -1050 -2 -1080 -6z m2104 -360 c92 -44 201 -160 291 -307 93 -153 143 -301 152 -450 l6 -103 -1513 0 -1513 0 6 103 c9 149 59 297 152 450 90 147 198 262 290 307 39 20 63 20 1064 20 1000 0 1026 0 1065 -20z m446 -1875 l0 -665 -1510 0 -1510 0 0 665 0 665 1510 0 1510 0 0 -665z m0 -1217 c0 -117 -5 -244 -10 -283 -19 -131 -92 -244 -203 -316 -122 -79 -35 -74 -1297 -74 -1262 0 -1175 -5 -1297 74 -111 72 -184 185 -203 316 -5 39 -10 166 -10 283 l0 212 1510 0 1510 0 0 -212z"/></g></svg>
+                     <!-- ICON: Bank -->
+                     <img src="https://img.icons8.com/?size=100&id=MRDxs37r5Fp9&format=png&color=000000" class="w-6 h-6 nav-icon" alt="Bank">
                 </button>
                 <button onclick="switchTab('referrals')" id="nav-referrals" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                    <!-- ICON: Referrals (Using Friend Icon as specified for Nav) -->
+                    <img src="https://img.icons8.com/?size=100&id=N9EwPosvU1Rm&format=png&color=000000" class="w-5 h-5 nav-icon" alt="Referrals">
                 </button>
             </nav>
         </div>
@@ -684,7 +697,7 @@
              }, 300);
         }
 
-        // --- NEW NOTIFICATION JS ---
+        // --- NEW NOTIFICATION JS (Updated Emojis) ---
         let toastTimeout;
         window.showT = async (title, msg, amountStr = '', senderEmail = null, isError = false) => {
             const t = document.getElementById('toast');
@@ -712,10 +725,11 @@
                     amtEl.classList.add('hidden'); 
                 }
                 
-                // Image Resources
+                // Image Resources (Updated)
                 const imgBank = "https://emojigraph.org/media/google/jar_1fad9.png";
-                const imgWarn = "https://emojigraph.org/media/facebook/warning_26a0-fe0f.png";
-                const imgOk = "https://emojigraph.org/media/apple/large-green-circle_1f7e2.png";
+                // New Icon URLs for system messages
+                const imgWarn = "https://img.icons8.com/?size=100&id=5PexHbhSpPcd&format=png&color=000000";
+                const imgOk = "https://img.icons8.com/?size=100&id=ThDU3IFKpFui&format=png&color=000000";
 
                 // Reset Image Classes
                 avImg.className = "w-full h-full hidden";
@@ -725,15 +739,25 @@
                     icon.classList.add('hidden');
                     avImg.classList.remove('hidden');
                     avImg.classList.add('object-cover'); // Avatars fill
+                    avImg.style.filter = ''; // No invert for user photos
                     const u = await getUserInfo(senderEmail);
                     avImg.src = u.avatar;
                 } else {
                     // System message
                     let sysImg = null;
+                    let shouldInvert = false;
                     
-                    if (isError) sysImg = imgWarn;
-                    else if (displayTitle.includes('Банка')) sysImg = imgBank;
-                    else if (displayTitle.includes('Успешно')) sysImg = imgOk;
+                    if (isError) {
+                        sysImg = imgWarn;
+                        shouldInvert = true; // Black icon on dark bg needs invert
+                    }
+                    else if (displayTitle.includes('Банка')) {
+                        sysImg = imgBank; // This is a colored emoji PNG, no invert
+                    }
+                    else if (displayTitle.includes('Успешно')) {
+                        sysImg = imgOk;
+                        shouldInvert = true; // Black icon on dark bg needs invert
+                    }
 
                     if (sysImg) {
                         // Use Image Icon
@@ -741,6 +765,8 @@
                         avImg.classList.remove('hidden');
                         avImg.classList.add('object-contain', 'p-1.5'); // Icons fit inside
                         avImg.src = sysImg;
+                        if(shouldInvert) avImg.style.filter = 'invert(1)';
+                        else avImg.style.filter = '';
                     } else {
                         // Default Text Emoji (Bell)
                         avImg.classList.add('hidden');
@@ -761,11 +787,23 @@
             const navR = document.getElementById('nav-referrals');
             const navB = document.getElementById('nav-bank');
             
+            // Remove text color (orange) from icons
             navW.classList.replace('text-orange-500', 'text-neutral-600');
             navR.classList.replace('text-orange-500', 'text-neutral-600');
             navB.classList.replace('text-orange-500', 'text-neutral-600');
             
-            document.getElementById('nav-'+tab).classList.replace('text-neutral-600', 'text-orange-500');
+            // Reset filters for all icons to default (grayish/dim)
+            document.querySelectorAll('.nav-icon').forEach(img => {
+                img.style.filter = 'invert(1) opacity(0.4)';
+            });
+
+            // Highlight active tab icon
+            const activeBtn = document.getElementById('nav-'+tab);
+            activeBtn.classList.replace('text-neutral-600', 'text-orange-500');
+            const activeImg = activeBtn.querySelector('img');
+            // Orange filter calculation for black icon -> Orange #FF4D00
+            // Approximately: invert(1) sepia(1) saturate(5000%) hue-rotate(10deg)
+            activeImg.style.filter = 'brightness(0) saturate(100%) invert(48%) sepia(99%) saturate(4644%) hue-rotate(3deg) brightness(101%) contrast(105%)';
         };
 
         // --- AUTH ---
@@ -924,6 +962,9 @@
                 document.getElementById('view-loading').classList.add('hidden');
                 document.getElementById('view-main').classList.replace('hidden', 'flex');
                 
+                // Set default nav state
+                switchTab('wallet');
+
                 document.getElementById('btn-login').disabled = false;
                 document.getElementById('btn-register').disabled = false;
             });
