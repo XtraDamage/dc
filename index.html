@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/ShalfeyArt/admin/refs/heads/main/icon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Doolcoin Wallet</title>
@@ -127,11 +128,11 @@
     <!-- h-[100dvh] для мобильных -->
     <div id="app" class="w-full h-[100dvh] sm:h-[95vh] sm:max-h-[850px] sm:max-w-[420px] sm:rounded-[3rem] relative bg-black shadow-2xl overflow-hidden border-0 sm:border border-white/10 flex flex-col">
         
-        <!-- NEW TOAST NOTIFICATION (Dynamic Island) -->
+        <!-- NEW TOAST NOTIFICATION (Absolute positioning inside App) -->
         <div id="toast">
             <div class="relative shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-[#111] border border-white/10 overflow-hidden">
                 <img id="toast-avatar" src="" class="w-full h-full object-cover hidden">
-                <div id="toast-icon-sys" class="text-xl hidden">🔔</div> <!-- Hidden by default now -->
+                <div id="toast-icon-sys" class="text-xl">🔔</div>
             </div>
             <div class="flex-1 min-w-0 flex flex-col justify-center">
                 <p id="toast-title" class="text-[9px] font-black uppercase text-neutral-500 tracking-widest leading-tight">Система</p>
@@ -750,13 +751,20 @@
                     if (isError) sysImg = imgWarn;
                     else if (displayTitle.includes('Банка')) sysImg = imgBank;
                     else if (displayTitle.includes('Успешно')) sysImg = imgOk;
-                    else sysImg = "https://img.icons8.com/?size=100&id=oStKNuPVzV7A&format=png&color=000000"; // USER CUSTOM BELL ICON
 
-                    // Apply system image
-                    icon.classList.add('hidden');
-                    avImg.classList.remove('hidden');
-                    avImg.classList.add('object-contain', 'p-1.5'); // Icons fit inside
-                    avImg.src = sysImg;
+                    if (sysImg) {
+                        // Use Image Icon
+                        icon.classList.add('hidden');
+                        avImg.classList.remove('hidden');
+                        avImg.classList.add('object-contain', 'p-1.5'); // Icons fit inside
+                        avImg.src = sysImg;
+                        // No invert needed if we fetched white icons
+                    } else {
+                        // Default Text Emoji (Bell)
+                        avImg.classList.add('hidden');
+                        icon.classList.remove('hidden');
+                        icon.textContent = '🔔';
+                    }
                 }
 
                 t.classList.add('active');
