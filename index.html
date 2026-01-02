@@ -119,19 +119,54 @@
             cursor: grab; touch-action: none;
         }
         .swipe-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 10px; }
+
+        /* --- GAME STYLES --- */
+        .invert-icon { filter: invert(1); }
+        
+        /* Hold Game */
+        .hold-btn { position: relative; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+        .hold-fill { position: absolute; bottom: 0; left: 0; width: 100%; background: #FF4D00; opacity: 0.3; pointer-events: none; transition: height 0.1s linear; }
+
+        /* Boxes Game */
+        .box-container { perspective: 1000px; }
+        .magic-box { transition: transform 0.5s ease-in-out; transform-style: preserve-3d; }
+        .magic-box.shuffling { transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1); }
+
+        /* Wheel Game */
+        .wheel-container { position: relative; width: 280px; height: 280px; margin: 0 auto; }
+        .wheel {
+            width: 100%; height: 100%; border-radius: 50%;
+            background: conic-gradient(
+                #111 0deg 60deg,
+                #222 60deg 120deg,
+                #111 120deg 180deg,
+                #222 180deg 240deg,
+                #111 240deg 300deg,
+                #222 300deg 360deg
+            );
+            border: 4px solid rgba(255,255,255,0.1);
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+        .wheel-segment { position: absolute; width: 50%; height: 2px; background: transparent; transform-origin: right center; top: 50%; left: 0; display: flex; justify-content: flex-start; padding-left: 20px; }
+        .wheel-text { transform: rotate(-90deg); color: white; font-weight: 800; font-size: 14px; }
+        .wheel-arrow { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); z-index: 20; width: 40px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5)); }
+
     </style>
 </head>
 <body oncontextmenu="return false;">
 
-    <!-- APP CONTAINER - Scalable and Centered -->
-    <!-- h-[100dvh] для мобильных -->
+    <!-- APP CONTAINER -->
     <div id="app" class="w-full h-[100dvh] sm:h-[95vh] sm:max-h-[850px] sm:max-w-[420px] sm:rounded-[3rem] relative bg-black shadow-2xl overflow-hidden border-0 sm:border border-white/10 flex flex-col">
         
-        <!-- NEW TOAST NOTIFICATION (Absolute positioning inside App) -->
+        <!-- NEW TOAST NOTIFICATION -->
         <div id="toast">
             <div class="relative shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-[#111] border border-white/10 overflow-hidden">
                 <img id="toast-avatar" src="" class="w-full h-full object-cover hidden">
-                <div id="toast-icon-sys" class="text-xl">🔔</div>
+                <!-- NEW ICON: Bell (Inverted to White) -->
+                <img id="toast-icon-sys" src="https://img.icons8.com/?size=100&id=oStKNuPVzV7A&format=png&color=000000" class="w-6 h-6 invert-icon hidden">
             </div>
             <div class="flex-1 min-w-0 flex flex-col justify-center">
                 <p id="toast-title" class="text-[9px] font-black uppercase text-neutral-500 tracking-widest leading-tight">Система</p>
@@ -253,6 +288,60 @@
                     </div>
                 </div>
 
+                <!-- GAMES TAB -->
+                <div id="tab-games" class="tab-content space-y-6">
+                    <div class="dool-card rounded-[2.5rem] p-6 relative overflow-hidden">
+                         <div class="absolute inset-0 bg-blue-500/5"></div>
+                         <h2 class="text-2xl font-black mb-2 relative z-10">Мини Игры</h2>
+                         <p class="text-neutral-500 text-xs mb-0 relative z-10">Выигрывай Doolcoin</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-4">
+                        <!-- GAME 1: HOLD TO WIN -->
+                        <div onclick="openGame('hold')" class="dool-card rounded-3xl p-4 flex items-center gap-4 cursor-pointer hover:bg-white/5 transition-all active:scale-95">
+                            <div class="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center shrink-0">
+                                <img src="https://img.icons8.com/?size=100&id=LbdUjgMUAu8M&format=png&color=000000" class="w-8 h-8 invert-icon">
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-bold text-sm">Hold to Win</h3>
+                                <p id="cd-text-hold" class="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">Нажми и держи</p>
+                            </div>
+                            <div class="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center">
+                                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+                            </div>
+                        </div>
+
+                        <!-- GAME 2: MYSTERY BOXES -->
+                        <div onclick="openGame('boxes')" class="dool-card rounded-3xl p-4 flex items-center gap-4 cursor-pointer hover:bg-white/5 transition-all active:scale-95">
+                            <div class="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center shrink-0">
+                                <img src="https://img.icons8.com/?size=100&id=Id8qAqVtU6EV&format=png&color=000000" class="w-8 h-8 invert-icon">
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-bold text-sm">Наперстки</h3>
+                                <p id="cd-text-boxes" class="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">Найди приз</p>
+                            </div>
+                            <div class="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center">
+                                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+                            </div>
+                        </div>
+
+                         <!-- GAME 3: WHEEL OF FORTUNE -->
+                         <div onclick="openGame('wheel')" class="dool-card rounded-3xl p-4 flex items-center gap-4 cursor-pointer hover:bg-white/5 transition-all active:scale-95">
+                            <div class="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center shrink-0">
+                                <!-- Using Wheel Arrow as icon fallback or just a generic circle -->
+                                <img src="https://img.icons8.com/?size=100&id=8P1z54VQlHYr&format=png&color=000000" class="w-8 h-8 invert-icon">
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="font-bold text-sm">Колесо Фортуны</h3>
+                                <p id="cd-text-wheel" class="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">Крути и выигрывай</p>
+                            </div>
+                            <div class="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center">
+                                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- REFERRAL TAB -->
                 <div id="tab-referrals" class="tab-content space-y-6">
                     <div class="dool-card rounded-[2.5rem] p-6 sm:p-8 relative overflow-hidden">
@@ -291,8 +380,6 @@
                         </div>
                         <div class="dool-card p-5 rounded-[2rem] flex flex-col items-center justify-center gap-1 aspect-square">
                             <div class="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center mb-2 text-orange-500">
-                                <!-- ICON: Earned (White -> colored by container text color via currentColor? No, image src. Used filter previously) -->
-                                <!-- Using White icon and applying CSS Filter to make it ORANGE -->
                                 <img src="https://img.icons8.com/?size=100&id=djfFWeKjwcd3&format=png&color=ffffff" class="w-5 h-5" style="filter: brightness(0) saturate(100%) invert(32%) sepia(98%) saturate(2329%) hue-rotate(358deg) brightness(101%) contrast(106%);" alt="Earned">
                             </div>
                             <p id="ref-earned" class="text-2xl font-black">0</p>
@@ -339,23 +426,24 @@
             </main>
 
             <!-- Navigation: Absolute positioned within App container -->
-            <nav class="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[360px] h-16 bg-[#111]/90 backdrop-blur-xl border border-white/10 rounded-[2rem] flex items-center justify-around px-2 z-50 shadow-2xl">
+            <nav class="absolute bottom-6 left-1/2 -translate-x-1/2 w-[94%] max-w-[380px] h-16 bg-[#111]/90 backdrop-blur-xl border border-white/10 rounded-[2rem] flex items-center justify-around px-2 z-50 shadow-2xl">
                 <button onclick="switchTab('wallet')" id="nav-wallet" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-orange-500 cursor-pointer">
-                    <!-- ICON: Wallet (White) - Increased size w-9 h-9 -->
-                    <img src="https://img.icons8.com/?size=100&id=Pv8alVtwvuFB&format=png&color=ffffff" class="w-9 h-9 nav-icon" alt="Wallet">
+                    <img src="https://img.icons8.com/?size=100&id=Pv8alVtwvuFB&format=png&color=ffffff" class="w-7 h-7 nav-icon" alt="Wallet">
+                </button>
+                <button onclick="switchTab('games')" id="nav-games" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
+                    <!-- ICON: Gamepad (New) -->
+                    <img src="https://img.icons8.com/?size=100&id=SIvYVkyYEONt&format=png&color=000000" class="w-7 h-7 nav-icon invert-icon" alt="Games">
                 </button>
                 <button onclick="switchTab('bank')" id="nav-bank" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
-                     <!-- ICON: Bank (White) - Increased size w-9 h-9 -->
-                     <img src="https://img.icons8.com/?size=100&id=MRDxs37r5Fp9&format=png&color=ffffff" class="w-9 h-9 nav-icon" alt="Bank">
+                     <img src="https://img.icons8.com/?size=100&id=MRDxs37r5Fp9&format=png&color=ffffff" class="w-7 h-7 nav-icon" alt="Bank">
                 </button>
                 <button onclick="switchTab('referrals')" id="nav-referrals" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
-                    <!-- ICON: Referrals (White) - Increased size w-9 h-9 -->
-                    <img src="https://img.icons8.com/?size=100&id=N9EwPosvU1Rm&format=png&color=ffffff" class="w-9 h-9 nav-icon" alt="Referrals">
+                    <img src="https://img.icons8.com/?size=100&id=N9EwPosvU1Rm&format=png&color=ffffff" class="w-7 h-7 nav-icon" alt="Referrals">
                 </button>
             </nav>
         </div>
 
-        <!-- MODAL OVERLAY CLICK WRAPPERS: Added onclick to background -->
+        <!-- MODAL OVERLAY CLICK WRAPPERS -->
 
         <!-- Модалка: Профиль -->
         <div id="modal-profile" onclick="if(event.target===this) closeModal('profile')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col items-center justify-center p-8 opacity-0 transition-opacity duration-300">
@@ -373,6 +461,87 @@
                     </div>
                     <p id="profile-email" class="text-xs text-neutral-500 font-bold mb-6 truncate px-2">...</p>
                     <button onclick="closeModal('profile')" class="w-full h-12 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer">Закрыть</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модалка: GAME HOLD -->
+        <div id="modal-game-hold" onclick="if(event.target===this) closeModal('game-hold')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
+            <div class="bg-[#111] border-t border-white/10 rounded-t-[2.5rem] p-0 transform translate-y-full transition-transform duration-300 h-[60%]" id="modal-game-hold-content">
+                <div class="swipe-zone"><div class="swipe-handle"></div></div>
+                <div class="p-8 flex flex-col items-center h-full pb-10">
+                    <h2 class="text-xl font-black mb-2">Hold to Win</h2>
+                    <p class="text-xs text-neutral-500 mb-8">Держи кнопку чтобы заполнить банку</p>
+                    
+                    <button id="btn-hold-game" class="hold-btn w-40 h-40 rounded-full border-4 border-white/10 flex items-center justify-center active:scale-95 transition-transform bg-[#0a0a0a] relative mb-8 outline-none">
+                         <img src="https://img.icons8.com/?size=100&id=LbdUjgMUAu8M&format=png&color=000000" class="w-16 h-16 invert-icon opacity-50 relative z-20">
+                         <div id="hold-fill" class="hold-fill h-0 z-10"></div>
+                         <div id="hold-success-glow" class="absolute inset-0 rounded-full bg-orange-500 blur-xl opacity-0 transition-opacity"></div>
+                    </button>
+                    
+                    <p id="hold-status" class="text-xs font-bold text-orange-500 h-4">Нажми и держи...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модалка: GAME BOXES -->
+        <div id="modal-game-boxes" onclick="if(event.target===this) closeModal('game-boxes')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
+            <div class="bg-[#111] border-t border-white/10 rounded-t-[2.5rem] p-0 transform translate-y-full transition-transform duration-300 h-[60%]" id="modal-game-boxes-content">
+                <div class="swipe-zone"><div class="swipe-handle"></div></div>
+                <div class="p-8 flex flex-col items-center h-full pb-10">
+                    <h2 class="text-xl font-black mb-2">Наперстки</h2>
+                    <p class="text-xs text-neutral-500 mb-8">Следи за шариком</p>
+
+                    <div class="w-full h-40 relative box-container mb-8">
+                        <!-- Boxes will be generated by JS -->
+                        <div id="boxes-wrapper" class="w-full h-full flex justify-between items-center relative px-2">
+                             <!-- Box 0 -->
+                             <div id="box-0" class="magic-box w-20 h-20 relative cursor-pointer" onclick="clickBox(0)">
+                                 <img src="https://img.icons8.com/?size=100&id=Id8qAqVtU6EV&format=png&color=000000" class="w-full h-full invert-icon absolute z-20 transition-opacity duration-300" id="box-img-0">
+                                 <img src="https://img.icons8.com/?size=100&id=Mf5KS1SMpMch&format=png&color=000000" class="w-full h-full invert-icon absolute z-10 opacity-0 transition-opacity duration-300" id="box-open-0">
+                                 <div class="w-6 h-6 bg-orange-500 rounded-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0 opacity-0" id="ball-0"></div>
+                             </div>
+                             <!-- Box 1 -->
+                             <div id="box-1" class="magic-box w-20 h-20 relative cursor-pointer" onclick="clickBox(1)">
+                                 <img src="https://img.icons8.com/?size=100&id=Id8qAqVtU6EV&format=png&color=000000" class="w-full h-full invert-icon absolute z-20 transition-opacity duration-300" id="box-img-1">
+                                 <img src="https://img.icons8.com/?size=100&id=Mf5KS1SMpMch&format=png&color=000000" class="w-full h-full invert-icon absolute z-10 opacity-0 transition-opacity duration-300" id="box-open-1">
+                                 <div class="w-6 h-6 bg-orange-500 rounded-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0 opacity-0" id="ball-1"></div>
+                             </div>
+                             <!-- Box 2 -->
+                             <div id="box-2" class="magic-box w-20 h-20 relative cursor-pointer" onclick="clickBox(2)">
+                                 <img src="https://img.icons8.com/?size=100&id=Id8qAqVtU6EV&format=png&color=000000" class="w-full h-full invert-icon absolute z-20 transition-opacity duration-300" id="box-img-2">
+                                 <img src="https://img.icons8.com/?size=100&id=Mf5KS1SMpMch&format=png&color=000000" class="w-full h-full invert-icon absolute z-10 opacity-0 transition-opacity duration-300" id="box-open-2">
+                                 <div class="w-6 h-6 bg-orange-500 rounded-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0 opacity-0" id="ball-2"></div>
+                             </div>
+                        </div>
+                    </div>
+                    
+                    <button id="btn-start-boxes" class="h-12 px-8 bg-white text-black rounded-xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer">Начать игру</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модалка: GAME WHEEL -->
+        <div id="modal-game-wheel" onclick="if(event.target===this) closeModal('game-wheel')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
+            <div class="bg-[#111] border-t border-white/10 rounded-t-[2.5rem] p-0 transform translate-y-full transition-transform duration-300 h-[70%]" id="modal-game-wheel-content">
+                <div class="swipe-zone"><div class="swipe-handle"></div></div>
+                <div class="p-8 flex flex-col items-center h-full pb-10 overflow-hidden">
+                    <h2 class="text-xl font-black mb-4">Колесо Фортуны</h2>
+                    
+                    <div class="wheel-container mb-8">
+                        <img src="https://img.icons8.com/?size=100&id=8P1z54VQlHYr&format=png&color=000000" class="wheel-arrow invert-icon">
+                        <div id="the-wheel" class="wheel">
+                            <!-- Segments generated via JS logic mainly, but CSS visual above -->
+                            <div class="wheel-segment" style="transform: rotate(30deg)"><span class="wheel-text">0.1</span></div>
+                            <div class="wheel-segment" style="transform: rotate(90deg)"><span class="wheel-text">LOSE</span></div>
+                            <div class="wheel-segment" style="transform: rotate(150deg)"><span class="wheel-text">0.5</span></div>
+                            <div class="wheel-segment" style="transform: rotate(210deg)"><span class="wheel-text">LOSE</span></div>
+                            <div class="wheel-segment" style="transform: rotate(270deg)"><span class="wheel-text">1.0</span></div>
+                            <div class="wheel-segment" style="transform: rotate(330deg)"><span class="wheel-text">2.0</span></div>
+                        </div>
+                    </div>
+                    
+                    <button id="btn-spin-wheel" class="h-12 px-10 bg-orange-500 text-white rounded-xl font-black text-xs uppercase tracking-wider hover:bg-orange-600 cursor-pointer shadow-[0_0_20px_rgba(255,77,0,0.3)]">Вращать</button>
                 </div>
             </div>
         </div>
@@ -435,7 +604,7 @@
             </div>
         </div>
 
-        <!-- Модалка: Получить (PREMIUM DESIGN FIXED) -->
+        <!-- Модалка: Получить -->
         <div id="modal-receive" onclick="if(event.target===this) closeModal('receive')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
             <div class="bg-[#0f0f0f] border border-white/10 rounded-t-[2.5rem] p-0 w-full transform translate-y-full transition-transform duration-300 shadow-2xl" id="modal-receive-content">
                 <!-- Swipe Zone -->
@@ -455,7 +624,7 @@
                                 <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-white">Doolcoin</span>
                             </div>
                             
-                            <!-- QR Container (Clean White Box) -->
+                            <!-- QR Container -->
                             <div id="qrcode-container"></div>
                         </div>
                     </div>
@@ -600,14 +769,14 @@
                 if(diff > 120) { // Threshold to close
                     closeModal(modalName);
                 } else {
-                    content.style.transform = ''; // Snap back to open (translate-y-0 equivalent in CSS logic, but here we just clear inline style)
+                    content.style.transform = ''; // Snap back to open
                     content.style.transform = 'translateY(0)';
                 }
             });
         }
 
         // Init swipes
-        ['send', 'receive', 'deposit', 'withdraw'].forEach(initSwipeClose);
+        ['send', 'receive', 'deposit', 'withdraw', 'game-hold', 'game-boxes', 'game-wheel'].forEach(initSwipeClose);
 
         // --- REFERRAL INIT LOGIC ---
         try {
@@ -658,7 +827,7 @@
             m.classList.remove('opacity-0');
             
             // Reset transforms for swipeable modals
-            if(['send', 'receive', 'deposit', 'withdraw'].includes(n)) {
+            if(n.startsWith('game-') || ['send', 'receive', 'deposit', 'withdraw'].includes(n)) {
                 c.style.transform = ''; 
                 setTimeout(() => c.classList.remove('translate-y-full'), 10);
             } else if(n !== 'scan') {
@@ -675,7 +844,7 @@
             if(!m || !c) return;
             m.classList.add('opacity-0');
             
-            if(['send', 'receive', 'deposit', 'withdraw'].includes(n)) {
+            if(n.startsWith('game-') || ['send', 'receive', 'deposit', 'withdraw'].includes(n)) {
                 c.classList.add('translate-y-full');
                 c.style.transform = ''; // Clear JS drag transform
             } else if(n !== 'scan') {
@@ -698,7 +867,7 @@
              }, 300);
         }
 
-        // --- NEW NOTIFICATION JS (Updated Emojis) ---
+        // --- NEW NOTIFICATION JS (Updated Icon Logic) ---
         let toastTimeout;
         window.showT = async (title, msg, amountStr = '', senderEmail = null, isError = false) => {
             const t = document.getElementById('toast');
@@ -726,43 +895,42 @@
                     amtEl.classList.add('hidden'); 
                 }
                 
-                // Image Resources (Updated to White/Colored versions)
+                // Image Resources
                 const imgBank = "https://emojigraph.org/media/facebook/jar_1fad9.png";
-                // White versions of icons for Toast
                 const imgWarn = "https://img.icons8.com/?size=100&id=5PexHbhSpPcd&format=png&color=ffffff";
                 const imgOk = "https://img.icons8.com/?size=100&id=ThDU3IFKpFui&format=png&color=ffffff";
+                // Default Bell Icon
+                const imgBell = "https://img.icons8.com/?size=100&id=oStKNuPVzV7A&format=png&color=000000";
 
                 // Reset Image Classes
                 avImg.className = "w-full h-full hidden";
-                avImg.style.filter = ''; // Reset filter
+                icon.className = "w-6 h-6 invert-icon hidden";
 
                 if (senderEmail) {
                     // User message (Avatar)
-                    icon.classList.add('hidden');
                     avImg.classList.remove('hidden');
-                    avImg.classList.add('object-cover'); // Avatars fill
+                    avImg.classList.add('object-cover'); 
+                    avImg.style.filter = '';
                     const u = await getUserInfo(senderEmail);
                     avImg.src = u.avatar;
                 } else {
                     // System message
-                    let sysImg = null;
-                    
-                    if (isError) sysImg = imgWarn;
-                    else if (displayTitle.includes('Банка')) sysImg = imgBank;
-                    else if (displayTitle.includes('Успешно')) sysImg = imgOk;
-
-                    if (sysImg) {
-                        // Use Image Icon
-                        icon.classList.add('hidden');
+                    if (isError) {
                         avImg.classList.remove('hidden');
-                        avImg.classList.add('object-contain', 'p-1.5'); // Icons fit inside
-                        avImg.src = sysImg;
-                        // No invert needed if we fetched white icons
+                        avImg.classList.add('object-contain', 'p-1.5');
+                        avImg.src = imgWarn;
+                    } else if (displayTitle.includes('Банка')) {
+                        avImg.classList.remove('hidden');
+                        avImg.classList.add('object-contain', 'p-1.5');
+                        avImg.src = imgBank;
+                    } else if (displayTitle.includes('Успешно')) {
+                        avImg.classList.remove('hidden');
+                        avImg.classList.add('object-contain', 'p-1.5');
+                        avImg.src = imgOk;
                     } else {
-                        // Default Text Emoji (Bell)
-                        avImg.classList.add('hidden');
+                        // Default Bell Icon with Invert Class
                         icon.classList.remove('hidden');
-                        icon.textContent = '🔔';
+                        icon.src = imgBell;
                     }
                 }
 
@@ -777,27 +945,42 @@
             const navW = document.getElementById('nav-wallet');
             const navR = document.getElementById('nav-referrals');
             const navB = document.getElementById('nav-bank');
+            const navG = document.getElementById('nav-games');
             
             // Reset text colors
-            navW.classList.replace('text-orange-500', 'text-neutral-600');
-            navR.classList.replace('text-orange-500', 'text-neutral-600');
-            navB.classList.replace('text-orange-500', 'text-neutral-600');
+            [navW, navR, navB, navG].forEach(el => {
+                if(el) el.classList.replace('text-orange-500', 'text-neutral-600');
+            });
             
             // Reset opacity for all nav icons (Inactive state)
             document.querySelectorAll('.nav-icon').forEach(img => {
                 img.style.filter = ''; // Reset Orange filter
                 img.style.opacity = '0.5'; // Dim inactive
+                if(img.classList.contains('invert-icon')) img.style.filter = 'invert(1)';
             });
 
             // Highlight active tab
             const activeBtn = document.getElementById('nav-'+tab);
-            activeBtn.classList.replace('text-neutral-600', 'text-orange-500');
-            const activeImg = activeBtn.querySelector('img');
-            
-            // Active state: Full opacity + Orange Filter
-            activeImg.style.opacity = '1';
-            // Filter to turn White (#FFFFFF) to Orange (#FF4D00)
-            activeImg.style.filter = 'brightness(0) saturate(100%) invert(32%) sepia(98%) saturate(2329%) hue-rotate(358deg) brightness(101%) contrast(106%)';
+            if(activeBtn) {
+                activeBtn.classList.replace('text-neutral-600', 'text-orange-500');
+                const activeImg = activeBtn.querySelector('img');
+                
+                // Active state: Full opacity + Orange Filter
+                activeImg.style.opacity = '1';
+                // Filter to turn White (#FFFFFF) to Orange (#FF4D00)
+                // Note: If icon is black and inverted, we need different filter logic or just use orange filter directly on black?
+                // The filter below is calibrated for white source.
+                // If source is black (games icon), invert(1) makes it white. Then we apply orange.
+                // But CSS filters stack.
+                // For 'invert-icon' class elements (black source):
+                if(activeImg.classList.contains('invert-icon')) {
+                     // Black -> Orange
+                     activeImg.style.filter = 'invert(27%) sepia(91%) saturate(2329%) hue-rotate(358deg) brightness(97%) contrast(106%)';
+                } else {
+                     // White -> Orange
+                     activeImg.style.filter = 'brightness(0) saturate(100%) invert(32%) sepia(98%) saturate(2329%) hue-rotate(358deg) brightness(101%) contrast(106%)';
+                }
+            }
         };
 
         // --- AUTH ---
@@ -946,6 +1129,7 @@
                 adjustBalanceSize(balStr);
 
                 updateBankVisuals(d);
+                checkCooldownsUI();
 
                 document.getElementById('ref-count').textContent = d.refCount || 0;
                 document.getElementById('ref-earned').textContent = (d.refEarned || 0).toFixed(1);
@@ -972,6 +1156,9 @@
                 for (const tx of docs) {
                     const isSent = tx.from === u.email;
                     let partner = isSent ? tx.to : tx.from;
+                    // Fix for System (Ref) or Game Rewards
+                    if (partner.startsWith('System')) partner = 'Система';
+
                     const dateStr = tx.date ? new Date(tx.date.toMillis()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
                     html += `<div class="flex items-center justify-between p-4 rounded-[1.5rem] bg-white/[0.03] border border-white/5">
                         <div class="flex items-center gap-3 overflow-hidden">
@@ -992,18 +1179,24 @@
             try {
                 const q = query(collection(db, "transactions"), where("to", "==", myEmail));
                 const snap = await getDocs(q);
+                let foundMatch = false;
                 if (!snap.empty) {
                     const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date);
-                    if (Math.abs(docs[0].amount - amountDiff) < 0.01) { 
-                        if (docs[0].type === 'referral_bonus') {
+                    const lastTx = docs[0];
+                    if (Math.abs(lastTx.amount - amountDiff) < 0.01) { 
+                        foundMatch = true;
+                        if (lastTx.type === 'referral_bonus') {
                              showT('Рефералы', 'Бонус за друга', `+${amountDiff.toFixed(1)} Đ`);
+                        } else if (lastTx.type === 'game_reward') {
+                             // Already handled in game logic usually, but fallback
+                             // showT('Игры', 'Победа', `+${amountDiff.toFixed(1)} Đ`);
                         } else {
-                             showT('Перевод', docs[0].from, `+${amountDiff.toFixed(1)} Đ`, docs[0].from); 
+                             showT('Перевод', lastTx.from, `+${amountDiff.toFixed(1)} Đ`, lastTx.from); 
                         }
-                        return; 
                     }
                 }
-                showT('Банк', 'Начисление процентов', `+${amountDiff.toFixed(1)} Đ`);
+                // If not found in tx (maybe interest or internal calc)
+                if (!foundMatch && amountDiff > 0) showT('Банк', 'Начисление процентов', `+${amountDiff.toFixed(1)} Đ`);
             } catch(e) {}
         }
 
@@ -1046,6 +1239,271 @@
         }
         
         setInterval(() => { if(myData) updateBankVisuals(myData); }, 1000);
+
+        // --- GAMES LOGIC ---
+        
+        // Cooldown configuration (in ms)
+        const GAMES_CD = {
+            hold: 3 * 60 * 1000, // 3 min
+            boxes: 5 * 60 * 1000, // 5 min
+            wheel: 60 * 60 * 1000 // 60 min
+        };
+
+        function getCooldown(game) {
+            const last = localStorage.getItem(`cd_${game}_${auth.currentUser.uid}`);
+            if(!last) return 0;
+            const diff = Date.now() - parseInt(last);
+            if(diff < GAMES_CD[game]) return GAMES_CD[game] - diff;
+            return 0;
+        }
+
+        function setCooldown(game) {
+            localStorage.setItem(`cd_${game}_${auth.currentUser.uid}`, Date.now());
+            checkCooldownsUI();
+        }
+
+        function checkCooldownsUI() {
+            if(!auth.currentUser) return;
+            ['hold', 'boxes', 'wheel'].forEach(g => {
+                const rem = getCooldown(g);
+                const el = document.getElementById(`cd-text-${g}`);
+                if(rem > 0) {
+                    const mins = Math.ceil(rem / 60000);
+                    el.textContent = `Через ${mins} мин`;
+                    el.classList.add('text-red-500');
+                } else {
+                    el.textContent = g === 'hold' ? 'Нажми и держи' : g === 'boxes' ? 'Найди приз' : 'Крути и выигрывай';
+                    el.classList.remove('text-red-500');
+                }
+            });
+        }
+        
+        setInterval(checkCooldownsUI, 30000);
+
+        window.openGame = (game) => {
+            if (getCooldown(game) > 0) return showT('Игры', 'Подождите восстановления', '', null, true);
+            openModal('game-' + game);
+        };
+
+        // --- GAME 1: HOLD TO WIN ---
+        let holdTimer;
+        const holdBtn = document.getElementById('btn-hold-game');
+        const holdFill = document.getElementById('hold-fill');
+        const holdStatus = document.getElementById('hold-status');
+        const holdGlow = document.getElementById('hold-success-glow');
+        
+        const startHold = (e) => {
+            e.preventDefault();
+            holdFill.style.transition = 'height 3s linear';
+            holdFill.style.height = '100%';
+            holdStatus.textContent = "Держим...";
+            
+            holdTimer = setTimeout(async () => {
+                // Success
+                holdGlow.classList.remove('opacity-0');
+                holdStatus.textContent = "ПОБЕДА!";
+                await rewardUser(0.2, 'hold');
+                setCooldown('hold');
+                setTimeout(() => {
+                     closeModal('game-hold');
+                     resetHold();
+                }, 1000);
+            }, 3000);
+        };
+        
+        const stopHold = () => {
+            clearTimeout(holdTimer);
+            holdFill.style.transition = 'height 0.1s linear';
+            holdFill.style.height = '0%';
+            holdStatus.textContent = "Сорвалось...";
+            setTimeout(() => {
+                if(holdFill.style.height === '0%') holdStatus.textContent = "Нажми и держи...";
+            }, 1000);
+        };
+
+        function resetHold() {
+             holdFill.style.height = '0%';
+             holdGlow.classList.add('opacity-0');
+             holdStatus.textContent = "Нажми и держи...";
+        }
+
+        holdBtn.addEventListener('mousedown', startHold);
+        holdBtn.addEventListener('touchstart', startHold);
+        holdBtn.addEventListener('mouseup', stopHold);
+        holdBtn.addEventListener('mouseleave', stopHold);
+        holdBtn.addEventListener('touchend', stopHold);
+
+        // --- GAME 2: BOXES ---
+        window.clickBox = async (idx) => {
+             // Game state handled inside logic
+        };
+
+        const btnStartBoxes = document.getElementById('btn-start-boxes');
+        btnStartBoxes.onclick = () => {
+             btnStartBoxes.classList.add('hidden');
+             playBoxesGame();
+        };
+
+        async function playBoxesGame() {
+             const winningIdx = Math.floor(Math.random() * 3);
+             
+             // 1. Reveal Ball
+             document.getElementById(`ball-${winningIdx}`).classList.remove('opacity-0');
+             document.getElementById(`box-img-${winningIdx}`).classList.add('opacity-30'); // Make box transparent
+             
+             await new Promise(r => setTimeout(r, 1000));
+             
+             // 2. Hide Ball
+             document.getElementById(`ball-${winningIdx}`).classList.add('opacity-0');
+             document.getElementById(`box-img-${winningIdx}`).classList.remove('opacity-30');
+             
+             await new Promise(r => setTimeout(r, 500));
+             
+             // 3. Shuffle (CSS Classes)
+             const boxes = [0,1,2];
+             const wrapper = document.getElementById('boxes-wrapper');
+             const boxEls = boxes.map(i => document.getElementById(`box-${i}`));
+             
+             // Simple Shuffle Animation
+             boxEls.forEach(b => b.classList.add('shuffling'));
+             
+             // Swap transforms randomly
+             const positions = ['0%', '100%', '200%']; // TranslateX values relative to container?
+             // Actually, flex layout makes hard swaps tricky without absolute.
+             // Let's use simple opacity shuffle for visual effect in this constraints, 
+             // OR toggle order style.
+             
+             // Let's use transform translation
+             // Current: Flex row. 
+             // Box widths 20 (5rem). Gap is variable.
+             // We will simulate shuffle by just waiting and internal logic, visual shake.
+             boxEls.forEach(b => {
+                 b.style.transform = `translateY(${Math.random() * 20 - 10}px)`;
+             });
+             
+             await new Promise(r => setTimeout(r, 300));
+              boxEls.forEach(b => {
+                 b.style.transform = `translateY(0)`;
+             });
+             await new Promise(r => setTimeout(r, 300));
+             
+             // 4. Enable Interaction
+             window.clickBox = async (clickedIdx) => {
+                 window.clickBox = () => {}; // Disable clicks
+                 
+                 // Open Box
+                 document.getElementById(`box-img-${clickedIdx}`).classList.add('hidden');
+                 document.getElementById(`box-open-${clickedIdx}`).classList.remove('opacity-0');
+                 
+                 if (clickedIdx === winningIdx) {
+                     document.getElementById(`ball-${clickedIdx}`).classList.remove('opacity-0');
+                     await rewardUser(0.5, 'boxes');
+                 } else {
+                     showT('Игры', 'Пусто :(', '', null, true);
+                 }
+                 
+                 setCooldown('boxes');
+                 setTimeout(() => {
+                     closeModal('game-boxes');
+                     resetBoxes();
+                 }, 1500);
+             };
+        }
+
+        function resetBoxes() {
+            btnStartBoxes.classList.remove('hidden');
+            for(let i=0; i<3; i++) {
+                document.getElementById(`box-img-${i}`).classList.remove('hidden', 'opacity-30');
+                document.getElementById(`box-open-${i}`).classList.add('opacity-0');
+                document.getElementById(`ball-${i}`).classList.add('opacity-0');
+            }
+            window.clickBox = () => {};
+        }
+
+        // --- GAME 3: WHEEL ---
+        const btnSpin = document.getElementById('btn-spin-wheel');
+        const wheel = document.getElementById('the-wheel');
+        
+        btnSpin.onclick = () => {
+             btnSpin.disabled = true;
+             // Segments: 
+             // 0-60: 0.1
+             // 60-120: LOSE
+             // 120-180: 0.5
+             // 180-240: LOSE
+             // 240-300: 1.0
+             // 300-360: 2.0
+             // Logic: Wheel rotates clockwise. The arrow is at top (0 deg visually, but standard CSS rotation starts 12 o'clock? No, 0 is usually 12 or 3 depending.
+             // conic-gradient starts at 12 o'clock (0deg).
+             // Arrow is at top.
+             // To land on a segment, we need to rotate the wheel so that segment is at top.
+             
+             const rewards = [
+                 { val: 0.1, deg: 30 },
+                 { val: 0, deg: 90 },
+                 { val: 0.5, deg: 150 },
+                 { val: 0, deg: 210 },
+                 { val: 1.0, deg: 270 },
+                 { val: 2.0, deg: 330 }
+             ];
+             
+             // Pick random result
+             const res = rewards[Math.floor(Math.random() * rewards.length)];
+             
+             // Calculate rotation: 
+             // We want res.deg to be at the top (0deg).
+             // Current rotation is 0. 
+             // Target rotation = 360 * 5 (spins) + (360 - res.deg).
+             // Example: Want 90deg segment at top. Wheel must rotate -90 or 270.
+             
+             const spins = 5;
+             const targetDeg = (360 * spins) + (360 - res.deg);
+             
+             wheel.style.transform = `rotate(${targetDeg}deg)`;
+             
+             setTimeout(async () => {
+                 if (res.val > 0) {
+                     await rewardUser(res.val, 'wheel');
+                 } else {
+                     showT('Колесо', 'Попробуй еще раз');
+                 }
+                 setCooldown('wheel');
+                 setTimeout(() => {
+                     closeModal('game-wheel');
+                     wheel.style.transition = 'none';
+                     wheel.style.transform = 'rotate(0deg)';
+                     setTimeout(() => wheel.style.transition = '', 100);
+                     btnSpin.disabled = false;
+                 }, 2000);
+             }, 4000);
+        };
+
+        // --- COMMON REWARD LOGIC ---
+        async function rewardUser(amount, gameId) {
+             try {
+                const userRef = doc(db, "users", auth.currentUser.uid);
+                await runTransaction(db, async (t) => {
+                    const uDoc = await t.get(userRef);
+                    if(!uDoc.exists()) return;
+                    
+                    t.update(userRef, { balance: increment(amount) });
+                    
+                    const txRef = doc(collection(db, "transactions"));
+                    t.set(txRef, { 
+                        from: 'System (Game)', 
+                        to: auth.currentUser.email, 
+                        amount: amount, 
+                        date: Timestamp.now(), 
+                        parties: [auth.currentUser.email],
+                        type: 'game_reward',
+                        game: gameId
+                    });
+                });
+                showT('Победа!', `Выигрыш`, `+${amount.toFixed(1)} Đ`);
+             } catch(e) { console.error(e); }
+        }
+
+        // --- END GAMES ---
 
         document.getElementById('btn-do-deposit').onclick = async () => {
             const amt = parseFloat(document.getElementById('deposit-amt').value);
