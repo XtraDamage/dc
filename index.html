@@ -1,8 +1,12 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/ShalfeyArt/admin/refs/heads/main/icon.png3">
     <link rel="icon" href="https://raw.githubusercontent.com/ShalfeyArt/admin/refs/heads/main/icon.png" type="image/png" media="(prefers-color-scheme: light)">
     <link rel="icon" href="https://raw.githubusercontent.com/ShalfeyArt/admin/refs/heads/main/icon2.png" type="image/png" media="(prefers-color-scheme: dark)">
+    <!-- PWA Manifest (Data URI) -->
+    <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIkRvb2xjb2luIFdhbGxldCIsCiAgInNob3J0X25hbWUiOiAiRG9vbGNvaW4iLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiIzAwMDAwMCIsCiAgInRoZW1lX2NvbG9yIjogIiMwMDAwMDAiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20vU2hhbGZleUFydC9hZG1pbi9yZWZzL2hlYWRzL21haW4vaWNvbi5wbmciLAogICAgICAic2l6ZXMiOiAiMTkyeDE5MiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIKICAgIH0sCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL1NoYWxmZXlBcnQvYWRtaW4vcmVmcy9oZWFkcy9tYWluL2ljb24ucG5nIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9wbmciCiAgICB9CiAgXQp9">
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Doolcoin Wallet</title>
@@ -216,6 +220,31 @@
             <main class="flex-1 overflow-y-auto px-5 hide-scroll pb-32 z-10">
                 <!-- WALLET TAB -->
                 <div id="tab-wallet" class="tab-content active space-y-6">
+                    
+                    <!-- PWA INSTALL CARD (Новое окно установки) -->
+                    <div id="pwa-install-card" class="hidden mb-2 relative overflow-hidden group transition-all duration-500">
+                        <!-- Glass Background -->
+                        <div class="absolute inset-0 bg-[#111] border border-white/10 rounded-[2rem]"></div>
+                        <div class="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                        
+                        <div class="relative z-10 p-5 flex items-center justify-between gap-4">
+                            <div class="flex items-center gap-4">
+                                <!-- Icon Container -->
+                                <div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center shrink-0">
+                                    <img id="pwa-icon-img" src="https://img.icons8.com/?size=100&id=uW4sInVlXQiT&format=png&color=000000" class="w-6 h-6 object-contain">
+                                </div>
+                                <div>
+                                    <h3 id="pwa-title" class="text-sm font-black text-white leading-tight mb-1">Установить App</h3>
+                                    <p id="pwa-desc" class="text-[10px] font-bold text-neutral-500 leading-tight">Быстрый вход и бонусы</p>
+                                </div>
+                            </div>
+                            
+                            <button id="pwa-install-btn" class="h-10 px-5 bg-white text-black rounded-xl font-black text-[10px] uppercase tracking-wider hover:bg-neutral-200 transition-colors cursor-pointer whitespace-nowrap">
+                                Скачать
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="dool-card rounded-[2.5rem] p-6 sm:p-8 relative overflow-hidden group">
                         <div class="absolute inset-0 gradient-bg opacity-[0.03] group-hover:opacity-[0.05] transition-opacity duration-500"></div>
                         <div class="absolute -right-12 -top-12 w-48 h-48 bg-[#FF4D00] rounded-full blur-[80px] opacity-20"></div>
@@ -582,7 +611,7 @@
             handle.addEventListener('touchstart', (e) => {
                 startY = e.touches[0].clientY;
                 isDragging = true;
-                content.style.transition = 'none'; // Disable transition for direct control
+                content.style.transition = 'none'; 
             }, {passive: true});
 
             handle.addEventListener('touchmove', (e) => {
@@ -597,12 +626,12 @@
             handle.addEventListener('touchend', (e) => {
                 isDragging = false;
                 const diff = currentY - startY;
-                content.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'; // Re-enable snap
+                content.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'; 
                 
-                if(diff > 120) { // Threshold to close
+                if(diff > 120) { 
                     closeModal(modalName);
                 } else {
-                    content.style.transform = ''; // Snap back to open (translate-y-0 equivalent in CSS logic, but here we just clear inline style)
+                    content.style.transform = '';
                     content.style.transform = 'translateY(0)';
                 }
             });
@@ -659,7 +688,6 @@
             void m.offsetWidth;
             m.classList.remove('opacity-0');
             
-            // Reset transforms for swipeable modals
             if(['send', 'receive', 'deposit', 'withdraw'].includes(n)) {
                 c.style.transform = ''; 
                 setTimeout(() => c.classList.remove('translate-y-full'), 10);
@@ -679,7 +707,7 @@
             
             if(['send', 'receive', 'deposit', 'withdraw'].includes(n)) {
                 c.classList.add('translate-y-full');
-                c.style.transform = ''; // Clear JS drag transform
+                c.style.transform = ''; 
             } else if(n !== 'scan') {
                 c.classList.add('scale-90');
             }
@@ -700,7 +728,7 @@
              }, 300);
         }
 
-        // --- NEW NOTIFICATION JS (Updated Emojis) ---
+        // --- NEW NOTIFICATION JS ---
         let toastTimeout;
         window.showT = async (title, msg, amountStr = '', senderEmail = null, isError = false) => {
             const t = document.getElementById('toast');
@@ -709,12 +737,10 @@
             const amtEl = document.getElementById('toast-amount');
             const titleEl = document.getElementById('toast-title');
             
-            // Reset
             clearTimeout(toastTimeout);
             t.classList.remove('active');
             
             setTimeout(async () => {
-                // 1. Title Override (Банк -> Банка)
                 let displayTitle = title;
                 if (displayTitle === 'Банк') displayTitle = 'Банка';
                 
@@ -728,25 +754,20 @@
                     amtEl.classList.add('hidden'); 
                 }
                 
-                // Image Resources (Updated to White/Colored versions)
                 const imgBank = "https://emojigraph.org/media/facebook/jar_1fad9.png";
-                // White versions of icons for Toast
                 const imgWarn = "https://img.icons8.com/?size=100&id=5PexHbhSpPcd&format=png&color=ffffff";
                 const imgOk = "https://img.icons8.com/?size=100&id=ThDU3IFKpFui&format=png&color=ffffff";
 
-                // Reset Image Classes
                 avImg.className = "w-full h-full hidden";
-                avImg.style.filter = ''; // Reset filter
+                avImg.style.filter = ''; 
 
                 if (senderEmail) {
-                    // User message (Avatar)
                     icon.classList.add('hidden');
                     avImg.classList.remove('hidden');
-                    avImg.classList.add('object-cover'); // Avatars fill
+                    avImg.classList.add('object-cover'); 
                     const u = await getUserInfo(senderEmail);
                     avImg.src = u.avatar;
                 } else {
-                    // System message
                     let sysImg = null;
                     
                     if (isError) sysImg = imgWarn;
@@ -754,14 +775,11 @@
                     else if (displayTitle.includes('Успешно')) sysImg = imgOk;
 
                     if (sysImg) {
-                        // Use Image Icon
                         icon.classList.add('hidden');
                         avImg.classList.remove('hidden');
-                        avImg.classList.add('object-contain', 'p-1.5'); // Icons fit inside
+                        avImg.classList.add('object-contain', 'p-1.5'); 
                         avImg.src = sysImg;
-                        // No invert needed if we fetched white icons
                     } else {
-                        // Default Text Emoji (Bell)
                         avImg.classList.add('hidden');
                         icon.classList.remove('hidden');
                         icon.textContent = '🔔';
@@ -780,25 +798,20 @@
             const navR = document.getElementById('nav-referrals');
             const navB = document.getElementById('nav-bank');
             
-            // Reset text colors
             navW.classList.replace('text-orange-500', 'text-neutral-600');
             navR.classList.replace('text-orange-500', 'text-neutral-600');
             navB.classList.replace('text-orange-500', 'text-neutral-600');
             
-            // Reset opacity for all nav icons (Inactive state)
             document.querySelectorAll('.nav-icon').forEach(img => {
-                img.style.filter = ''; // Reset Orange filter
-                img.style.opacity = '0.5'; // Dim inactive
+                img.style.filter = ''; 
+                img.style.opacity = '0.5'; 
             });
 
-            // Highlight active tab
             const activeBtn = document.getElementById('nav-'+tab);
             activeBtn.classList.replace('text-neutral-600', 'text-orange-500');
             const activeImg = activeBtn.querySelector('img');
             
-            // Active state: Full opacity + Orange Filter
             activeImg.style.opacity = '1';
-            // Filter to turn White (#FFFFFF) to Orange (#FF4D00)
             activeImg.style.filter = 'brightness(0) saturate(100%) invert(32%) sepia(98%) saturate(2329%) hue-rotate(358deg) brightness(101%) contrast(106%)';
         };
 
@@ -958,7 +971,6 @@
                 document.getElementById('view-loading').classList.add('hidden');
                 document.getElementById('view-main').classList.replace('hidden', 'flex');
                 
-                // Set default nav state
                 switchTab('wallet');
 
                 document.getElementById('btn-login').disabled = false;
@@ -1028,7 +1040,6 @@
             const diffMs = now - lastUpdate;
             const diffWeeks = diffMs / (1000 * 60 * 60 * 24 * 7); 
             
-            // Formula: Principal * (1 + rate)^time, Rate = 0.05 (5%)
             const compoundBal = storedBalance * Math.pow(1.05, diffWeeks);
             return compoundBal;
         }
@@ -1109,7 +1120,6 @@
             const data = JSON.stringify({ t: "req", e: email, a: amt });
             container.innerHTML = '';
             
-            // Fixed generation logic: Standard black on white
             new QRCode(container, { 
                 text: data, 
                 width: 180, 
@@ -1227,13 +1237,87 @@
         };
 
         document.getElementById('btn-logout').onclick = () => signOut(auth);
-
-        // --- GLOBAL CLICK HANDLER (Copy My Email) ---
+        
         window.copyMyEmail = () => {
             const email = auth.currentUser.email;
             navigator.clipboard.writeText(email);
             showT('Успешно', 'Адрес скопирован');
         };
+
+        // --- PWA INSTALL LOGIC ---
+        const pwaCard = document.getElementById('pwa-install-card');
+        const pwaBtn = document.getElementById('pwa-install-btn');
+        const pwaIcon = document.getElementById('pwa-icon-img');
+        const pwaTitle = document.getElementById('pwa-title');
+        
+        // Icons
+        const iconCloud = "https://img.icons8.com/?size=100&id=uW4sInVlXQiT&format=png&color=000000";
+        const iconLoad = "https://img.icons8.com/?size=100&id=MM56OZC1vEjp&format=png&color=000000";
+        const iconDone = "https://img.icons8.com/?size=100&id=bf5bzNyU2idK&format=png&color=000000";
+        
+        let deferredPrompt;
+
+        // 1. Listen for install prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            pwaCard.classList.remove('hidden');
+        });
+
+        // 2. Check if already installed (Standalone)
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone || document.referrer.includes('android-app://');
+        
+        // Fallback: If not installed and event didn't fire (e.g. iOS or Dev), show card anyway for manual install
+        if (!isStandalone) {
+             setTimeout(() => {
+                 // If not yet shown by event, show it
+                 if (pwaCard.classList.contains('hidden')) {
+                     pwaCard.classList.remove('hidden');
+                 }
+             }, 2000);
+        }
+
+        pwaBtn.addEventListener('click', async () => {
+            // Change to Loading
+            pwaIcon.src = iconLoad;
+            pwaIcon.classList.add('animate-spin');
+            pwaBtn.textContent = "Загрузка...";
+            pwaBtn.disabled = true;
+
+            if (deferredPrompt) {
+                // Native Prompt
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                
+                // Stop spin
+                pwaIcon.classList.remove('animate-spin');
+                
+                if (outcome === 'accepted') {
+                    pwaIcon.src = iconDone;
+                    pwaBtn.textContent = "Готово";
+                    pwaTitle.textContent = "Установлено";
+                    deferredPrompt = null;
+                    setTimeout(() => pwaCard.classList.add('hidden'), 3000);
+                } else {
+                    // Reset if cancelled
+                    pwaIcon.src = iconCloud;
+                    pwaBtn.textContent = "Скачать";
+                    pwaBtn.disabled = false;
+                }
+            } else {
+                // Manual / iOS Flow simulation
+                setTimeout(() => {
+                    pwaIcon.classList.remove('animate-spin');
+                    pwaIcon.src = iconDone;
+                    pwaBtn.textContent = "Инструкция";
+                    pwaBtn.disabled = false;
+                    
+                    showT('Установка', 'Нажмите "Поделиться" -> "На экран домой"', '', null);
+                    
+                    // Keep card shown but "done" state for a moment
+                }, 1500);
+            }
+        });
 
     </script>
 </body>
