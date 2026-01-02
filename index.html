@@ -119,17 +119,6 @@
             cursor: grab; touch-action: none;
         }
         .swipe-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 10px; }
-
-        /* --- GAME ANIMATIONS --- */
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .spin-wheel { transition: transform 4s cubic-bezier(0.1, 0.9, 0.2, 1); }
-        
-        .hold-ring-bg { stroke: rgba(255,255,255,0.1); }
-        .hold-ring-progress { stroke: #FF4D00; stroke-dasharray: 283; stroke-dashoffset: 283; transition: stroke-dashoffset 0.1s linear; }
-        .hold-active .hold-ring-progress { transition: stroke-dashoffset 0.05s linear; }
-        .pulse-btn { animation: pulseOrange 2s infinite; }
-        @keyframes pulseOrange { 0% { box-shadow: 0 0 0 0 rgba(255, 77, 0, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(255, 77, 0, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 77, 0, 0); } }
-
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -264,54 +253,6 @@
                     </div>
                 </div>
 
-                <!-- GAMES TAB (NEW) -->
-                <div id="tab-games" class="tab-content space-y-6">
-                    <div class="dool-card rounded-[2.5rem] p-6 text-center relative overflow-hidden">
-                        <div class="absolute inset-0 bg-purple-500/5"></div>
-                        <div class="relative z-10">
-                            <h2 class="text-2xl font-black mb-1">Arcade</h2>
-                            <p class="text-[10px] font-bold text-neutral-500 uppercase tracking-widest">Играй и зарабатывай</p>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <!-- Hold Game -->
-                        <div onclick="openModal('game-hold')" class="dool-card p-5 rounded-[2rem] flex flex-col items-center justify-center gap-4 aspect-square cursor-pointer active:scale-95 transition-transform hover:bg-white/5 relative overflow-hidden group">
-                            <div class="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                            <div class="w-16 h-16 rounded-full bg-[#1a1a1a] border border-white/10 flex items-center justify-center text-3xl shadow-2xl relative z-10">
-                                👆
-                                <div class="absolute inset-0 border-2 border-orange-500 rounded-full animate-ping opacity-20"></div>
-                            </div>
-                            <div class="text-center relative z-10">
-                                <h3 class="font-black text-sm">Hold Coin</h3>
-                                <p class="text-[9px] text-neutral-500 font-bold uppercase mt-1">Удерживай</p>
-                            </div>
-                        </div>
-
-                        <!-- Roulette Game -->
-                        <div onclick="openModal('game-spin')" class="dool-card p-5 rounded-[2rem] flex flex-col items-center justify-center gap-4 aspect-square cursor-pointer active:scale-95 transition-transform hover:bg-white/5 relative overflow-hidden group">
-                             <div class="absolute inset-0 bg-gradient-to-bl from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                             <div class="w-16 h-16 rounded-full bg-[#1a1a1a] border border-white/10 flex items-center justify-center text-3xl shadow-2xl relative z-10">
-                                🎡
-                            </div>
-                            <div class="text-center relative z-10">
-                                <h3 class="font-black text-sm">Roulette</h3>
-                                <p class="text-[9px] text-neutral-500 font-bold uppercase mt-1">Испытай удачу</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="dool-card rounded-[2rem] p-5 relative overflow-hidden">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center text-xl">🏆</div>
-                            <div>
-                                <h3 class="font-bold text-sm text-white">Рейтинг</h3>
-                                <p class="text-[10px] text-neutral-500 font-bold">Скоро доступно</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- REFERRAL TAB -->
                 <div id="tab-referrals" class="tab-content space-y-6">
                     <div class="dool-card rounded-[2.5rem] p-6 sm:p-8 relative overflow-hidden">
@@ -350,6 +291,8 @@
                         </div>
                         <div class="dool-card p-5 rounded-[2rem] flex flex-col items-center justify-center gap-1 aspect-square">
                             <div class="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center mb-2 text-orange-500">
+                                <!-- ICON: Earned (White -> colored by container text color via currentColor? No, image src. Used filter previously) -->
+                                <!-- Using White icon and applying CSS Filter to make it ORANGE -->
                                 <img src="https://img.icons8.com/?size=100&id=djfFWeKjwcd3&format=png&color=ffffff" class="w-5 h-5" style="filter: brightness(0) saturate(100%) invert(32%) sepia(98%) saturate(2329%) hue-rotate(358deg) brightness(101%) contrast(106%);" alt="Earned">
                             </div>
                             <p id="ref-earned" class="text-2xl font-black">0</p>
@@ -395,25 +338,24 @@
                 </div>
             </main>
 
-            <!-- Navigation: Updated with Games Tab -->
+            <!-- Navigation: Absolute positioned within App container -->
             <nav class="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[360px] h-16 bg-[#111]/90 backdrop-blur-xl border border-white/10 rounded-[2rem] flex items-center justify-around px-2 z-50 shadow-2xl">
                 <button onclick="switchTab('wallet')" id="nav-wallet" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-orange-500 cursor-pointer">
-                    <img src="https://img.icons8.com/?size=100&id=Pv8alVtwvuFB&format=png&color=ffffff" class="w-7 h-7 nav-icon" alt="Wallet">
-                </button>
-                 <button onclick="switchTab('games')" id="nav-games" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
-                    <!-- ICON: Gamepad (White) -->
-                    <img src="https://img.icons8.com/?size=100&id=20815&format=png&color=ffffff" class="w-7 h-7 nav-icon" alt="Games">
+                    <!-- ICON: Wallet (White) - Increased size w-9 h-9 -->
+                    <img src="https://img.icons8.com/?size=100&id=Pv8alVtwvuFB&format=png&color=ffffff" class="w-9 h-9 nav-icon" alt="Wallet">
                 </button>
                 <button onclick="switchTab('bank')" id="nav-bank" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
-                     <img src="https://img.icons8.com/?size=100&id=MRDxs37r5Fp9&format=png&color=ffffff" class="w-7 h-7 nav-icon" alt="Bank">
+                     <!-- ICON: Bank (White) - Increased size w-9 h-9 -->
+                     <img src="https://img.icons8.com/?size=100&id=MRDxs37r5Fp9&format=png&color=ffffff" class="w-9 h-9 nav-icon" alt="Bank">
                 </button>
                 <button onclick="switchTab('referrals')" id="nav-referrals" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
-                    <img src="https://img.icons8.com/?size=100&id=N9EwPosvU1Rm&format=png&color=ffffff" class="w-7 h-7 nav-icon" alt="Referrals">
+                    <!-- ICON: Referrals (White) - Increased size w-9 h-9 -->
+                    <img src="https://img.icons8.com/?size=100&id=N9EwPosvU1Rm&format=png&color=ffffff" class="w-9 h-9 nav-icon" alt="Referrals">
                 </button>
             </nav>
         </div>
 
-        <!-- MODAL OVERLAY CLICK WRAPPERS -->
+        <!-- MODAL OVERLAY CLICK WRAPPERS: Added onclick to background -->
 
         <!-- Модалка: Профиль -->
         <div id="modal-profile" onclick="if(event.target===this) closeModal('profile')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col items-center justify-center p-8 opacity-0 transition-opacity duration-300">
@@ -452,71 +394,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Модалка: GAME HOLD -->
-        <div id="modal-game-hold" onclick="if(event.target===this) closeModal('game-hold')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
-            <div class="bg-[#111] border-t border-white/10 rounded-t-[2.5rem] p-0 transform translate-y-full transition-transform duration-300" id="modal-game-hold-content">
-                <div class="swipe-zone"><div class="swipe-handle"></div></div>
-                <div class="p-8 pb-10 flex flex-col items-center text-center">
-                    <h2 class="text-xl font-black mb-1">Hold to Earn</h2>
-                    <p class="text-xs text-neutral-500 font-medium mb-8">Удерживай кнопку до заполнения</p>
-                    
-                    <div class="relative w-48 h-48 mb-8 flex items-center justify-center">
-                        <!-- Progress Ring SVG -->
-                        <svg class="absolute inset-0 w-full h-full transform -rotate-90 pointer-events-none" viewBox="0 0 100 100">
-                            <circle class="hold-ring-bg" cx="50" cy="50" r="45" fill="none" stroke-width="6"/>
-                            <circle id="hold-progress" class="hold-ring-progress" cx="50" cy="50" r="45" fill="none" stroke-width="6" stroke-linecap="round"/>
-                        </svg>
-                        
-                        <!-- The Button -->
-                        <button id="btn-hold-game" class="w-32 h-32 rounded-full gradient-bg shadow-[0_0_40px_rgba(255,77,0,0.4)] flex items-center justify-center text-5xl active:scale-95 transition-transform pulse-btn cursor-pointer relative z-10 touch-none select-none">
-                            👆
-                        </button>
-                    </div>
-
-                    <p id="hold-status" class="text-sm font-bold text-orange-500 h-5">Зажми кнопку</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Модалка: GAME SPIN -->
-        <div id="modal-game-spin" onclick="if(event.target===this) closeModal('game-spin')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
-            <div class="bg-[#111] border-t border-white/10 rounded-t-[2.5rem] p-0 transform translate-y-full transition-transform duration-300" id="modal-game-spin-content">
-                <div class="swipe-zone"><div class="swipe-handle"></div></div>
-                <div class="p-8 pb-10 flex flex-col items-center text-center overflow-hidden">
-                    <h2 class="text-xl font-black mb-1">Lucky Spin</h2>
-                    <p class="text-xs text-neutral-500 font-medium mb-6">Вращай и выигрывай</p>
-                    
-                    <div class="relative w-64 h-64 mb-8">
-                        <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 z-20 text-3xl">🔻</div>
-                        
-                        <!-- Wheel -->
-                        <div id="wheel" class="w-full h-full rounded-full border-4 border-[#222] relative spin-wheel overflow-hidden bg-[#1a1a1a] shadow-2xl">
-                             <!-- Segments (CSS Conic Gradient equivalent) -->
-                             <div class="absolute inset-0 rounded-full" style="background: conic-gradient(
-                                 #222 0deg 90deg, 
-                                 #111 90deg 180deg, 
-                                 #222 180deg 270deg, 
-                                 #111 270deg 360deg
-                             );"></div>
-                             <!-- Lines -->
-                             <div class="absolute top-0 bottom-0 left-1/2 w-[2px] bg-white/10 -translate-x-1/2"></div>
-                             <div class="absolute left-0 right-0 top-1/2 h-[2px] bg-white/10 -translate-y-1/2"></div>
-                             
-                             <!-- Labels -->
-                             <span class="absolute top-6 left-1/2 -translate-x-1/2 font-black text-white">10 Đ</span>
-                             <span class="absolute bottom-6 left-1/2 -translate-x-1/2 font-black text-neutral-500">0 Đ</span>
-                             <span class="absolute left-6 top-1/2 -translate-y-1/2 font-black text-white">5 Đ</span>
-                             <span class="absolute right-6 top-1/2 -translate-y-1/2 font-black text-white">1 Đ</span>
-                        </div>
-                         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full z-10 shadow-lg"></div>
-                    </div>
-
-                    <button id="btn-spin" class="w-full h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer">Вращать</button>
-                </div>
-            </div>
-        </div>
-
 
         <!-- Модалка: Отправить -->
         <div id="modal-send" onclick="if(event.target===this) closeModal('send')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
@@ -730,7 +607,7 @@
         }
 
         // Init swipes
-        ['send', 'receive', 'deposit', 'withdraw', 'game-hold', 'game-spin'].forEach(initSwipeClose);
+        ['send', 'receive', 'deposit', 'withdraw'].forEach(initSwipeClose);
 
         // --- REFERRAL INIT LOGIC ---
         try {
@@ -781,7 +658,7 @@
             m.classList.remove('opacity-0');
             
             // Reset transforms for swipeable modals
-            if(['send', 'receive', 'deposit', 'withdraw', 'game-hold', 'game-spin'].includes(n)) {
+            if(['send', 'receive', 'deposit', 'withdraw'].includes(n)) {
                 c.style.transform = ''; 
                 setTimeout(() => c.classList.remove('translate-y-full'), 10);
             } else if(n !== 'scan') {
@@ -798,7 +675,7 @@
             if(!m || !c) return;
             m.classList.add('opacity-0');
             
-            if(['send', 'receive', 'deposit', 'withdraw', 'game-hold', 'game-spin'].includes(n)) {
+            if(['send', 'receive', 'deposit', 'withdraw'].includes(n)) {
                 c.classList.add('translate-y-full');
                 c.style.transform = ''; // Clear JS drag transform
             } else if(n !== 'scan') {
@@ -854,7 +731,6 @@
                 // White versions of icons for Toast
                 const imgWarn = "https://img.icons8.com/?size=100&id=5PexHbhSpPcd&format=png&color=ffffff";
                 const imgOk = "https://img.icons8.com/?size=100&id=ThDU3IFKpFui&format=png&color=ffffff";
-                const imgGame = "https://img.icons8.com/?size=100&id=20815&format=png&color=ffffff";
 
                 // Reset Image Classes
                 avImg.className = "w-full h-full hidden";
@@ -874,7 +750,6 @@
                     if (isError) sysImg = imgWarn;
                     else if (displayTitle.includes('Банка')) sysImg = imgBank;
                     else if (displayTitle.includes('Успешно')) sysImg = imgOk;
-                    else if (displayTitle.includes('Игра')) sysImg = imgGame;
 
                     if (sysImg) {
                         // Use Image Icon
@@ -902,13 +777,11 @@
             const navW = document.getElementById('nav-wallet');
             const navR = document.getElementById('nav-referrals');
             const navB = document.getElementById('nav-bank');
-            const navG = document.getElementById('nav-games');
             
             // Reset text colors
             navW.classList.replace('text-orange-500', 'text-neutral-600');
             navR.classList.replace('text-orange-500', 'text-neutral-600');
             navB.classList.replace('text-orange-500', 'text-neutral-600');
-            navG.classList.replace('text-orange-500', 'text-neutral-600');
             
             // Reset opacity for all nav icons (Inactive state)
             document.querySelectorAll('.nav-icon').forEach(img => {
@@ -1083,10 +956,8 @@
                 document.getElementById('view-loading').classList.add('hidden');
                 document.getElementById('view-main').classList.replace('hidden', 'flex');
                 
-                // Set default nav state (if new load)
-                if(!document.querySelector('.tab-content.active')) {
-                     switchTab('wallet');
-                }
+                // Set default nav state
+                switchTab('wallet');
 
                 document.getElementById('btn-login').disabled = false;
                 document.getElementById('btn-register').disabled = false;
@@ -1101,9 +972,6 @@
                 for (const tx of docs) {
                     const isSent = tx.from === u.email;
                     let partner = isSent ? tx.to : tx.from;
-                    if(tx.type === 'game_win') partner = 'Arcade';
-                    if(tx.type === 'referral_bonus') partner = 'Referral';
-
                     const dateStr = tx.date ? new Date(tx.date.toMillis()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
                     html += `<div class="flex items-center justify-between p-4 rounded-[1.5rem] bg-white/[0.03] border border-white/5">
                         <div class="flex items-center gap-3 overflow-hidden">
@@ -1126,19 +994,16 @@
                 const snap = await getDocs(q);
                 if (!snap.empty) {
                     const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date);
-                    const recentTx = docs[0];
-                    if (Math.abs(recentTx.amount - amountDiff) < 0.01) { 
-                        if (recentTx.type === 'referral_bonus') {
+                    if (Math.abs(docs[0].amount - amountDiff) < 0.01) { 
+                        if (docs[0].type === 'referral_bonus') {
                              showT('Рефералы', 'Бонус за друга', `+${amountDiff.toFixed(1)} Đ`);
-                        } else if (recentTx.type === 'game_win') {
-                             // Already handled in game logic mostly, but safe to show
                         } else {
-                             showT('Перевод', recentTx.from, `+${amountDiff.toFixed(1)} Đ`, recentTx.from); 
+                             showT('Перевод', docs[0].from, `+${amountDiff.toFixed(1)} Đ`, docs[0].from); 
                         }
                         return; 
                     }
                 }
-                // If no matching TX, assume Bank or Game update
+                showT('Банк', 'Начисление процентов', `+${amountDiff.toFixed(1)} Đ`);
             } catch(e) {}
         }
 
@@ -1361,184 +1226,11 @@
 
         document.getElementById('btn-logout').onclick = () => signOut(auth);
 
+        // --- GLOBAL CLICK HANDLER (Copy My Email) ---
         window.copyMyEmail = () => {
             const email = auth.currentUser.email;
             navigator.clipboard.writeText(email);
             showT('Успешно', 'Адрес скопирован');
-        };
-
-        // --- GAME LOGIC ---
-
-        // 1. Hold Game
-        const holdBtn = document.getElementById('btn-hold-game');
-        const holdRing = document.getElementById('hold-progress');
-        const holdStatus = document.getElementById('hold-status');
-        let holdStartTime = 0;
-        let holdFrameId = null;
-        const HOLD_DURATION = 3000; // 3 sec
-
-        function startHold(e) {
-            if(e.type === 'touchstart') e.preventDefault(); // prevent ghost clicks
-            holdStartTime = Date.now();
-            document.querySelector('#modal-game-hold-content').classList.add('hold-active');
-            holdStatus.textContent = "Удерживай...";
-            holdBtn.classList.add('scale-95');
-            
-            // Vibration
-            if (navigator.vibrate) navigator.vibrate(50);
-            
-            tickHold();
-        }
-
-        function endHold() {
-            cancelAnimationFrame(holdFrameId);
-            document.querySelector('#modal-game-hold-content').classList.remove('hold-active');
-            holdStatus.textContent = "Зажми кнопку";
-            holdBtn.classList.remove('scale-95');
-            holdRing.style.strokeDashoffset = 283; // Reset
-        }
-
-        function tickHold() {
-            const now = Date.now();
-            const diff = now - holdStartTime;
-            const progress = Math.min(diff / HOLD_DURATION, 1);
-            
-            // Update Ring (283 is approx circumference of r=45)
-            const offset = 283 - (283 * progress);
-            holdRing.style.strokeDashoffset = offset;
-
-            if (progress >= 1) {
-                // WIN
-                completeHoldGame();
-            } else {
-                holdFrameId = requestAnimationFrame(tickHold);
-            }
-        }
-
-        async function completeHoldGame() {
-            endHold();
-            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-            holdStatus.textContent = "УСПЕХ!";
-            
-            // Reward Logic
-            const reward = 0.5;
-            try {
-                await updateDoc(doc(db, "users", auth.currentUser.uid), {
-                    balance: increment(reward)
-                });
-                
-                // Optional: log transaction
-                await setDoc(doc(collection(db, "transactions")), {
-                    from: 'Arcade',
-                    to: auth.currentUser.email,
-                    amount: reward,
-                    date: Timestamp.now(),
-                    parties: [auth.currentUser.email],
-                    type: 'game_win'
-                });
-
-                showT('Игра', 'Майнинг завершен', `+${reward} Đ`);
-                closeModal('game-hold');
-            } catch(e) { console.error(e); }
-        }
-
-        holdBtn.addEventListener('mousedown', startHold);
-        holdBtn.addEventListener('touchstart', startHold);
-        holdBtn.addEventListener('mouseup', endHold);
-        holdBtn.addEventListener('mouseleave', endHold);
-        holdBtn.addEventListener('touchend', endHold);
-
-
-        // 2. Roulette Logic
-        const spinBtn = document.getElementById('btn-spin');
-        const wheel = document.getElementById('wheel');
-        let isSpinning = false;
-
-        spinBtn.onclick = async () => {
-            if (isSpinning) return;
-            // Cooldown check could go here
-            if (myData.balance < 0.5) return showT('Ошибка', 'Цена спина 0.5 Đ', '', null, true);
-
-            isSpinning = true;
-            spinBtn.disabled = true;
-            
-            // Deduct cost
-            try {
-                await updateDoc(doc(db, "users", auth.currentUser.uid), {
-                    balance: increment(-0.5)
-                });
-            } catch(e) {
-                 isSpinning = false; spinBtn.disabled = false;
-                 return showT('Ошибка', 'Сбой сети');
-            }
-
-            // Random angle
-            const extraSpins = 5 * 360; // 5 full turns
-            const randomDeg = Math.floor(Math.random() * 360);
-            const totalDeg = extraSpins + randomDeg;
-            
-            wheel.style.transform = `rotate(${totalDeg}deg)`;
-
-            setTimeout(async () => {
-                isSpinning = false;
-                spinBtn.disabled = false;
-                wheel.style.transition = 'none';
-                wheel.style.transform = `rotate(${randomDeg % 360}deg)`;
-                void wheel.offsetHeight; 
-                wheel.style.transition = 'transform 4s cubic-bezier(0.1, 0.9, 0.2, 1)';
-
-                // Calculate Win based on segments
-                // 0-90: 270-360 in rotation space (Blue/Black) -> 1 Đ
-                // 90-180: 180-270 (Black) -> 5 Đ
-                // 180-270: 90-180 (Blue) -> 0 Đ
-                // 270-360: 0-90 (Black) -> 10 Đ
-                
-                // Normalized angle relative to pointer (top center)
-                // Pointer is fixed. Wheel rotates clockwise.
-                // 0 deg rotation -> Top is 0-90 start? 
-                // Let's simplify: 4 segments.
-                // 0-90deg segment ends up at Top if rotation is between 270-360?
-                // Let's just map randomDeg directly.
-                
-                let win = 0;
-                // Note: The segments in CSS are:
-                // 0-90 (#222) -> Top Right
-                // 90-180 (#111) -> Bottom Right
-                // 180-270 (#222) -> Bottom Left
-                // 270-360 (#111) -> Top Left
-                
-                // The pointer is at Top.
-                // If rotate(0), Top touches border of 270-360 and 0-90.
-                
-                const normalized = randomDeg % 360;
-                // If wheel rotated 45 deg, the "0" point moved 45 deg clockwise. The pointer is at 0.
-                // So the segment UNDER the pointer is the one at 360 - 45 = 315 deg.
-                
-                const pointerAngle = (360 - normalized) % 360;
-
-                if (pointerAngle >= 0 && pointerAngle < 90) win = 10;
-                else if (pointerAngle >= 90 && pointerAngle < 180) win = 1;
-                else if (pointerAngle >= 180 && pointerAngle < 270) win = 5;
-                else win = 0;
-
-                if (win > 0) {
-                     await updateDoc(doc(db, "users", auth.currentUser.uid), {
-                        balance: increment(win)
-                    });
-                    await setDoc(doc(collection(db, "transactions")), {
-                        from: 'Arcade',
-                        to: auth.currentUser.email,
-                        amount: win,
-                        date: Timestamp.now(),
-                        parties: [auth.currentUser.email],
-                        type: 'game_win'
-                    });
-                    showT('Победа!', `Вы выиграли`, `+${win} Đ`);
-                    if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
-                } else {
-                    showT('Увы', 'Попробуй еще раз');
-                }
-            }, 4000);
         };
 
     </script>
