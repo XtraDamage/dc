@@ -133,7 +133,7 @@
         <div id="toast">
             <div class="relative shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-[#111] border border-white/10 overflow-hidden">
                 <img id="toast-avatar" src="" class="w-full h-full object-cover hidden">
-                <div id="toast-icon-sys" class="text-xl">🔔</div>
+                <div id="toast-icon-sys" class="text-xl hidden">🔔</div>
             </div>
             <div class="flex-1 min-w-0 flex flex-col justify-center">
                 <p id="toast-title" class="text-[9px] font-black uppercase text-neutral-500 tracking-widest leading-tight">Система</p>
@@ -779,6 +779,8 @@
                 // White versions of icons for Toast
                 const imgWarn = "https://img.icons8.com/?size=100&id=5PexHbhSpPcd&format=png&color=ffffff";
                 const imgOk = "https://img.icons8.com/?size=100&id=ThDU3IFKpFui&format=png&color=ffffff";
+                // New Default Icon
+                const imgDefault = "https://img.icons8.com/?size=100&id=oStKNuPVzV7A&format=png&color=ffffff";
 
                 // Reset Image Classes
                 avImg.className = "w-full h-full hidden";
@@ -798,6 +800,7 @@
                     if (isError) sysImg = imgWarn;
                     else if (displayTitle.includes('Банка')) sysImg = imgBank;
                     else if (displayTitle.includes('Успешно')) sysImg = imgOk;
+                    else sysImg = imgDefault; // Use new default icon
 
                     if (sysImg) {
                         // Use Image Icon
@@ -805,13 +808,7 @@
                         avImg.classList.remove('hidden');
                         avImg.classList.add('object-contain', 'p-1.5'); // Icons fit inside
                         avImg.src = sysImg;
-                        // No invert needed if we fetched white icons
-                    } else {
-                        // Default Text Emoji (Bell)
-                        avImg.classList.add('hidden');
-                        icon.classList.remove('hidden');
-                        icon.textContent = '🔔';
-                    }
+                    } 
                 }
 
                 t.classList.add('active');
