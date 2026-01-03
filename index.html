@@ -581,6 +581,20 @@
         const db = getFirestore(app);
         const googleProvider = new GoogleAuthProvider();
 
+        // -------------------------
+        // ANTI-FRAUD UTILS
+        // -------------------------
+        async function getClientIP() {
+            try {
+                const res = await fetch('https://api.ipify.org?format=json');
+                const data = await res.json();
+                return data.ip;
+            } catch (e) {
+                console.warn('IP fetch failed', e);
+                return '0.0.0.0'; // Fallback if blocked
+            }
+        }
+
         // Исправленная функция выхода (доступна из HTML)
         window.appLogout = () => {
              signOut(auth).then(() => {
@@ -843,8 +857,9 @@
                 if (!snap.exists()) {
                     const email = u.email;
                     const emailLower = u.email.toLowerCase();
+                    const clientIP = await getClientIP();
 
-                    await setDoc(userRef, {
+                    const userData = {
                         email: email, 
                         lowercaseEmail: emailLower,
                         balance: 10.0, 
@@ -854,11 +869,15 @@
                         refCount: 0, 
                         refEarned: 0, 
                         createdAt: Timestamp.now(),
-                        isBanned: false // Default not banned
-                    });
+                        isBanned: false,
+                        ip: clientIP,
+                        referralStatus: 'none'
+                    };
 
-                    // --- REFERRAL LOGIC ---
+                    // --- REFERRAL LOGIC (SECURE) ---
+                    // Don't pay immediately. Just link and check IP.
                     const refEmail = localStorage.getItem('dool_ref');
+                    
                     if (refEmail && refEmail !== emailLower) {
                         try {
                             let q = query(collection(db, "users"), where("lowercaseEmail", "==", refEmail));
@@ -873,30 +892,18 @@
                                 const referrerData = referrerDoc.data();
                                 const referrerRealEmail = referrerData.email || refEmail;
                                 
-                                await runTransaction(db, async (t) => {
-                                    const rDoc = await t.get(referrerDoc.ref);
-                                    if(!rDoc.exists()) return;
-
-                                    t.update(referrerDoc.ref, {
-                                        balance: increment(10),
-                                        refCount: increment(1),
-                                        refEarned: increment(10)
-                                    });
-                                    
-                                    const txRef = doc(collection(db, "transactions"));
-                                    t.set(txRef, { 
-                                        from: 'System (Ref)', 
-                                        to: referrerRealEmail, 
-                                        amount: 10.0, 
-                                        date: Timestamp.now(), 
-                                        parties: [referrerRealEmail],
-                                        type: 'referral_bonus'
-                                    });
-                                });
+                                // ANTI-FRAUD CHECK: IP
+                                if (referrerData.ip !== clientIP) {
+                                    userData.referredBy = referrerRealEmail;
+                                    userData.referredByUid = referrerDoc.id; // Store UID for easier transaction
+                                    userData.referralStatus = 'pending'; // Pending first transaction
+                                }
                             }
                         } catch (err) { console.error("Ref error:", err); }
                     }
                     localStorage.removeItem('dool_ref');
+                    
+                    await setDoc(userRef, userData);
                 }
                 
                 startApp(u);
@@ -1243,13 +1250,53 @@
                 await runTransaction(db, async (t) => {
                     const senderRef = doc(db, "users", auth.currentUser.uid);
                     const sDoc = await t.get(senderRef);
-                    if (sDoc.data().balance < amt) throw new Error("Недостаточно средств");
+                    const sData = sDoc.data();
 
+                    if (sData.balance < amt) throw new Error("Недостаточно средств");
+
+                    // 1. DEDUCT & ADD
                     t.update(senderRef, { balance: increment(-amt) });
                     t.update(receiverRef, { balance: increment(amt) });
                     
+                    // 2. CREATE TX RECORD
                     const txRef = doc(collection(db, "transactions"));
                     t.set(txRef, { from: myEmail, to: to, amount: amt, date: Timestamp.now(), parties: [myEmail, to] });
+
+                    // 3. REFERRAL ACTIVATION LOGIC (Inside Transaction)
+                    // Logic: Must be pending + Must NOT be sending to the referrer
+                    if (sData.referralStatus === 'pending' && sData.referredBy && sData.referredByUid) {
+                        
+                        // Rule: "if he transferred to the same person who invited him don't accrue"
+                        // to (recipient email) !== referredBy (referrer email)
+                        if (to !== sData.referredBy) {
+                            
+                            // Reference to referrer doc using stored UID
+                            const refDocRef = doc(db, "users", sData.referredByUid);
+                            
+                            // Credit Referrer
+                            t.update(refDocRef, {
+                                balance: increment(10),
+                                refCount: increment(1),
+                                refEarned: increment(10)
+                            });
+                            
+                            // Mark Sender as 'paid' so we don't pay again
+                            t.update(senderRef, { referralStatus: 'paid' });
+                            
+                            // Create Bonus Transaction Record
+                            const bonusTxRef = doc(collection(db, "transactions"));
+                            t.set(bonusTxRef, { 
+                                from: 'System (Ref)', 
+                                to: sData.referredBy, 
+                                amount: 10.0, 
+                                date: Timestamp.now(), 
+                                parties: [sData.referredBy],
+                                type: 'referral_bonus'
+                            });
+                        }
+                        // Note: If they send to referrer, we do NOTHING. Status stays 'pending'.
+                        // They can still trigger it later by sending to someone else.
+                    }
                 });
                 
                 closeModal('send');
