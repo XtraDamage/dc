@@ -169,7 +169,6 @@
                     Ваш аккаунт был заблокирован администрацией за нарушение правил использования сервиса.
                 </p>
             </div>
-        </div>
 
         <!-- Авторизация -->
         <div id="view-auth" class="hidden flex-col h-full p-6 justify-center relative">
@@ -581,16 +580,11 @@
         const db = getFirestore(app);
         const googleProvider = new GoogleAuthProvider();
 
-        // Исправленная функция выхода (доступна из HTML)
-        window.appLogout = () => {
+        window.signOut = (auth) => {
              signOut(auth).then(() => {
-                // Скрываем экран бана при выходе, чтобы показался экран входа
+                // Ensure ban screen is hidden on logout
                 document.getElementById('view-banned').classList.add('hidden');
                 document.getElementById('view-banned').classList.remove('flex');
-             }).catch((error) => {
-                 console.error("Ошибка выхода:", error);
-                 // Если ошибка, пробуем перезагрузить страницу
-                 window.location.reload();
              });
         };
 
