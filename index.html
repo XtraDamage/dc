@@ -152,6 +152,29 @@
             </div>
         </div>
 
+        <!-- Экран блокировки (BAN VIEW) -->
+        <div id="view-banned" class="hidden flex-col h-full p-6 justify-center items-center relative z-[200] bg-black">
+            <div class="absolute inset-0 bg-red-500/5 z-0 pointer-events-none"></div>
+            
+            <div class="w-32 h-32 bg-red-500/10 rounded-full flex items-center justify-center mb-6 relative border border-red-500/20 shadow-[0_0_50px_rgba(255,0,0,0.2)]">
+                 <div class="absolute inset-0 bg-red-500/20 blur-xl rounded-full animate-pulse"></div>
+                 <!-- BANNED ICON -->
+                 <img src="https://img.icons8.com/?size=100&id=bQBCD3cqTiwW&format=png&color=ffffff" class="w-16 h-16 relative z-10 opacity-90 drop-shadow-[0_0_10px_rgba(255,0,0,0.5)]">
+            </div>
+            
+            <h2 class="text-2xl font-black text-white mb-3 uppercase tracking-wide relative z-10">Доступ ограничен</h2>
+            
+            <div class="bg-white/5 border border-white/10 rounded-2xl p-4 w-full max-w-[280px] mb-8 relative z-10">
+                <p class="text-neutral-400 text-center text-xs font-bold leading-relaxed">
+                    Ваш аккаунт был заблокирован администрацией за нарушение правил использования сервиса.
+                </p>
+            </div>
+
+            <button onclick="signOut(auth)" class="px-8 py-3 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-white uppercase tracking-wider hover:bg-white/10 active:scale-95 transition-all cursor-pointer relative z-10">
+                Выйти из аккаунта
+            </button>
+        </div>
+
         <!-- Авторизация -->
         <div id="view-auth" class="hidden flex-col h-full p-6 justify-center relative">
             <div class="absolute top-0 left-0 w-full h-1/2 gradient-bg opacity-[0.03] blur-3xl pointer-events-none"></div>
@@ -562,6 +585,14 @@
         const db = getFirestore(app);
         const googleProvider = new GoogleAuthProvider();
 
+        window.signOut = (auth) => {
+             signOut(auth).then(() => {
+                // Ensure ban screen is hidden on logout
+                document.getElementById('view-banned').classList.add('hidden');
+                document.getElementById('view-banned').classList.remove('flex');
+             });
+        };
+
         let myData = null;
         let lastBal = null;
         const userCache = {};
@@ -821,7 +852,8 @@
                         avatar: u.photoURL || '', 
                         refCount: 0, 
                         refEarned: 0, 
-                        createdAt: Timestamp.now()
+                        createdAt: Timestamp.now(),
+                        isBanned: false // Default not banned
                     });
 
                     // --- REFERRAL LOGIC ---
@@ -870,6 +902,7 @@
             } else {
                 document.getElementById('view-loading').classList.add('hidden');
                 document.getElementById('view-main').classList.add('hidden');
+                document.getElementById('view-banned').classList.add('hidden');
                 document.getElementById('view-auth').classList.replace('hidden', 'flex');
             }
         });
@@ -935,6 +968,20 @@
             onSnapshot(doc(db, "users", u.uid), async (snap) => {
                 const d = snap.data();
                 if (!d) return;
+
+                // --- BAN SYSTEM CHECK ---
+                if (d.isBanned === true) {
+                    document.getElementById('view-loading').classList.add('hidden');
+                    document.getElementById('view-main').classList.add('hidden');
+                    document.getElementById('view-auth').classList.add('hidden');
+                    document.getElementById('view-banned').classList.remove('hidden');
+                    document.getElementById('view-banned').classList.add('flex');
+                    return; // Stop rendering main app
+                } else {
+                    document.getElementById('view-banned').classList.add('hidden');
+                    document.getElementById('view-banned').classList.remove('flex');
+                }
+                // -------------------------
                 
                 if (lastBal !== null && d.balance > lastBal) {
                     const diff = d.balance - lastBal;
