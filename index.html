@@ -170,7 +170,7 @@
                 </p>
             </div>
 
-            <button onclick="signOut(auth)" class="px-8 py-3 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-white uppercase tracking-wider hover:bg-white/10 active:scale-95 transition-all cursor-pointer relative z-10">
+            <button onclick="appLogout()" class="px-8 py-3 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-white uppercase tracking-wider hover:bg-white/10 active:scale-95 transition-all cursor-pointer relative z-10">
                 Выйти из аккаунта
             </button>
         </div>
@@ -585,11 +585,16 @@
         const db = getFirestore(app);
         const googleProvider = new GoogleAuthProvider();
 
-        window.signOut = (auth) => {
+        // Исправленная функция выхода (доступна из HTML)
+        window.appLogout = () => {
              signOut(auth).then(() => {
-                // Ensure ban screen is hidden on logout
+                // Скрываем экран бана при выходе, чтобы показался экран входа
                 document.getElementById('view-banned').classList.add('hidden');
                 document.getElementById('view-banned').classList.remove('flex');
+             }).catch((error) => {
+                 console.error("Ошибка выхода:", error);
+                 // Если ошибка, пробуем перезагрузить страницу
+                 window.location.reload();
              });
         };
 
