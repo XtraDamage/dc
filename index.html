@@ -826,9 +826,38 @@
                 document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-loading').classList.add('hidden'); document.getElementById('view-main').classList.replace('hidden', 'flex'); 
                 if(!document.querySelector('.tab-content.active')) switchTab('wallet');
             });
-            // Transaction History logic omitted for brevity (same as before)
+            
+            // Restoring History Logic
+            const qTx = query(collection(db, "transactions"), where("parties", "array-contains", u.email));
+            onSnapshot(qTx, async (snap) => {
+                const list = document.getElementById('tx-history'); if (snap.empty) { list.innerHTML = `<p class="text-center text-neutral-600 text-[10px] uppercase font-bold py-4">...</p>`; return; }
+                const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date); let html = '';
+                for (const tx of docs) {
+                    const isSent = tx.from === u.email, partner = isSent ? tx.to : tx.from, dateStr = tx.date ? new Date(tx.date.toMillis()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+                    html += `<div class="flex items-center justify-between p-4 rounded-[1.5rem] bg-white/[0.03] border border-white/5"><div class="flex items-center gap-3 overflow-hidden"><img id="av-${tx.date.toMillis()}" src="https://ui-avatars.com/api/?background=222&color=666&name=${partner.charAt(0)}" class="w-10 h-10 rounded-full bg-neutral-800 object-cover border border-white/5 shrink-0"><div class="min-w-0"><p class="text-[9px] font-black uppercase ${isSent ? 'text-neutral-500' : 'text-[#FF4D00]'} tracking-widest mb-0.5">${isSent ? 'To:' : 'From:'}</p><p class="text-[11px] font-bold text-white truncate w-32 leading-tight">${partner}</p></div></div><div class="text-right"><p class="text-sm font-black ${isSent ? 'text-white' : 'text-[#FF4D00]'}">${isSent ? '-' : '+'}${tx.amount.toFixed(1)}</p><p class="text-[9px] text-neutral-600 font-bold uppercase">${dateStr}</p></div></div>`;
+                    if(partner.includes('@')) getUserInfo(partner).then(inf => { const el = document.getElementById(`av-${tx.date.toMillis()}`); if(el) el.src = inf.avatar; });
+                }
+                list.innerHTML = html;
+            });
         }
-        async function handleIncomingTransfer(myEmail, amountDiff) { showT('Банк', 'Баланс обновлен', `+${amountDiff.toFixed(1)} Đ`); }
+        
+        async function handleIncomingTransfer(myEmail, amountDiff) {
+            try { 
+                const q = query(collection(db, "transactions"), where("to", "==", myEmail)); 
+                const snap = await getDocs(q); 
+                if (!snap.empty) { 
+                    const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date); 
+                    // Check if the latest transaction matches the amount diff closely
+                    if (docs.length > 0 && Math.abs(docs[0].amount - amountDiff) < 0.01) { 
+                        if (docs[0].type === 'referral_bonus') showT('Bonus', getTrans('ref_desc'), `+${amountDiff.toFixed(1)} Đ`); 
+                        else showT('Transfer', docs[0].from, `+${amountDiff.toFixed(1)} Đ`, docs[0].from); 
+                        return; 
+                    } 
+                } 
+                showT('Банк', getTrans('in_jar'), `+${amountDiff.toFixed(1)} Đ`); 
+            } catch(e) {}
+        }
+        
         async function getUserInfo(email) { return { avatar: `https://ui-avatars.com/api/?background=random&color=fff&name=${email.charAt(0)}`, email: email }; }
 
         /* BANK & TRANSFERS */
