@@ -29,6 +29,35 @@
         .tab-content.active { display: block; animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
         
+        /* --- LIGHT THEME OVERRIDES --- */
+        /* Используем инверсию для быстрой смены темы без переписывания всего HTML */
+        #app.light-mode {
+            background-color: #F2F4F6 !important;
+            color: #111 !important;
+        }
+        #app.light-mode .dool-card {
+            background: #ffffff !important;
+            border: 1px solid rgba(0,0,0,0.05) !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+        #app.light-mode .glass-panel {
+            background: rgba(0, 0, 0, 0.05) !important;
+            border: 1px solid rgba(0, 0, 0, 0.05) !important;
+            color: #000 !important;
+        }
+        #app.light-mode .text-white { color: #000 !important; }
+        #app.light-mode .text-neutral-400, 
+        #app.light-mode .text-neutral-500,
+        #app.light-mode .text-neutral-600 { color: #666 !important; }
+        #app.light-mode input { color: #000 !important; }
+        #app.light-mode input::placeholder { color: #888 !important; }
+        /* Инвертируем белые иконки в черные */
+        #app.light-mode img:not(.no-invert) { filter: invert(1) !important; }
+        #app.light-mode .scan-border-glow { border-color: rgba(255, 77, 0, 0.8); }
+        #app.light-mode #nav-wallet, #app.light-mode #nav-bank, #app.light-mode #nav-referrals {
+            /* Fix nav icons in light mode */
+        }
+
         /* --- NEW NOTIFICATION STYLE (Dynamic Island) --- */
         #toast { 
             position: absolute; top: 12px; left: 50%; transform: translateX(-50%) translateY(-150%);
@@ -121,18 +150,19 @@
             cursor: grab; touch-action: none;
         }
         .swipe-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 10px; }
+        #app.light-mode .swipe-handle { background: rgba(0,0,0,0.2); }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
     <!-- APP CONTAINER - Scalable and Centered -->
     <!-- h-[100dvh] для мобильных -->
-    <div id="app" class="w-full h-[100dvh] sm:h-[95vh] sm:max-h-[850px] sm:max-w-[420px] sm:rounded-[3rem] relative bg-black shadow-2xl overflow-hidden border-0 sm:border border-white/10 flex flex-col">
+    <div id="app" class="w-full h-[100dvh] sm:h-[95vh] sm:max-h-[850px] sm:max-w-[420px] sm:rounded-[3rem] relative bg-black shadow-2xl overflow-hidden border-0 sm:border border-white/10 flex flex-col transition-colors duration-500">
         
         <!-- NEW TOAST NOTIFICATION (Absolute positioning inside App) -->
         <div id="toast">
             <div class="relative shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-[#111] border border-white/10 overflow-hidden">
-                <img id="toast-avatar" src="" class="w-full h-full object-cover hidden">
+                <img id="toast-avatar" src="" class="w-full h-full object-cover hidden no-invert">
                 <div id="toast-icon-sys" class="text-xl hidden">🔔</div>
             </div>
             <div class="flex-1 min-w-0 flex flex-col justify-center">
@@ -192,7 +222,7 @@
             <div class="space-y-3 relative z-10">
                 <button id="btn-google" class="w-full h-14 bg-white text-black rounded-2xl font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-3 transition-all active:scale-95 cursor-pointer relative overflow-hidden group">
                     <div class="absolute inset-0 bg-neutral-200 opacity-0 group-hover:opacity-10 transition-opacity"></div>
-                    <svg width="24" height="24" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.84.81-.81z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                    <svg width="24" height="24" viewBox="0 0 24 24" class="no-invert"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.84.81-.81z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
                     <span>Google</span>
                 </button>
 
@@ -219,17 +249,23 @@
             <header class="px-6 pt-12 pb-4 flex justify-between items-center z-20">
                 <div class="flex items-center gap-3 active:opacity-70 transition-opacity cursor-pointer" onclick="openModal('profile')">
                     <div class="p-[2px] gradient-bg rounded-full shadow-[0_0_20px_rgba(255,77,0,0.3)]">
-                        <img id="main-avatar" src="" class="w-10 h-10 rounded-full object-cover bg-black border-2 border-black">
+                        <img id="main-avatar" src="" class="w-10 h-10 rounded-full object-cover bg-black border-2 border-black no-invert">
                     </div>
                     <div class="flex flex-col justify-center">
                         <p id="main-username" class="text-xs font-bold truncate max-w-[140px] leading-tight">...</p>
-                        <p class="text-[9px] font-black text-neutral-500 uppercase tracking-widest leading-tight">Профиль</p>
+                        <p class="text-[9px] font-black text-neutral-500 uppercase tracking-widest leading-tight" data-t="profile">Профиль</p>
                     </div>
                 </div>
-                <button id="btn-logout" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer">
-                    <!-- ICON: Logout (White) -->
-                    <img src="https://img.icons8.com/?size=100&id=5HW1YsFkzHio&format=png&color=ffffff" class="w-5 h-5 opacity-80" alt="Logout">
-                </button>
+                <div class="flex items-center gap-2">
+                    <!-- NEW SETTINGS BUTTON -->
+                    <button onclick="openModal('settings')" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer">
+                        <img src="https://img.icons8.com/?size=100&id=xyFoc6U1Hu3c&format=png&color=ffffff" class="w-5 h-5 opacity-80" alt="Settings">
+                    </button>
+                    <!-- LOGOUT BUTTON -->
+                    <button id="btn-logout" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer">
+                        <img src="https://img.icons8.com/?size=100&id=5HW1YsFkzHio&format=png&color=ffffff" class="w-5 h-5 opacity-80" alt="Logout">
+                    </button>
+                </div>
             </header>
 
             <main class="flex-1 overflow-y-auto px-5 hide-scroll pb-32 z-10">
@@ -240,7 +276,7 @@
                         <div class="absolute -right-12 -top-12 w-48 h-48 bg-[#FF4D00] rounded-full blur-[80px] opacity-20"></div>
                         
                         <div class="relative z-10 flex flex-col items-center justify-center py-6">
-                            <span class="text-[10px] font-bold text-neutral-500 uppercase tracking-[0.2em] mb-2">Общий баланс</span>
+                            <span class="text-[10px] font-bold text-neutral-500 uppercase tracking-[0.2em] mb-2" data-t="total_balance">Общий баланс</span>
                             <div class="w-full flex items-baseline justify-center gap-1 mb-2 px-2">
                                 <h2 id="balance-val" class="text-5xl font-black tracking-tighter leading-none whitespace-nowrap overflow-visible">0.00</h2>
                                 <span class="text-2xl font-black gradient-text leading-none mb-1 self-end pb-1">Đ</span>
@@ -248,27 +284,27 @@
                         </div>
 
                         <div class="flex gap-3 mt-4 relative z-10">
-                            <button onclick="openModal('send')" class="flex-1 h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 active:scale-95 transition-all shadow-lg shadow-white/5 cursor-pointer flex flex-col items-center justify-center">
-                                <span>Отправить</span>
+                            <button onclick="openModal('send')" class="flex-1 h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 active:scale-95 transition-all shadow-lg shadow-white/5 cursor-pointer flex flex-col items-center justify-center no-invert">
+                                <span data-t="send">Отправить</span>
                             </button>
                             <button onclick="openModal('scan')" class="w-14 h-14 glass-panel text-white rounded-2xl flex items-center justify-center hover:bg-white/10 active:scale-95 transition-all cursor-pointer border border-white/10 hover:border-orange-500/50">
                                 <!-- ICON: QR Code (White) -->
                                 <img src="https://img.icons8.com/?size=100&id=XdgEzmYg0J8k&format=png&color=ffffff" class="w-6 h-6" alt="Scan">
                             </button>
                             <button onclick="openModal('receive')" class="flex-1 h-14 glass-panel text-white border border-white/10 rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-white/10 active:scale-95 transition-all cursor-pointer flex flex-col items-center justify-center">
-                                <span>Получить</span>
+                                <span data-t="receive">Получить</span>
                             </button>
                         </div>
                     </div>
 
                     <div class="space-y-4">
                         <div class="flex items-center justify-between px-2">
-                            <h3 class="text-[11px] font-black text-neutral-500 uppercase tracking-widest">История операций</h3>
+                            <h3 class="text-[11px] font-black text-neutral-500 uppercase tracking-widest" data-t="history">История операций</h3>
                         </div>
                         <div id="tx-history" class="space-y-2 pb-10">
                             <div class="text-center py-10">
                                 <div class="w-8 h-8 border-2 border-white/10 border-t-orange-500 rounded-full animate-spin mx-auto mb-4"></div>
-                                <p class="text-[10px] font-bold text-neutral-600 uppercase tracking-widest">Загрузка...</p>
+                                <p class="text-[10px] font-bold text-neutral-600 uppercase tracking-widest" data-t="loading">Загрузка...</p>
                             </div>
                         </div>
                     </div>
@@ -278,13 +314,13 @@
                 <div id="tab-referrals" class="tab-content space-y-6">
                     <div class="dool-card rounded-[2.5rem] p-6 sm:p-8 relative overflow-hidden">
                         <div class="absolute top-0 right-0 w-32 h-32 gradient-bg blur-[60px] opacity-20"></div>
-                        <h3 class="text-2xl font-black mb-2 relative z-10">Пригласи друга</h3>
+                        <h3 class="text-2xl font-black mb-2 relative z-10" data-t="invite_friend">Пригласи друга</h3>
                         <p class="text-neutral-500 text-xs mb-8 leading-relaxed max-w-[80%] relative z-10">Получи <span class="text-white font-bold">10.00 Đ</span> за каждого друга.</p>
                         
                         <div class="bg-black/40 border border-white/5 p-4 rounded-2xl space-y-3 relative z-10 backdrop-blur-sm">
                             <div class="flex items-center justify-between gap-4">
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-[9px] font-black text-neutral-600 uppercase tracking-widest mb-1">Ваша ссылка</p>
+                                    <p class="text-[9px] font-black text-neutral-600 uppercase tracking-widest mb-1" data-t="your_link">Ваша ссылка</p>
                                     <input readonly id="ref-link" class="w-full text-[10px] font-mono text-neutral-400 bg-transparent outline-none truncate" value="...">
                                 </div>
                                 <div class="flex gap-2">
@@ -292,8 +328,8 @@
                                         <!-- ICON: Share (White) -->
                                         <img src="https://img.icons8.com/?size=100&id=PuZtTk7UXaiT&format=png&color=ffffff" class="w-4 h-4" alt="Share">
                                     </button>
-                                    <button onclick="copyRef()" class="w-10 h-10 flex items-center justify-center bg-orange-500 rounded-xl hover:bg-orange-600 transition-all cursor-pointer">
-                                        <!-- ICON: Copy (Black - because button is white) -->
+                                    <button onclick="copyRef()" class="w-10 h-10 flex items-center justify-center bg-orange-500 rounded-xl hover:bg-orange-600 transition-all cursor-pointer no-invert">
+                                        <!-- ICON: Copy (Black) -->
                                         <img src="https://img.icons8.com/?size=100&id=v6i0IST6rKnE&format=png&color=000000" class="w-4 h-4" alt="Copy">
                                     </button>
                                 </div>
@@ -304,20 +340,17 @@
                     <div class="grid grid-cols-2 gap-3">
                         <div class="dool-card p-5 rounded-[2rem] flex flex-col items-center justify-center gap-1 aspect-square">
                             <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center mb-2 text-neutral-400">
-                                <!-- ICON: Friend (Ref count) (White) -->
                                 <img src="https://img.icons8.com/?size=100&id=p8UFrp2VUgHR&format=png&color=000000" class="w-5 h-5 opacity-70" alt="Friends">
                             </div>
                             <p id="ref-count" class="text-2xl font-black">0</p>
-                            <p class="text-[9px] font-bold text-neutral-600 uppercase tracking-wider">Друзей</p>
+                            <p class="text-[9px] font-bold text-neutral-600 uppercase tracking-wider" data-t="friends">Друзей</p>
                         </div>
                         <div class="dool-card p-5 rounded-[2rem] flex flex-col items-center justify-center gap-1 aspect-square">
                             <div class="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center mb-2 text-orange-500">
-                                <!-- ICON: Earned (White -> colored by container text color via currentColor? No, image src. Used filter previously) -->
-                                <!-- Using White icon and applying CSS Filter to make it ORANGE -->
-                                <img src="https://img.icons8.com/?size=100&id=djfFWeKjwcd3&format=png&color=ffffff" class="w-5 h-5" style="filter: brightness(0) saturate(100%) invert(32%) sepia(98%) saturate(2329%) hue-rotate(358deg) brightness(101%) contrast(106%);" alt="Earned">
+                                <img src="https://img.icons8.com/?size=100&id=djfFWeKjwcd3&format=png&color=ffffff" class="w-5 h-5 no-invert" style="filter: brightness(0) saturate(100%) invert(32%) sepia(98%) saturate(2329%) hue-rotate(358deg) brightness(101%) contrast(106%);" alt="Earned">
                             </div>
                             <p id="ref-earned" class="text-2xl font-black">0</p>
-                            <p class="text-[9px] font-bold text-neutral-600 uppercase tracking-wider">Заработано</p>
+                            <p class="text-[9px] font-bold text-neutral-600 uppercase tracking-wider" data-t="earned">Заработано</p>
                         </div>
                     </div>
                 </div>
@@ -325,19 +358,19 @@
                 <!-- BANK TAB -->
                 <div id="tab-bank" class="tab-content space-y-6">
                     <div class="text-center pt-4 pb-2">
-                        <h2 class="text-xl font-black uppercase tracking-widest text-neutral-400">Стейкинг</h2>
+                        <h2 class="text-xl font-black uppercase tracking-widest text-neutral-400" data-t="staking">Стейкинг</h2>
                         <p class="text-[10px] text-orange-500 font-bold uppercase tracking-widest">+5% в неделю ⌛</p>
                     </div>
 
                    <div class="bank-stack-container">
-                        <img src="https://emojigraph.org/media/facebook/jar_1fad9.png" class="bank-layer-bottom">
-                        <img src="https://emojigraph.org/media/google/fire_1f525.png" class="bank-layer-fire">
-                        <img src="https://emojigraph.org/media/facebook/jar_1fad9.png" class="bank-layer-top">
+                        <img src="https://emojigraph.org/media/facebook/jar_1fad9.png" class="bank-layer-bottom no-invert">
+                        <img src="https://emojigraph.org/media/google/fire_1f525.png" class="bank-layer-fire no-invert">
+                        <img src="https://emojigraph.org/media/facebook/jar_1fad9.png" class="bank-layer-top no-invert">
                     </div>
 
                     <div class="dool-card rounded-[2.5rem] p-6 sm:p-8 text-center relative overflow-hidden">
                         <div class="absolute inset-0 bg-orange-500/5"></div>
-                        <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-2 relative z-10">В банке</p>
+                        <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-2 relative z-10" data-t="in_bank">В банке</p>
                         <div class="flex items-center justify-center gap-2 relative z-10">
                             <h2 id="bank-balance-val" class="text-4xl font-black">0.0</h2>
                             <span class="text-xl font-black text-orange-500">Đ</span>
@@ -363,31 +396,113 @@
             <nav class="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[360px] h-16 bg-[#111]/90 backdrop-blur-xl border border-white/10 rounded-[2rem] flex items-center justify-around px-2 z-50 shadow-2xl">
                 <button onclick="switchTab('wallet')" id="nav-wallet" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-orange-500 cursor-pointer">
                     <!-- ICON: Wallet (White) - Increased size w-9 h-9 -->
-                    <img src="https://img.icons8.com/?size=100&id=Pv8alVtwvuFB&format=png&color=ffffff" class="w-9 h-9 nav-icon" alt="Wallet">
+                    <img src="https://img.icons8.com/?size=100&id=Pv8alVtwvuFB&format=png&color=ffffff" class="w-9 h-9 nav-icon no-invert" alt="Wallet">
                 </button>
                 <button onclick="switchTab('bank')" id="nav-bank" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
                      <!-- ICON: Bank (White) - Increased size w-9 h-9 -->
-                     <img src="https://img.icons8.com/?size=100&id=MRDxs37r5Fp9&format=png&color=ffffff" class="w-9 h-9 nav-icon" alt="Bank">
+                     <img src="https://img.icons8.com/?size=100&id=MRDxs37r5Fp9&format=png&color=ffffff" class="w-9 h-9 nav-icon no-invert" alt="Bank">
                 </button>
                 <button onclick="switchTab('referrals')" id="nav-referrals" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
                     <!-- ICON: Referrals (White) - Increased size w-9 h-9 -->
-                    <img src="https://img.icons8.com/?size=100&id=N9EwPosvU1Rm&format=png&color=ffffff" class="w-9 h-9 nav-icon" alt="Referrals">
+                    <img src="https://img.icons8.com/?size=100&id=N9EwPosvU1Rm&format=png&color=ffffff" class="w-9 h-9 nav-icon no-invert" alt="Referrals">
                 </button>
             </nav>
         </div>
 
         <!-- MODAL OVERLAY CLICK WRAPPERS: Added onclick to background -->
 
+        <!-- Модалка: Настройки (Settings) -->
+        <div id="modal-settings" onclick="if(event.target===this) closeModal('settings')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
+             <div class="bg-[#111] border-t border-white/10 rounded-t-[2.5rem] p-0 transform translate-y-full transition-transform duration-300" id="modal-settings-content">
+                <!-- Swipe Zone -->
+                <div class="swipe-zone"><div class="swipe-handle"></div></div>
+                <div class="p-8 pb-10 space-y-6">
+                    <h2 class="text-2xl font-black mb-4 px-2" data-t="settings">Настройки</h2>
+                    
+                    <!-- Theme Toggle -->
+                    <div class="glass-panel rounded-3xl p-4 flex items-center justify-between">
+                         <div class="flex items-center gap-3">
+                             <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
+                                 <img src="https://img.icons8.com/?size=100&id=nGdbxRylhrdU&format=png&color=ffffff" class="w-6 h-6">
+                             </div>
+                             <span class="font-bold text-sm" data-t="theme">Тема</span>
+                         </div>
+                         <button onclick="toggleTheme()" id="theme-btn" class="w-14 h-8 bg-white/10 rounded-full relative transition-colors no-invert">
+                             <div id="theme-knob" class="absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-transform shadow-md flex items-center justify-center">
+                                <!-- Dynamic Icon inside Knob -->
+                                <img id="theme-icon" src="https://img.icons8.com/?size=100&id=I0BKFITuoSCV&format=png&color=000000" class="w-3 h-3 no-invert">
+                             </div>
+                         </button>
+                    </div>
+
+                    <!-- Language Selector -->
+                    <div class="glass-panel rounded-3xl p-4">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
+                                <img src="https://img.icons8.com/?size=100&id=ya6K4D74SdP6&format=png&color=ffffff" class="w-6 h-6">
+                            </div>
+                            <span class="font-bold text-sm" data-t="language">Язык</span>
+                        </div>
+                        <div class="grid grid-cols-5 gap-2" id="lang-selector">
+                             <!-- Lang buttons generated by JS -->
+                             <button onclick="setLanguage('ru')" class="lang-btn h-10 rounded-xl bg-white/5 text-[10px] font-black uppercase hover:bg-orange-500 hover:text-white transition-colors border border-white/5" data-lang="ru">RU</button>
+                             <button onclick="setLanguage('en')" class="lang-btn h-10 rounded-xl bg-white/5 text-[10px] font-black uppercase hover:bg-orange-500 hover:text-white transition-colors border border-white/5" data-lang="en">EN</button>
+                             <button onclick="setLanguage('es')" class="lang-btn h-10 rounded-xl bg-white/5 text-[10px] font-black uppercase hover:bg-orange-500 hover:text-white transition-colors border border-white/5" data-lang="es">ES</button>
+                             <button onclick="setLanguage('uk')" class="lang-btn h-10 rounded-xl bg-white/5 text-[10px] font-black uppercase hover:bg-orange-500 hover:text-white transition-colors border border-white/5" data-lang="uk">UK</button>
+                             <button onclick="setLanguage('fr')" class="lang-btn h-10 rounded-xl bg-white/5 text-[10px] font-black uppercase hover:bg-orange-500 hover:text-white transition-colors border border-white/5" data-lang="fr">FR</button>
+                        </div>
+                    </div>
+
+                    <!-- About / Info -->
+                    <div onclick="openModal('about')" class="glass-panel rounded-3xl p-4 flex items-center justify-between cursor-pointer active:scale-95 transition-transform hover:bg-white/5">
+                        <div class="flex items-center gap-3">
+                             <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
+                                 <img src="https://img.icons8.com/?size=100&id=40JxrZB76JLv&format=png&color=ffffff" class="w-6 h-6">
+                             </div>
+                             <span class="font-bold text-sm" data-t="about">О программе</span>
+                         </div>
+                         <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" class="opacity-50"><path d="M9 18l6-6-6-6"/></svg>
+                    </div>
+
+                    <button onclick="closeModal('settings')" class="w-full h-12 bg-white/5 text-neutral-500 rounded-xl font-bold text-xs uppercase tracking-wider transition-colors">Закрыть</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модалка: О Программе (About) -->
+        <div id="modal-about" onclick="if(event.target===this) closeModal('about')" class="hidden absolute inset-0 z-[130] bg-black/90 backdrop-blur-xl flex flex-col justify-center items-center p-6 opacity-0 transition-opacity duration-300">
+             <div class="w-full max-w-sm glass-panel p-8 rounded-[2.5rem] text-center border border-white/10 relative transform scale-90 transition-transform duration-300" id="modal-about-content">
+                  <div class="w-20 h-20 gradient-bg rounded-[2rem] flex items-center justify-center text-4xl font-black text-white mx-auto mb-6 shadow-2xl">Đ</div>
+                  <h2 class="text-2xl font-black mb-2">Doolcoin Wallet</h2>
+                  <p class="text-[10px] text-neutral-500 uppercase tracking-widest mb-6">Версия 2.0.1 (Beta)</p>
+                  
+                  <div class="text-xs text-neutral-400 font-medium leading-relaxed space-y-4 mb-8 text-left bg-black/20 p-4 rounded-xl border border-white/5">
+                      <p><span class="text-orange-500 font-bold">ВАЖНО:</span> Данное приложение является образовательным симулятором.</p>
+                      <p>Doolcoin (Đ) — это виртуальная валюта, не имеющая реальной денежной стоимости. Приложение демонстрирует принципы работы интерфейсов банковских приложений.</p>
+                      <p>Все транзакции происходят в тестовой сети и не являются реальными финансовыми операциями.</p>
+                  </div>
+
+                  <div class="flex flex-col gap-2 text-[10px] text-neutral-600 font-bold uppercase tracking-wider mb-6">
+                      <a href="https://icons8.com" target="_blank" class="hover:text-white transition-colors flex items-center justify-center gap-2">
+                          <img src="https://img.icons8.com/color/48/000000/icons8-logo.png" class="w-4 h-4 no-invert">
+                          Icons provided by Icons8
+                      </a>
+                  </div>
+
+                  <button onclick="closeModal('about')" class="w-full h-12 bg-white text-black rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-neutral-200 transition-colors cursor-pointer no-invert">Понятно</button>
+             </div>
+        </div>
+
         <!-- Модалка: Профиль -->
         <div id="modal-profile" onclick="if(event.target===this) closeModal('profile')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col items-center justify-center p-8 opacity-0 transition-opacity duration-300">
             <div class="w-full max-w-xs transform scale-90 transition-transform duration-300" id="modal-profile-content">
                 <div class="bg-[#111] border border-white/10 p-8 rounded-[2.5rem] text-center shadow-2xl">
-                    <h2 class="text-xl font-black mb-6">Ваш Профиль</h2>
+                    <h2 class="text-xl font-black mb-6" data-t="profile">Ваш Профиль</h2>
                     <div class="relative inline-block mb-6 group">
                         <div class="p-1 gradient-bg rounded-full">
-                            <img id="edit-avatar-img" src="" class="w-24 h-24 rounded-full object-cover border-4 border-[#111] bg-neutral-900">
+                            <img id="edit-avatar-img" src="" class="w-24 h-24 rounded-full object-cover border-4 border-[#111] bg-neutral-900 no-invert">
                         </div>
-                        <label class="absolute bottom-0 right-0 bg-white text-black w-8 h-8 flex items-center justify-center rounded-full cursor-pointer hover:scale-110 transition-transform shadow-lg">
+                        <label class="absolute bottom-0 right-0 bg-white text-black w-8 h-8 flex items-center justify-center rounded-full cursor-pointer hover:scale-110 transition-transform shadow-lg no-invert">
                             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
                             <input type="file" id="avatar-input" class="hidden" accept="image/*">
                         </label>
@@ -411,7 +526,7 @@
                         <p class="text-2xl font-black text-white">+10.00 Đ</p>
                     </div>
                     
-                    <button onclick="closeModal('invited-info')" class="w-full h-12 bg-white text-black rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-neutral-200 transition-colors cursor-pointer">Отлично</button>
+                    <button onclick="closeModal('invited-info')" class="w-full h-12 bg-white text-black rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-neutral-200 transition-colors cursor-pointer no-invert">Отлично</button>
                 </div>
             </div>
         </div>
@@ -423,10 +538,10 @@
                 <div class="swipe-zone"><div class="swipe-handle"></div></div>
                 
                 <div class="p-8 pb-10">
-                    <h2 class="text-2xl font-black mb-6 px-2">Перевод</h2>
+                    <h2 class="text-2xl font-black mb-6 px-2" data-t="transfer">Перевод</h2>
                     
                     <div id="proposal-notice" class="hidden mb-4 bg-orange-500/10 border border-orange-500/20 p-3 rounded-2xl flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-black">
+                        <div class="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-black no-invert">
                             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
                         </div>
                         <div>
@@ -437,11 +552,11 @@
 
                     <div class="space-y-3">
                         <div class="bg-white/5 rounded-2xl p-4 border border-white/5 focus-within:border-orange-500/50 transition-colors">
-                            <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Получатель</p>
+                            <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1" data-t="recipient">Получатель</p>
                             <input type="email" id="send-email" placeholder="email@example.com" class="w-full bg-transparent outline-none font-bold text-sm placeholder:text-neutral-700">
                         </div>
                         <div class="bg-white/5 rounded-2xl p-4 border border-white/5 focus-within:border-orange-500/50 transition-colors">
-                            <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Сумма (Мин 0.1)</p>
+                            <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1" data-t="amount">Сумма (Мин 0.1)</p>
                             <div class="flex items-center gap-2">
                                 <input type="number" id="send-amt" placeholder="0.0" class="w-full bg-transparent outline-none font-black text-3xl placeholder:text-neutral-700">
                                 <span class="text-xl font-black text-orange-500">Đ</span>
@@ -449,7 +564,7 @@
                         </div>
                         <div class="flex gap-3 pt-4">
                             <button onclick="closeModal('send')" class="flex-1 h-14 bg-white/5 text-neutral-400 rounded-2xl font-bold text-xs uppercase tracking-wider cursor-pointer">Отмена</button>
-                            <button id="btn-do-send" class="flex-[2] h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer">Отправить</button>
+                            <button id="btn-do-send" class="flex-[2] h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer no-invert" data-t="send">Отправить</button>
                         </div>
                     </div>
                 </div>
@@ -464,8 +579,8 @@
                 
                 <div class="p-8 pb-10">
                     <div class="text-center mb-6">
-                        <h2 class="text-2xl font-black mb-1">Получить</h2>
-                        <p class="text-neutral-500 text-xs font-medium">Покажите этот код отправителю</p>
+                        <h2 class="text-2xl font-black mb-1" data-t="receive">Получить</h2>
+                        <p class="text-neutral-500 text-xs font-medium" data-t="show_code">Покажите этот код отправителю</p>
                     </div>
 
                     <!-- PREMIUM QR CARD -->
@@ -477,14 +592,14 @@
                             </div>
                             
                             <!-- QR Container (Clean White Box) -->
-                            <div id="qrcode-container"></div>
+                            <div id="qrcode-container" class="no-invert"></div>
                         </div>
                     </div>
 
                     <div class="space-y-4">
                         <div class="bg-white/5 p-4 rounded-2xl border border-white/5 flex items-center justify-between">
                             <div class="flex-1">
-                                <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Предложить сумму</p>
+                                <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1" data-t="req_amount">Предложить сумму</p>
                                 <input type="number" id="receive-amt-req" placeholder="Любая" class="w-full bg-transparent outline-none font-bold text-lg placeholder:text-neutral-700">
                             </div>
                             <span class="text-lg font-black text-orange-500 ml-3">Đ</span>
@@ -492,7 +607,7 @@
 
                         <div onclick="copyMyEmail()" class="bg-white/5 p-4 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-white/10 active:scale-95 transition-all border border-white/5">
                             <div class="flex-1 min-w-0 pr-2">
-                                <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Ваш адрес</p>
+                                <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1" data-t="your_addr">Ваш адрес</p>
                                 <p id="my-email-addr" class="font-mono text-orange-500 truncate text-sm">...</p>
                             </div>
                             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" class="text-neutral-500"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
@@ -508,15 +623,15 @@
                 <!-- Swipe Zone -->
                 <div class="swipe-zone"><div class="swipe-handle"></div></div>
                 <div class="p-8 pb-10">
-                    <h2 class="text-xl font-black mb-4">Положить в банку</h2>
+                    <h2 class="text-xl font-black mb-4" data-t="deposit_title">Положить в банку</h2>
                     <div class="bg-white/5 rounded-2xl p-4 border border-white/5 mb-4">
-                        <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Сумма</p>
+                        <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1" data-t="amount">Сумма</p>
                         <div class="flex items-center gap-2">
                             <input type="number" id="deposit-amt" placeholder="0.0" class="w-full bg-transparent outline-none font-black text-3xl placeholder:text-neutral-700">
                             <span class="text-xl font-black text-orange-500">Đ</span>
                         </div>
                     </div>
-                    <button id="btn-do-deposit" class="w-full h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer">Положить</button>
+                    <button id="btn-do-deposit" class="w-full h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer no-invert" data-t="deposit_action">Положить</button>
                     <button onclick="closeModal('deposit')" class="w-full mt-2 h-10 text-neutral-500 font-bold text-[10px] uppercase cursor-pointer">Отмена</button>
                 </div>
             </div>
@@ -528,15 +643,15 @@
                 <!-- Swipe Zone -->
                 <div class="swipe-zone"><div class="swipe-handle"></div></div>
                 <div class="p-8 pb-10">
-                    <h2 class="text-xl font-black mb-4">Достать из банки</h2>
+                    <h2 class="text-xl font-black mb-4" data-t="withdraw_title">Достать из банки</h2>
                     <div class="bg-white/5 rounded-2xl p-4 border border-white/5 mb-4">
-                        <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Сумма</p>
+                        <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1" data-t="amount">Сумма</p>
                         <div class="flex items-center gap-2">
                             <input type="number" id="withdraw-amt" placeholder="0.0" class="w-full bg-transparent outline-none font-black text-3xl placeholder:text-neutral-700">
                             <span class="text-xl font-black text-orange-500">Đ</span>
                         </div>
                     </div>
-                    <button id="btn-do-withdraw" class="w-full h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer">Достать</button>
+                    <button id="btn-do-withdraw" class="w-full h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer no-invert" data-t="withdraw_action">Достать</button>
                     <button onclick="closeModal('withdraw')" class="w-full mt-2 h-10 text-neutral-500 font-bold text-[10px] uppercase cursor-pointer">Отмена</button>
                 </div>
             </div>
@@ -580,6 +695,131 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         const googleProvider = new GoogleAuthProvider();
+
+        // -------------------------
+        // SETTINGS & LOCALIZATION LOGIC
+        // -------------------------
+        
+        const translations = {
+            ru: {
+                profile: 'Профиль', total_balance: 'Общий баланс', send: 'Отправить', receive: 'Получить',
+                history: 'История операций', invite_friend: 'Пригласи друга', your_link: 'Ваша ссылка',
+                friends: 'Друзей', earned: 'Заработано', staking: 'Стейкинг', in_bank: 'В банке',
+                settings: 'Настройки', theme: 'Тема', language: 'Язык', about: 'О программе',
+                transfer: 'Перевод', recipient: 'Получатель', amount: 'Сумма',
+                show_code: 'Покажите этот код отправителю', req_amount: 'Предложить сумму', your_addr: 'Ваш адрес',
+                deposit_title: 'Положить в банку', deposit_action: 'Положить',
+                withdraw_title: 'Достать из банки', withdraw_action: 'Достать', loading: 'Загрузка...'
+            },
+            en: {
+                profile: 'Profile', total_balance: 'Total Balance', send: 'Send', receive: 'Receive',
+                history: 'Transaction History', invite_friend: 'Invite a Friend', your_link: 'Your Link',
+                friends: 'Friends', earned: 'Earned', staking: 'Staking', in_bank: 'In Bank',
+                settings: 'Settings', theme: 'Theme', language: 'Language', about: 'About App',
+                transfer: 'Transfer', recipient: 'Recipient', amount: 'Amount',
+                show_code: 'Show this code to sender', req_amount: 'Request Amount', your_addr: 'Your Address',
+                deposit_title: 'Deposit to Bank', deposit_action: 'Deposit',
+                withdraw_title: 'Withdraw from Bank', withdraw_action: 'Withdraw', loading: 'Loading...'
+            },
+            es: {
+                profile: 'Perfil', total_balance: 'Balance Total', send: 'Enviar', receive: 'Recibir',
+                history: 'Historial', invite_friend: 'Invitar Amigo', your_link: 'Tu Enlace',
+                friends: 'Amigos', earned: 'Ganado', staking: 'Staking', in_bank: 'En Banco',
+                settings: 'Ajustes', theme: 'Tema', language: 'Idioma', about: 'Sobre la App',
+                transfer: 'Transferencia', recipient: 'Destinatario', amount: 'Cantidad',
+                show_code: 'Muestra este código', req_amount: 'Solicitar Cantidad', your_addr: 'Tu Dirección',
+                deposit_title: 'Depositar en Banco', deposit_action: 'Depositar',
+                withdraw_title: 'Retirar del Banco', withdraw_action: 'Retirar', loading: 'Cargando...'
+            },
+            uk: {
+                profile: 'Профіль', total_balance: 'Загальний баланс', send: 'Надіслати', receive: 'Отримати',
+                history: 'Історія операцій', invite_friend: 'Запроси друга', your_link: 'Ваше посилання',
+                friends: 'Друзів', earned: 'Зароблено', staking: 'Стейкінг', in_bank: 'У банку',
+                settings: 'Налаштування', theme: 'Тема', language: 'Мова', about: 'Про програму',
+                transfer: 'Переказ', recipient: 'Отримувач', amount: 'Сума',
+                show_code: 'Покажіть цей код', req_amount: 'Запросити суму', your_addr: 'Ваша адреса',
+                deposit_title: 'Покласти в банку', deposit_action: 'Покласти',
+                withdraw_title: 'Дістати з банки', withdraw_action: 'Дістати', loading: 'Завантаження...'
+            },
+            fr: {
+                profile: 'Profil', total_balance: 'Solde Total', send: 'Envoyer', receive: 'Recevoir',
+                history: 'Historique', invite_friend: 'Inviter un ami', your_link: 'Votre lien',
+                friends: 'Amis', earned: 'Gagné', staking: 'Staking', in_bank: 'En Banque',
+                settings: 'Paramètres', theme: 'Thème', language: 'Langue', about: 'À propos',
+                transfer: 'Virement', recipient: 'Destinataire', amount: 'Montant',
+                show_code: 'Montrez ce code', req_amount: 'Demander Montant', your_addr: 'Votre Adresse',
+                deposit_title: 'Dépôt Banque', deposit_action: 'Déposer',
+                withdraw_title: 'Retrait Banque', withdraw_action: 'Retirer', loading: 'Chargement...'
+            }
+        };
+
+        window.setLanguage = (lang) => {
+            if (!translations[lang]) return;
+            localStorage.setItem('dool_lang', lang);
+            
+            // Update UI Text
+            document.querySelectorAll('[data-t]').forEach(el => {
+                const key = el.getAttribute('data-t');
+                if (translations[lang][key]) {
+                    el.textContent = translations[lang][key];
+                }
+            });
+
+            // Update Active State in Settings
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                if (btn.getAttribute('data-lang') === lang) {
+                    btn.classList.add('bg-orange-500', 'text-white');
+                    btn.classList.remove('bg-white/5');
+                } else {
+                    btn.classList.remove('bg-orange-500', 'text-white');
+                    btn.classList.add('bg-white/5');
+                }
+            });
+        };
+
+        window.toggleTheme = () => {
+            const app = document.getElementById('app');
+            const knob = document.getElementById('theme-knob');
+            const icon = document.getElementById('theme-icon');
+            const isLight = app.classList.contains('light-mode');
+            
+            if (!isLight) {
+                // Switch to Light
+                app.classList.add('light-mode');
+                knob.style.transform = 'translateX(100%)';
+                // Dark Moon Icon
+                icon.src = "https://img.icons8.com/?size=100&id=I0BKFITuoSCV&format=png&color=000000"; 
+                localStorage.setItem('dool_theme', 'light');
+            } else {
+                // Switch to Dark
+                app.classList.remove('light-mode');
+                knob.style.transform = 'translateX(0)';
+                // Light Sun Icon
+                icon.src = "https://img.icons8.com/?size=100&id=nGdbxRylhrdU&format=png&color=000000";
+                localStorage.setItem('dool_theme', 'dark');
+            }
+        };
+
+        // Init Settings
+        function initSettings() {
+            // Theme
+            const savedTheme = localStorage.getItem('dool_theme');
+            if (savedTheme === 'light') {
+                document.getElementById('app').classList.add('light-mode');
+                document.getElementById('theme-knob').style.transform = 'translateX(100%)';
+                document.getElementById('theme-icon').src = "https://img.icons8.com/?size=100&id=I0BKFITuoSCV&format=png&color=000000";
+            }
+
+            // Language
+            const savedLang = localStorage.getItem('dool_lang') || 'ru';
+            setLanguage(savedLang);
+        }
+
+        initSettings();
+
+        // -------------------------
+        // END SETTINGS LOGIC
+        // -------------------------
 
         // -------------------------
         // ANTI-FRAUD UTILS
@@ -655,7 +895,7 @@
         }
 
         // Init swipes
-        ['send', 'receive', 'deposit', 'withdraw'].forEach(initSwipeClose);
+        ['send', 'receive', 'deposit', 'withdraw', 'settings'].forEach(initSwipeClose);
 
         // --- REFERRAL INIT LOGIC ---
         try {
@@ -706,7 +946,7 @@
             m.classList.remove('opacity-0');
             
             // Reset transforms for swipeable modals
-            if(['send', 'receive', 'deposit', 'withdraw'].includes(n)) {
+            if(['send', 'receive', 'deposit', 'withdraw', 'settings'].includes(n)) {
                 c.style.transform = ''; 
                 setTimeout(() => c.classList.remove('translate-y-full'), 10);
             } else if(n !== 'scan') {
@@ -723,7 +963,7 @@
             if(!m || !c) return;
             m.classList.add('opacity-0');
             
-            if(['send', 'receive', 'deposit', 'withdraw'].includes(n)) {
+            if(['send', 'receive', 'deposit', 'withdraw', 'settings'].includes(n)) {
                 c.classList.add('translate-y-full');
                 c.style.transform = ''; // Clear JS drag transform
             } else if(n !== 'scan') {
@@ -743,6 +983,9 @@
                  document.getElementById('send-email').readOnly = false;
                  document.getElementById('proposal-notice').classList.add('hidden');
                  document.getElementById('btn-do-send').textContent = "Отправить";
+                 // Re-apply language text if needed, but "Отправить" is default
+                 const lang = localStorage.getItem('dool_lang') || 'ru';
+                 if(translations[lang]) document.getElementById('btn-do-send').textContent = translations[lang].send;
              }, 300);
         }
 
@@ -783,7 +1026,7 @@
                 const imgDefault = "https://img.icons8.com/?size=100&id=oStKNuPVzV7A&format=png&color=ffffff";
 
                 // Reset Image Classes
-                avImg.className = "w-full h-full hidden";
+                avImg.className = "w-full h-full hidden no-invert";
                 avImg.style.filter = ''; // Reset filter
 
                 if (senderEmail) {
@@ -1034,7 +1277,7 @@
                     const dateStr = tx.date ? new Date(tx.date.toMillis()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
                     html += `<div class="flex items-center justify-between p-4 rounded-[1.5rem] bg-white/[0.03] border border-white/5">
                         <div class="flex items-center gap-3 overflow-hidden">
-                            <img id="av-${tx.date ? tx.date.toMillis() : ''}" src="https://ui-avatars.com/api/?background=222&color=666&name=${partner.charAt(0)}" class="w-10 h-10 rounded-full bg-neutral-800 object-cover border border-white/5 shrink-0">
+                            <img id="av-${tx.date ? tx.date.toMillis() : ''}" src="https://ui-avatars.com/api/?background=222&color=666&name=${partner.charAt(0)}" class="w-10 h-10 rounded-full bg-neutral-800 object-cover border border-white/5 shrink-0 no-invert">
                             <div class="min-w-0"><p class="text-[9px] font-black uppercase ${isSent ? 'text-neutral-500' : 'text-[#FF4D00]'} tracking-widest mb-0.5">${isSent ? 'Кому:' : 'От:'}</p><p class="text-[11px] font-bold text-white truncate w-32 leading-tight">${partner}</p></div>
                         </div>
                         <div class="text-right"><p class="text-sm font-black ${isSent ? 'text-white' : 'text-[#FF4D00]'}">${isSent ? '-' : '+'}${tx.amount.toFixed(1)}</p><p class="text-[9px] text-neutral-600 font-bold uppercase">${dateStr}</p></div>
@@ -1299,7 +1542,13 @@
                 closeModal('send');
                 showT('Успешно', `Отправлено ${to}`, `-${amt.toFixed(1)} Đ`);
             } catch (e) { showT('Ошибка', e.message, '', null, true); }
-            finally { btn.disabled = false; btn.textContent = 'Отправить'; }
+            finally { 
+                 btn.disabled = false; 
+                 // Restore language specific text
+                 const lang = localStorage.getItem('dool_lang') || 'ru';
+                 if(translations[lang]) btn.textContent = translations[lang].send;
+                 else btn.textContent = 'Отправить'; 
+            }
         };
 
         window.copyRef = () => { 
