@@ -89,8 +89,7 @@
         body.light-theme #modal-receive-content,
         body.light-theme #modal-deposit-content,
         body.light-theme #modal-withdraw-content,
-        body.light-theme #modal-settings-content,
-        body.light-theme #modal-verify-content { background-color: #ffffff; color: #000; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); }
+        body.light-theme #modal-settings-content { background-color: #ffffff; color: #000; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); }
         
         /* Toast Light */
         body.light-theme #toast { background: rgba(255,255,255,0.98); border-color: rgba(0,0,0,0.08); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1); }
@@ -109,10 +108,6 @@
         /* QR Card in Light Mode */
         body.light-theme .qr-card-premium { background: linear-gradient(180deg, #f3f4f6 0%, #ffffff 100%); border-color: rgba(0,0,0,0.1); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1); }
         
-        /* VERIFY BADGE */
-        .verify-badge { display: inline-flex; vertical-align: middle; margin-left: 4px; }
-        .verify-badge img { width: 14px; height: 14px; object-fit: contain; }
-
         /* ABOUT CARD (PREMIUM) */
         .about-card {
             position: relative;
@@ -227,12 +222,7 @@
                         <img id="main-avatar" src="" class="w-10 h-10 rounded-full object-cover bg-black border-2 border-black">
                     </div>
                     <div class="flex flex-col justify-center">
-                        <div class="flex items-center gap-1">
-                            <p id="main-username" class="text-xs font-bold truncate max-w-[140px] leading-tight text-white">...</p>
-                            <span id="main-badge" class="verify-badge hidden">
-                                <img src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" alt="Verified">
-                            </span>
-                        </div>
+                        <p id="main-username" class="text-xs font-bold truncate max-w-[140px] leading-tight text-white">...</p>
                         <p class="text-[9px] font-black text-neutral-500 uppercase tracking-widest leading-tight" data-lang="profile">Профиль</p>
                     </div>
                 </div>
@@ -433,7 +423,7 @@
                                     </div>
                                     <span class="font-black text-sm tracking-widest text-white">DOOLCOIN</span>
                                 </div>
-                                <span class="text-[9px] font-mono text-neutral-500">v1.1.0</span>
+                                <span class="text-[9px] font-mono text-neutral-500">v1.0.2</span>
                             </div>
                             
                             <h3 class="text-xs font-bold text-white mb-2" data-lang="legal_title">Юридическая информация</h3>
@@ -469,39 +459,8 @@
                             <input type="file" id="avatar-input" class="hidden" accept="image/*">
                         </label>
                     </div>
-                    
-                    <!-- Verification Status -->
-                    <div class="mb-6 flex justify-center">
-                         <div id="profile-verify-status" class="bg-white/5 border border-white/10 rounded-xl px-4 py-2 flex items-center gap-2">
-                            <!-- Injected via JS -->
-                         </div>
-                    </div>
-
                     <p id="profile-email" class="text-xs text-neutral-500 font-bold mb-6 truncate px-2">...</p>
                     <button onclick="closeModal('profile')" class="w-full h-12 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer" data-lang="close">Закрыть</button>
-                </div>
-            </div>
-        </div>
-        
-        <!-- VERIFICATION MODAL -->
-        <div id="modal-verify" onclick="if(event.target===this) closeModal('verify')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
-            <div class="bg-[#111] border-t border-white/10 rounded-t-[2.5rem] p-0 transform translate-y-full transition-transform duration-300" id="modal-verify-content">
-                <div class="swipe-zone"><div class="swipe-handle"></div></div>
-                <div class="p-8 pb-10">
-                    <h2 class="text-xl font-black mb-4 text-white" data-lang="verify_title">Верификация</h2>
-                    <p class="text-xs text-neutral-400 font-medium mb-6 leading-relaxed" data-lang="verify_desc">
-                        Получите галочку верификации, чтобы повысить доверие других пользователей.
-                    </p>
-                    
-                    <div class="space-y-4 mb-6">
-                         <div class="bg-white/5 rounded-2xl p-4 border border-white/5">
-                            <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1" data-lang="full_name">ФИО</p>
-                            <input type="text" id="verify-name" placeholder="Иванов Иван Иванович" class="w-full bg-transparent outline-none font-bold text-sm text-white placeholder:text-neutral-700">
-                        </div>
-                    </div>
-
-                    <button id="btn-submit-verify" onclick="submitVerification()" class="w-full h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer" data-lang="submit_req">Отправить заявку</button>
-                    <button onclick="closeModal('verify')" class="w-full mt-2 h-10 text-neutral-500 font-bold text-[10px] uppercase cursor-pointer" data-lang="cancel">Отмена</button>
                 </div>
             </div>
         </div>
@@ -666,36 +625,31 @@
                 total_balance: "Общий баланс", send: "Отправить", receive: "Получить", history: "История операций", loading: "Загрузка...", invite_friend: "Пригласи друга", ref_desc: "Получи", your_link: "Ваша ссылка", friends: "Друзей", earned: "Заработано", staking: "Стейкинг", in_jar: "В банке", profile: "Профиль", wallet_future: "Кошелек будущего", or: "Или", login: "Войти", create: "Создать", settings: "Настройки", theme: "Тема оформления", theme_light: "Светлая", theme_dark: "Тёмная", language: "Язык", your_profile: "Ваш Профиль", close: "Закрыть", send_title: "Перевод", recipient: "Получатель", amount: "Сумма (Мин 0.1)", cancel: "Отмена", send_action: "Отправить", show_qr: "Покажите этот код отправителю", req_amount: "Предложить сумму", your_addr: "Ваш адрес", deposit_title: "Положить в банку", deposit_action: "Положить", withdraw_title: "Достать из банки", withdraw_action: "Достать", scanning: "Сканирование", access_denied: "Доступ ограничен", password_ph: "Пароль", deposit_success: "Депозит успешен", withdraw_success: "Вывод успешен", addr_copied: "Адрес скопирован", link_copied: "Ссылка скопирована", sent_to: "Отправлено", error_fill: "Заполните поля", error_pass_len: "Пароль < 6 символов", error_self: "Нельзя отправить себе", error_min: "Минимум 0.1 Đ", error_fund: "Недостаточно средств",
                 legal_title: "Юридическая информация",
                 legal_text: "Doolcoin (Đ) — это внутриигровая условная единица. Она не является платёжным средством, электронной валютой или ценной бумагой. Đ не имеет реальной денежной стоимости и не гарантирует возможности обмена на фиатные деньги. Все операции носят исключительно развлекательный характер.",
-                any: "Любая",
-                verify_title: "Верификация", verify_desc: "Получите галочку верификации, чтобы повысить доверие других пользователей.", full_name: "ФИО", submit_req: "Отправить заявку", verified: "Верифицирован", not_verified: "Нет верификации", pending: "На проверке", req_sent: "Заявка отправлена"
+                any: "Любая"
             },
             en: {
                 total_balance: "Total Balance", send: "Send", receive: "Receive", history: "Transaction History", loading: "Loading...", invite_friend: "Invite a Friend", ref_desc: "Get", your_link: "Your Link", friends: "Friends", earned: "Earned", staking: "Staking", in_jar: "In Bank", profile: "Profile", wallet_future: "Wallet of the Future", or: "Or", login: "Log In", create: "Create", settings: "Settings", theme: "Theme", theme_light: "Light", theme_dark: "Dark", language: "Language", your_profile: "Your Profile", close: "Close", send_title: "Transfer", recipient: "Recipient", amount: "Amount (Min 0.1)", cancel: "Cancel", send_action: "Send", show_qr: "Show this code to sender", req_amount: "Request Amount", your_addr: "Your Address", deposit_title: "Deposit to Bank", deposit_action: "Deposit", withdraw_title: "Withdraw from Bank", withdraw_action: "Withdraw", scanning: "Scanning", access_denied: "Access Denied", password_ph: "Password", deposit_success: "Deposit successful", withdraw_success: "Withdrawal successful", addr_copied: "Address copied", link_copied: "Link copied", sent_to: "Sent to", error_fill: "Fill all fields", error_pass_len: "Password < 6 chars", error_self: "Cannot send to self", error_min: "Minimum 0.1 Đ", error_fund: "Insufficient funds",
                 legal_title: "Legal Information",
                 legal_text: "Doolcoin (Đ) is an in-game virtual unit. It is not a means of payment, electronic currency, or security. Đ has no real monetary value and does not guarantee exchangeability for fiat money. All operations are exclusively for entertainment purposes.",
-                any: "Any",
-                verify_title: "Verification", verify_desc: "Get a verification badge to increase trust among other users.", full_name: "Full Name", submit_req: "Submit Request", verified: "Verified", not_verified: "Not Verified", pending: "Pending", req_sent: "Request sent"
+                any: "Any"
             },
             es: {
                 total_balance: "Saldo Total", send: "Enviar", receive: "Recibir", history: "Historial", loading: "Cargando...", invite_friend: "Invitar Amigo", ref_desc: "Obtén", your_link: "Tu Enlace", friends: "Amigos", earned: "Ganado", staking: "Staking", in_jar: "En Banco", profile: "Perfil", wallet_future: "Billetera del Futuro", or: "O", login: "Entrar", create: "Crear", settings: "Ajustes", theme: "Tema", theme_light: "Claro", theme_dark: "Oscuro", language: "Idioma", your_profile: "Tu Perfil", close: "Cerrar", send_title: "Transferir", recipient: "Destinatario", amount: "Cantidad (Mín 0.1)", cancel: "Cancelar", send_action: "Enviar", show_qr: "Muestra este código", req_amount: "Solicitar Cantidad", your_addr: "Tu Dirección", deposit_title: "Depositar", deposit_action: "Depositar", withdraw_title: "Retirar", withdraw_action: "Retirar", scanning: "Escaneando", access_denied: "Acceso Denegado", password_ph: "Contraseña", deposit_success: "Depósito exitoso", withdraw_success: "Retiro exitoso", addr_copied: "Dirección copiada", link_copied: "Enlace copiado", sent_to: "Enviado a", error_fill: "Rellena los campos", error_pass_len: "Contraseña < 6 carac.", error_self: "No puedes enviarte a ti", error_min: "Mínimo 0.1 Đ", error_fund: "Fondos insuficientes",
                 legal_title: "Información Legal",
                 legal_text: "Doolcoin (Đ) es una unidad virtual del juego. No es un medio de pago, moneda electrónica o valor. Đ no tiene valor monetario real y no garantiza el intercambio por dinero fiduciario. Todas las operaciones son exclusivamente para entretenimiento.",
-                any: "Cualquier",
-                verify_title: "Verificación", verify_desc: "Obtenga una insignia de verificación para aumentar la confianza.", full_name: "Nombre completo", submit_req: "Enviar solicitud", verified: "Verificado", not_verified: "No verificado", pending: "Pendiente", req_sent: "Solicitud enviada"
+                any: "Cualquier"
             },
             uk: {
                 total_balance: "Загальний баланс", send: "Надіслати", receive: "Отримати", history: "Історія операцій", loading: "Завантаження...", invite_friend: "Запроси друга", ref_desc: "Отримай", your_link: "Ваше посилання", friends: "Друзів", earned: "Зароблено", staking: "Стейкінг", in_jar: "У банку", profile: "Профіль", wallet_future: "Гаманець майбутнього", or: "Або", login: "Увійти", create: "Створити", settings: "Налаштування", theme: "Тема оформлення", theme_light: "Світла", theme_dark: "Темна", language: "Мова", your_profile: "Ваш Профіль", close: "Закрити", send_title: "Переказ", recipient: "Отримувач", amount: "Сума (Мін 0.1)", cancel: "Скасувати", send_action: "Надіслати", show_qr: "Покажіть цей код", req_amount: "Запитати суму", your_addr: "Ваша адреса", deposit_title: "Покласти в банку", deposit_action: "Покласти", withdraw_title: "Дістати з банки", withdraw_action: "Дістати", scanning: "Сканування", access_denied: "Доступ обмежено", password_ph: "Пароль", deposit_success: "Депозит успішний", withdraw_success: "Виведення успішне", addr_copied: "Адресу скопійовано", link_copied: "Посилання скопійовано", sent_to: "Надіслано", error_fill: "Заповніть поля", error_pass_len: "Пароль < 6 символів", error_self: "Не можна собі", error_min: "Мін 0.1 Đ", error_fund: "Недостатньо коштів",
                 legal_title: "Юридична інформація",
                 legal_text: "Doolcoin (Đ) — це внутрішньоігрова умовна одиниця. Вона не є платіжним засобом, електронною валютою або цінним папером. Đ не має реальної грошової вартості і не гарантує обміну на фіатні гроші. Всі операції носять виключно розважальний характер.",
-                any: "Будь-яка",
-                verify_title: "Верифікація", verify_desc: "Отримайте галочку верифікації, щоб підвищити довіру.", full_name: "ПІБ", submit_req: "Надіслати заявку", verified: "Верифіковано", not_verified: "Немає верифікації", pending: "На перевірці", req_sent: "Заявка надіслана"
+                any: "Будь-яка"
             },
             fr: {
                 total_balance: "Solde Total", send: "Envoyer", receive: "Recevoir", history: "Historique", loading: "Chargement...", invite_friend: "Inviter un ami", ref_desc: "Obtenez", your_link: "Votre lien", friends: "Amis", earned: "Gagné", staking: "Staking", in_jar: "En Banque", profile: "Profil", wallet_future: "Portefeuille du futur", or: "Ou", login: "Connexion", create: "Créer", settings: "Paramètres", theme: "Thème", theme_light: "Clair", theme_dark: "Sombre", language: "Langue", your_profile: "Votre Profil", close: "Fermer", send_title: "Transfert", recipient: "Destinataire", amount: "Montant (Min 0.1)", cancel: "Annuler", send_action: "Envoyer", show_qr: "Montrez ce code", req_amount: "Demander montant", your_addr: "Votre adresse", deposit_title: "Dépôt", deposit_action: "Déposer", withdraw_title: "Retrait", withdraw_action: "Retirer", scanning: "Scanner", access_denied: "Accès refusé", password_ph: "Mot de passe", deposit_success: "Dépôt réussi", withdraw_success: "Retrait réussi", addr_copied: "Adresse copiée", link_copied: "Lien copié", sent_to: "Envoyé à", error_fill: "Remplir les champs", error_pass_len: "Mot de passe < 6 car.", error_self: "Impossible d'envoyer à soi-même", error_min: "Min 0.1 Đ", error_fund: "Fonds insuffisants",
                 legal_title: "Information Légale",
                 legal_text: "Doolcoin (Đ) est une unité virtuelle de jeu. Ce n'est pas un moyen de paiement, une monnaie électronique ou un titre. Đ n'a aucune valeur monétaire réelle et ne garantit pas l'échange contre de la monnaie fiduciaire. Toutes les opérations sont exclusivement à des fins de divertissement.",
-                any: "Toute",
-                verify_title: "Vérification", verify_desc: "Obtenez un badge de vérification.", full_name: "Nom complet", submit_req: "Soumettre", verified: "Vérifié", not_verified: "Non vérifié", pending: "En attente", req_sent: "Demande envoyée"
+                any: "Toute"
             }
         };
 
@@ -752,7 +706,7 @@
             handle.addEventListener('touchmove', (e) => { if(!isDragging) return; currentY = e.touches[0].clientY; const diff = currentY - startY; if(diff > 0) content.style.transform = `translateY(${diff}px)`; }, {passive: true});
             handle.addEventListener('touchend', (e) => { isDragging = false; const diff = currentY - startY; content.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'; if(diff > 120) closeModal(modalName); else content.style.transform = ''; });
         }
-        ['send', 'receive', 'deposit', 'withdraw', 'settings', 'verify'].forEach(initSwipeClose);
+        ['send', 'receive', 'deposit', 'withdraw', 'settings'].forEach(initSwipeClose);
 
         function showRefButton(email) { const btn = document.getElementById('auth-ref-btn'); if(btn) btn.classList.remove('hidden'); }
         try {
@@ -763,22 +717,22 @@
 
         async function getUserInfo(email) {
             if (userCache[email]) return userCache[email];
-            let info = { avatar: `https://ui-avatars.com/api/?background=random&color=fff&name=${email.charAt(0).toUpperCase()}&size=128`, email: email, isVerified: false };
-            try { const q = query(collection(db, "users"), where("email", "==", email)); const res = await getDocs(q); if (!res.empty) { const d = res.docs[0].data(); if (d.avatar) info.avatar = d.avatar; if (d.verificationStatus === 'verified') info.isVerified = true; } } catch (e) {}
+            let info = { avatar: `https://ui-avatars.com/api/?background=random&color=fff&name=${email.charAt(0).toUpperCase()}&size=128`, email: email };
+            try { const q = query(collection(db, "users"), where("email", "==", email)); const res = await getDocs(q); if (!res.empty) { const d = res.docs[0].data(); if (d.avatar) info.avatar = d.avatar; } } catch (e) {}
             userCache[email] = info; return info;
         }
 
         window.openModal = (n) => {
             const m = document.getElementById('modal-'+n), c = document.getElementById(`modal-${n}-content`);
             if(!m || !c) return; m.classList.remove('hidden'); void m.offsetWidth; m.classList.remove('opacity-0');
-            if(['send', 'receive', 'deposit', 'withdraw', 'settings', 'verify'].includes(n)) { c.style.transform = ''; setTimeout(() => c.classList.remove('translate-y-full'), 10); } else if(n !== 'scan') c.classList.remove('scale-90');
+            if(['send', 'receive', 'deposit', 'withdraw', 'settings'].includes(n)) { c.style.transform = ''; setTimeout(() => c.classList.remove('translate-y-full'), 10); } else if(n !== 'scan') c.classList.remove('scale-90');
             if(n === 'receive') updateQR(); if(n === 'scan') startScannerV2();
         };
 
         window.closeModal = (n) => {
             const m = document.getElementById('modal-'+n), c = document.getElementById(`modal-${n}-content`);
             if(!m || !c) return; m.classList.add('opacity-0');
-            if(['send', 'receive', 'deposit', 'withdraw', 'settings', 'verify'].includes(n)) c.classList.add('translate-y-full'); else if(n !== 'scan') c.classList.add('scale-90');
+            if(['send', 'receive', 'deposit', 'withdraw', 'settings'].includes(n)) c.classList.add('translate-y-full'); else if(n !== 'scan') c.classList.add('scale-90');
             if(n === 'scan') stopScannerV2(); if(n === 'send') clearSendForm(); setTimeout(() => m.classList.add('hidden'), 300);
         };
 
@@ -818,7 +772,7 @@
                 const userRef = doc(db, "users", u.uid); const snap = await getDoc(userRef);
                 if (!snap.exists()) {
                     const email = u.email, emailLower = u.email.toLowerCase(), clientIP = await getClientIP();
-                    const userData = { email: email, lowercaseEmail: emailLower, balance: 10.0, bankBalance: 0, lastBankUpdate: Timestamp.now(), avatar: u.photoURL || '', refCount: 0, refEarned: 0, createdAt: Timestamp.now(), isBanned: false, ip: clientIP, referralStatus: 'none', verificationStatus: 'none' };
+                    const userData = { email: email, lowercaseEmail: emailLower, balance: 10.0, bankBalance: 0, lastBankUpdate: Timestamp.now(), avatar: u.photoURL || '', refCount: 0, refEarned: 0, createdAt: Timestamp.now(), isBanned: false, ip: clientIP, referralStatus: 'none' };
                     const refEmail = localStorage.getItem('dool_ref');
                     if (refEmail && refEmail !== emailLower) {
                         try {
@@ -852,25 +806,6 @@
                 updateBankVisuals(d);
                 document.getElementById('ref-count').textContent = d.refCount || 0; document.getElementById('ref-earned').textContent = (d.refEarned || 0).toFixed(1);
                 const av = d.avatar || `https://ui-avatars.com/api/?background=random&color=fff&name=${u.email.charAt(0)}`; document.getElementById('main-avatar').src = av; document.getElementById('edit-avatar-img').src = av;
-                
-                // VERIFICATION UI UPDATE
-                const verifyStatus = document.getElementById('profile-verify-status');
-                const mainBadge = document.getElementById('main-badge');
-                
-                if (d.verificationStatus === 'verified') {
-                    mainBadge.classList.remove('hidden');
-                    verifyStatus.innerHTML = `<img src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" class="w-5 h-5"><span class="text-xs font-bold text-white uppercase tracking-widest">${getTrans('verified')}</span>`;
-                    verifyStatus.className = "bg-orange-500/20 border border-orange-500 rounded-xl px-4 py-2 flex items-center gap-2";
-                } else if (d.verificationStatus === 'pending') {
-                    mainBadge.classList.add('hidden');
-                    verifyStatus.innerHTML = `<span class="text-xs font-bold text-neutral-400 uppercase tracking-widest">⌛ ${getTrans('pending')}</span>`;
-                    verifyStatus.className = "bg-white/5 border border-white/10 rounded-xl px-4 py-2 flex items-center gap-2";
-                } else {
-                    mainBadge.classList.add('hidden');
-                    verifyStatus.innerHTML = `<button onclick="openModal('verify')" class="text-xs font-bold text-orange-500 uppercase tracking-widest hover:text-white transition-colors">${getTrans('not_verified')} →</button>`;
-                    verifyStatus.className = "bg-white/5 border border-white/10 rounded-xl px-4 py-2 flex items-center gap-2";
-                }
-
                 document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-loading').classList.add('hidden'); document.getElementById('view-main').classList.replace('hidden', 'flex'); switchTab('wallet'); document.getElementById('btn-login').disabled = false; document.getElementById('btn-register').disabled = false;
             });
             const qTx = query(collection(db, "transactions"), where("parties", "array-contains", u.email));
@@ -879,12 +814,7 @@
                 const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date); let html = '';
                 for (const tx of docs) {
                     const isSent = tx.from === u.email, partner = isSent ? tx.to : tx.from, dateStr = tx.date ? new Date(tx.date.toMillis()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
-                    let partnerBadge = '';
-                    if (partner.includes('@')) {
-                        const pInfo = await getUserInfo(partner);
-                        if(pInfo.isVerified) partnerBadge = `<span class="verify-badge"><img src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff"></span>`;
-                    }
-                    html += `<div class="flex items-center justify-between p-4 rounded-[1.5rem] bg-white/[0.03] border border-white/5"><div class="flex items-center gap-3 overflow-hidden"><img id="av-${tx.date.toMillis()}" src="https://ui-avatars.com/api/?background=222&color=666&name=${partner.charAt(0)}" class="w-10 h-10 rounded-full bg-neutral-800 object-cover border border-white/5 shrink-0"><div class="min-w-0"><p class="text-[9px] font-black uppercase ${isSent ? 'text-neutral-500' : 'text-[#FF4D00]'} tracking-widest mb-0.5">${isSent ? 'To:' : 'From:'}</p><div class="flex items-center"><p class="text-[11px] font-bold text-white truncate max-w-[120px] leading-tight">${partner}</p>${partnerBadge}</div></div></div><div class="text-right"><p class="text-sm font-black ${isSent ? 'text-white' : 'text-[#FF4D00]'}">${isSent ? '-' : '+'}${tx.amount.toFixed(1)}</p><p class="text-[9px] text-neutral-600 font-bold uppercase">${dateStr}</p></div></div>`;
+                    html += `<div class="flex items-center justify-between p-4 rounded-[1.5rem] bg-white/[0.03] border border-white/5"><div class="flex items-center gap-3 overflow-hidden"><img id="av-${tx.date.toMillis()}" src="https://ui-avatars.com/api/?background=222&color=666&name=${partner.charAt(0)}" class="w-10 h-10 rounded-full bg-neutral-800 object-cover border border-white/5 shrink-0"><div class="min-w-0"><p class="text-[9px] font-black uppercase ${isSent ? 'text-neutral-500' : 'text-[#FF4D00]'} tracking-widest mb-0.5">${isSent ? 'To:' : 'From:'}</p><p class="text-[11px] font-bold text-white truncate w-32 leading-tight">${partner}</p></div></div><div class="text-right"><p class="text-sm font-black ${isSent ? 'text-white' : 'text-[#FF4D00]'}">${isSent ? '-' : '+'}${tx.amount.toFixed(1)}</p><p class="text-[9px] text-neutral-600 font-bold uppercase">${dateStr}</p></div></div>`;
                     if(partner.includes('@')) getUserInfo(partner).then(inf => { const el = document.getElementById(`av-${tx.date.toMillis()}`); if(el) el.src = inf.avatar; });
                 }
                 list.innerHTML = html;
@@ -928,26 +858,6 @@
         window.shareRef = async () => { if (navigator.share) { try { await navigator.share({ title: 'Doolcoin Wallet', text: 'Bonus!', url: document.getElementById('ref-link').value }); } catch (err) {} } else copyRef(); };
         document.getElementById('btn-logout').onclick = () => signOut(auth);
         window.copyMyEmail = () => { navigator.clipboard.writeText(auth.currentUser.email); showT('Успешно', getTrans('addr_copied')); };
-
-        // Verification Submit Logic
-        window.submitVerification = async () => {
-            const name = document.getElementById('verify-name').value;
-            if(!name || name.length < 3) return showT('Ошибка', getTrans('error_fill'), '', null, true);
-            const btn = document.getElementById('btn-submit-verify');
-            btn.disabled = true;
-            try {
-                await updateDoc(doc(db, "users", auth.currentUser.uid), {
-                    verificationStatus: 'pending',
-                    realName: name
-                });
-                closeModal('verify');
-                showT('Успешно', getTrans('req_sent'));
-            } catch(e) {
-                showT('Ошибка', e.message, '', null, true);
-            } finally {
-                btn.disabled = false;
-            }
-        };
     </script>
 </body>
 </html>
