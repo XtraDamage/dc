@@ -63,31 +63,60 @@
         .swipe-zone { width: 100%; height: 32px; display: flex; align-items: center; justify-content: center; cursor: grab; touch-action: none; }
         .swipe-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 10px; }
 
-        /* NFT STYLES */
-        .nft-card {
+        /* --- NEW PREMIUM NFT CARD STYLES --- */
+        .nft-card-premium {
             position: relative;
-            aspect-ratio: 1/1;
-            border-radius: 20px;
+            background: #111;
+            border-radius: 24px;
             overflow: hidden;
-            box-shadow: 0 10px 30px -5px rgba(0,0,0,0.5);
-            transition: transform 0.2s;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.6);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border: 1px solid rgba(255,255,255,0.05);
+            display: flex; flex-direction: column;
+            aspect-ratio: 3/4; /* Trading card ratio */
+        }
+        .nft-card-premium:active { transform: scale(0.98); }
+        
+        .nft-img-container {
+            position: relative;
+            width: 100%;
+            flex: 1; /* Takes available space */
+            background: #000;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+        }
+        .nft-img-bg { position: absolute; inset: 0; opacity: 0.8; }
+        .nft-img-pattern { position: absolute; inset: 0; opacity: 0.2; mix-blend-mode: overlay; background-repeat: repeat; }
+        .nft-main-icon { 
+            width: 50%; height: 50%; 
+            z-index: 10; 
+            filter: drop-shadow(0 15px 30px rgba(0,0,0,0.6)); 
+            transition: transform 0.4s ease; 
+        }
+        .nft-card-premium:hover .nft-main-icon { transform: scale(1.1) rotate(2deg); }
+
+        .nft-info-bar {
+            padding: 12px;
+            background: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255,255,255,0.05);
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        
+        .nft-rarity-badge {
+            position: absolute; top: 10px; left: 10px; z-index: 20;
+            padding: 4px 8px; border-radius: 6px;
+            font-size: 9px; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 0.05em; color: #fff;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
             border: 1px solid rgba(255,255,255,0.1);
         }
-        .nft-card:active { transform: scale(0.95); }
-        .nft-bg { position: absolute; inset: 0; z-index: 0; }
-        .nft-pattern { position: absolute; inset: 0; opacity: 0.3; background-repeat: repeat; z-index: 1; mix-blend-mode: overlay; }
-        .nft-icon-wrapper { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 2; }
-        .nft-icon { width: 50%; height: 50%; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); transition: transform 0.3s ease; }
-        .nft-shine {
-            position: absolute; inset: 0; z-index: 3;
-            background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 50%, rgba(255,255,255,0) 100%);
-            opacity: 0.6; pointer-events: none;
-        }
-        .nft-price-tag {
-            position: absolute; bottom: 8px; right: 8px; z-index: 10;
-            background: rgba(0,0,0,0.8); backdrop-filter: blur(4px);
-            padding: 4px 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);
-            font-size: 10px; font-weight: 800; color: #fff;
+
+        .nft-owner-pill {
+            display: flex; items-center; gap: 6px;
+            background: rgba(255,255,255,0.05);
+            padding: 4px 8px; border-radius: 99px;
+            width: fit-content;
         }
 
         /* --- LIGHT THEME FIXES --- */
@@ -118,6 +147,7 @@
         body.light-theme #modal-withdraw-content,
         body.light-theme #modal-nft-create-content,
         body.light-theme #modal-nft-sell-content,
+        body.light-theme #modal-nft-filter-content,
         body.light-theme #modal-settings-content { background-color: #ffffff; color: #000; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); }
         
         /* Toast Light */
@@ -136,6 +166,10 @@
 
         /* QR Card in Light Mode */
         body.light-theme .qr-card-premium { background: linear-gradient(180deg, #f3f4f6 0%, #ffffff 100%); border-color: rgba(0,0,0,0.1); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1); }
+        
+        body.light-theme .nft-card-premium { background: #fff; border-color: rgba(0,0,0,0.08); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        body.light-theme .nft-info-bar { background: #fff; border-top-color: rgba(0,0,0,0.05); }
+        body.light-theme .nft-owner-pill { background: rgba(0,0,0,0.05); }
         
         /* ABOUT CARD (PREMIUM) */
         .about-card {
@@ -161,6 +195,10 @@
         .nft-tab-btn { opacity: 0.5; transition: all 0.3s; border-bottom: 2px solid transparent; }
         .nft-tab-btn.active { opacity: 1; border-bottom-color: #FF4D00; color: #FF4D00; }
 
+        /* RANGE SLIDER */
+        .range-slider { -webkit-appearance: none; width: 100%; height: 4px; border-radius: 5px; background: rgba(255,255,255,0.1); outline: none; }
+        .range-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #FF4D00; cursor: pointer; border: 2px solid #fff; box-shadow: 0 0 10px rgba(255,77,0,0.5); }
+        body.light-theme .range-slider { background: rgba(0,0,0,0.1); }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -399,18 +437,18 @@
 
                     <!-- NFT MARKET -->
                     <div id="sub-tab-market" class="space-y-4">
-                        <div class="flex gap-2 overflow-x-auto hide-scroll pb-2">
-                             <button onclick="toggleSort()" class="h-10 px-4 rounded-xl glass-panel flex items-center gap-2 border border-white/5 shrink-0">
-                                <img id="sort-icon" src="https://img.icons8.com/?size=100&id=r5snZmRTalHS&format=png&color=ffffff" class="w-4 h-4 settings-icon transition-transform duration-300">
-                                <span class="text-[10px] font-bold uppercase text-neutral-400">Цена</span>
+                        <div class="flex gap-2 items-center sticky top-12 z-20 bg-[#050505]/90 py-2 backdrop-blur-md">
+                            <div class="relative flex-1">
+                                <img src="https://img.icons8.com/?size=100&id=132&format=png&color=888888" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 opacity-50">
+                                <input type="text" id="nft-search" placeholder="Поиск по ID/Автору..." class="w-full h-11 pl-10 pr-4 rounded-xl bg-white/5 border border-white/5 text-[11px] text-white outline-none placeholder:text-neutral-600 font-bold focus:border-orange-500/30 transition-colors">
+                            </div>
+                            <button onclick="openModal('nft-filter')" class="h-11 w-11 rounded-xl glass-panel flex items-center justify-center border border-white/5 shrink-0 hover:bg-white/10 transition-colors relative">
+                                <img src="https://img.icons8.com/?size=100&id=lIPVBw1hMKkS&format=png&color=ffffff" class="w-5 h-5 settings-icon">
+                                <div id="filter-dot" class="hidden absolute top-2 right-2 w-2 h-2 bg-orange-500 rounded-full border border-black"></div>
                             </button>
-                            <button onclick="toggleFilterModal()" class="h-10 w-10 rounded-xl glass-panel flex items-center justify-center border border-white/5 shrink-0">
-                                <img src="https://img.icons8.com/?size=100&id=lIPVBw1hMKkS&format=png&color=ffffff" class="w-4 h-4 settings-icon">
-                            </button>
-                            <input type="text" id="nft-search" placeholder="Поиск по ID/Email..." class="h-10 px-4 rounded-xl bg-white/5 border border-white/5 text-[10px] text-white w-full outline-none placeholder:text-neutral-600 font-bold">
                         </div>
 
-                        <div id="nft-market-grid" class="grid grid-cols-2 gap-3 pb-24">
+                        <div id="nft-market-grid" class="grid grid-cols-2 gap-3 pb-24 px-1">
                             <!-- Items Injected Here -->
                             <div class="col-span-2 text-center py-10">
                                 <div class="w-8 h-8 border-2 border-white/10 border-t-orange-500 rounded-full animate-spin mx-auto mb-4"></div>
@@ -421,19 +459,23 @@
 
                     <!-- NFT STUDIO -->
                     <div id="sub-tab-studio" class="hidden space-y-4">
-                        <div class="dool-card rounded-[2.5rem] p-6 relative overflow-hidden text-center">
-                            <div class="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-blue-500/10"></div>
+                        <div class="dool-card rounded-[2.5rem] p-6 relative overflow-hidden text-center border border-purple-500/20">
+                            <div class="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-blue-500/5"></div>
                             <div class="relative z-10">
-                                <h3 class="text-xl font-black text-white mb-2">Создать NFT</h3>
-                                <p class="text-xs text-neutral-400 mb-4 max-w-[200px] mx-auto leading-relaxed">Случайная генерация уникального арта.</p>
+                                <h3 class="text-xl font-black text-white mb-2">Генератор NFT</h3>
+                                <p class="text-xs text-neutral-400 mb-4 max-w-[200px] mx-auto leading-relaxed">Создайте уникальный цифровой арт. Редкость определяется удачей.</p>
                                 <button onclick="openModal('nft-create')" class="h-12 px-8 bg-white text-black rounded-xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 transition-colors shadow-lg shadow-purple-500/20">
                                     Создать за 100 Đ
                                 </button>
                             </div>
                         </div>
                         
-                        <h3 class="text-[11px] font-black text-neutral-500 uppercase tracking-widest px-2 pt-2">Моя коллекция</h3>
-                        <div id="nft-my-grid" class="grid grid-cols-2 gap-3 pb-24">
+                        <div class="flex items-center gap-2 px-2 pt-2">
+                             <img src="https://img.icons8.com/?size=100&id=8g5bBqXF5j8R&format=png&color=888888" class="w-4 h-4">
+                             <h3 class="text-[11px] font-black text-neutral-500 uppercase tracking-widest">Моя коллекция</h3>
+                        </div>
+                        
+                        <div id="nft-my-grid" class="grid grid-cols-2 gap-3 pb-24 px-1">
                             <!-- My Items Injected Here -->
                         </div>
                     </div>
@@ -633,17 +675,60 @@
             </div>
         </div>
 
+        <!-- NFT FILTER MODAL (NEW) -->
+        <div id="modal-nft-filter" onclick="if(event.target===this) closeModal('nft-filter')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
+            <div class="bg-[#111] border-t border-white/10 rounded-t-[2.5rem] p-0 transform translate-y-full transition-transform duration-300" id="modal-nft-filter-content">
+               <div class="swipe-zone"><div class="swipe-handle"></div></div>
+               <div class="p-6 pb-8 space-y-6">
+                   <div class="flex items-center justify-between">
+                       <h2 class="text-xl font-black text-white uppercase tracking-wider">Фильтры</h2>
+                       <button onclick="resetFilters()" class="text-[10px] text-orange-500 font-bold uppercase tracking-wider">Сбросить</button>
+                   </div>
+                   
+                   <!-- SORT -->
+                   <div>
+                       <p class="text-[10px] text-neutral-500 font-bold uppercase tracking-widest mb-3">Сортировка</p>
+                       <div class="grid grid-cols-3 gap-2">
+                           <button onclick="setFilterSort('price_asc')" id="sort-btn-price_asc" class="h-10 rounded-xl bg-white/5 border border-white/5 text-[10px] font-bold text-neutral-400 hover:text-white transition-colors">Цена ↑</button>
+                           <button onclick="setFilterSort('price_desc')" id="sort-btn-price_desc" class="h-10 rounded-xl bg-white/5 border border-white/5 text-[10px] font-bold text-neutral-400 hover:text-white transition-colors">Цена ↓</button>
+                           <button onclick="setFilterSort('newest')" id="sort-btn-newest" class="h-10 rounded-xl bg-white/5 border border-white/5 text-[10px] font-bold text-neutral-400 hover:text-white transition-colors">Новые</button>
+                       </div>
+                   </div>
+
+                   <!-- PRICE RANGE -->
+                   <div>
+                       <div class="flex justify-between mb-3">
+                            <p class="text-[10px] text-neutral-500 font-bold uppercase tracking-widest">Цена (Đ)</p>
+                       </div>
+                       <div class="flex gap-3 items-center">
+                           <div class="bg-white/5 rounded-xl px-3 py-2 border border-white/5 flex-1">
+                               <p class="text-[8px] text-neutral-500 font-bold uppercase">От</p>
+                               <input type="number" id="filter-min-price" class="bg-transparent w-full outline-none text-white font-bold text-sm" placeholder="0">
+                           </div>
+                           <div class="w-4 h-[1px] bg-white/20"></div>
+                           <div class="bg-white/5 rounded-xl px-3 py-2 border border-white/5 flex-1">
+                               <p class="text-[8px] text-neutral-500 font-bold uppercase">До</p>
+                               <input type="number" id="filter-max-price" class="bg-transparent w-full outline-none text-white font-bold text-sm" placeholder="∞">
+                           </div>
+                       </div>
+                   </div>
+
+                   <button onclick="applyFilters()" class="w-full h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200">Применить</button>
+               </div>
+           </div>
+       </div>
+
         <!-- NFT CREATE CONFIRM -->
         <div id="modal-nft-create" onclick="if(event.target===this) closeModal('nft-create')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
             <div class="bg-[#111] border-t border-white/10 rounded-t-[2.5rem] p-0 transform translate-y-full transition-transform duration-300" id="modal-nft-create-content">
                <div class="swipe-zone"><div class="swipe-handle"></div></div>
                <div class="p-8 pb-10 text-center">
-                   <div class="w-16 h-16 mx-auto mb-4 bg-purple-500/20 rounded-full flex items-center justify-center text-3xl">🎨</div>
+                   <div class="w-16 h-16 mx-auto mb-4 bg-purple-500/20 rounded-full flex items-center justify-center text-3xl animate-bounce">🎨</div>
                    <h2 class="text-xl font-black mb-2 text-white">Создать NFT?</h2>
                    <p class="text-xs text-neutral-400 mb-6">Это будет стоить <span class="text-white font-bold">100 Đ</span>. Результат полностью случаен.</p>
                    <div class="grid grid-cols-2 gap-3">
                        <button onclick="closeModal('nft-create')" class="h-12 bg-white/5 text-neutral-400 rounded-xl font-bold text-xs uppercase">Отмена</button>
-                       <button onclick="doCreateNFT()" class="h-12 bg-white text-black rounded-xl font-black text-xs uppercase hover:bg-neutral-200">Создать</button>
+                       <button onclick="doCreateNFT()" id="btn-create-nft-action" class="h-12 bg-white text-black rounded-xl font-black text-xs uppercase hover:bg-neutral-200">Создать</button>
                    </div>
                </div>
            </div>
@@ -663,7 +748,7 @@
                            <span class="text-xl font-black text-orange-500">Đ</span>
                        </div>
                    </div>
-                   <button onclick="doSellNFT()" class="w-full h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer">Сохранить</button>
+                   <button onclick="doSellNFT()" id="btn-sell-confirm" class="w-full h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer">Сохранить</button>
                </div>
            </div>
        </div>
@@ -728,8 +813,14 @@
         };
         window.setLanguage(currentLang); window.setTheme(currentTheme);
 
-        let myData = null, lastBal = null, userCache = {}, html5QrCode = null, nftsUnsubscribe = null;
-        let marketSortAsc = true;
+        let myData = null, lastBal = null, html5QrCode = null, nftsUnsubscribe = null;
+        
+        // --- NFT FILTER STATE ---
+        let filterState = {
+            sort: 'newest', // newest, price_asc, price_desc
+            minPrice: null,
+            maxPrice: null
+        };
 
         /* SWIPE CLOSE */
         function initSwipeClose(modalName) {
@@ -740,7 +831,7 @@
             handle.addEventListener('touchmove', (e) => { if(!isDragging) return; currentY = e.touches[0].clientY; const diff = currentY - startY; if(diff > 0) content.style.transform = `translateY(${diff}px)`; }, {passive: true});
             handle.addEventListener('touchend', (e) => { isDragging = false; const diff = currentY - startY; content.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'; if(diff > 120) closeModal(modalName); else content.style.transform = ''; });
         }
-        ['send', 'receive', 'deposit', 'withdraw', 'settings', 'nft-create', 'nft-sell'].forEach(initSwipeClose);
+        ['send', 'receive', 'deposit', 'withdraw', 'settings', 'nft-create', 'nft-sell', 'nft-filter'].forEach(initSwipeClose);
 
         /* BASIC LOGIC */
         function getTrans(key) { return langData[currentLang][key] || key; }
@@ -769,13 +860,14 @@
         window.openModal = (n) => {
             const m = document.getElementById('modal-'+n), c = document.getElementById(`modal-${n}-content`);
             if(!m || !c) return; m.classList.remove('hidden'); void m.offsetWidth; m.classList.remove('opacity-0');
-            if(['send', 'receive', 'deposit', 'withdraw', 'settings', 'nft-create', 'nft-sell'].includes(n)) { c.style.transform = ''; setTimeout(() => c.classList.remove('translate-y-full'), 10); } else if(n !== 'scan' && n !== 'profile' && n !== 'invited-info') c.classList.remove('scale-90');
+            if(['send', 'receive', 'deposit', 'withdraw', 'settings', 'nft-create', 'nft-sell', 'nft-filter'].includes(n)) { c.style.transform = ''; setTimeout(() => c.classList.remove('translate-y-full'), 10); } else if(n !== 'scan' && n !== 'profile' && n !== 'invited-info') c.classList.remove('scale-90');
             if(n === 'receive') updateQR(); if(n === 'scan') startScannerV2();
+            if(n === 'nft-filter') renderFilterUI();
         };
         window.closeModal = (n) => {
             const m = document.getElementById('modal-'+n), c = document.getElementById(`modal-${n}-content`);
             if(!m || !c) return; m.classList.add('opacity-0');
-            if(['send', 'receive', 'deposit', 'withdraw', 'settings', 'nft-create', 'nft-sell'].includes(n)) c.classList.add('translate-y-full'); else if(n !== 'scan' && n !== 'profile' && n !== 'invited-info') c.classList.add('scale-90');
+            if(['send', 'receive', 'deposit', 'withdraw', 'settings', 'nft-create', 'nft-sell', 'nft-filter'].includes(n)) c.classList.add('translate-y-full'); else if(n !== 'scan' && n !== 'profile' && n !== 'invited-info') c.classList.add('scale-90');
             if(n === 'scan') stopScannerV2(); setTimeout(() => m.classList.add('hidden'), 300);
         };
 
@@ -827,7 +919,6 @@
                 if(!document.querySelector('.tab-content.active')) switchTab('wallet');
             });
             
-            // Restoring History Logic
             const qTx = query(collection(db, "transactions"), where("parties", "array-contains", u.email));
             onSnapshot(qTx, async (snap) => {
                 const list = document.getElementById('tx-history'); if (snap.empty) { list.innerHTML = `<p class="text-center text-neutral-600 text-[10px] uppercase font-bold py-4">...</p>`; return; }
@@ -847,7 +938,6 @@
                 const snap = await getDocs(q); 
                 if (!snap.empty) { 
                     const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date); 
-                    // Check if the latest transaction matches the amount diff closely
                     if (docs.length > 0 && Math.abs(docs[0].amount - amountDiff) < 0.01) { 
                         if (docs[0].type === 'referral_bonus') showT('Bonus', getTrans('ref_desc'), `+${amountDiff.toFixed(1)} Đ`); 
                         else showT('Transfer', docs[0].from, `+${amountDiff.toFixed(1)} Đ`, docs[0].from); 
@@ -867,7 +957,37 @@
         document.getElementById('btn-do-deposit').onclick = async () => { const amt = parseFloat(document.getElementById('deposit-amt').value); if (!amt || amt < 0.1) return showT('Ошибка', getTrans('error_min'), '', null, true); if (amt > myData.balance) return showT('Ошибка', getTrans('error_fund'), '', null, true); try { const userRef = doc(db, "users", auth.currentUser.uid); await runTransaction(db, async (t) => { const d = (await t.get(userRef)).data(); t.update(userRef, { balance: d.balance - amt, bankBalance: calculateCompoundBalance(d.bankBalance, d.lastBankUpdate) + amt, lastBankUpdate: serverTimestamp() }); }); closeModal('deposit'); document.getElementById('deposit-amt').value = ''; showT('Банк', getTrans('deposit_success')); } catch(e) { showT('Ошибка', e.message, '', null, true); } };
         document.getElementById('btn-do-withdraw').onclick = async () => { const amt = parseFloat(document.getElementById('withdraw-amt').value); if (!amt || amt < 0.1) return showT('Ошибка', getTrans('error_min'), '', null, true); try { const userRef = doc(db, "users", auth.currentUser.uid); await runTransaction(db, async (t) => { const d = (await t.get(userRef)).data(); const currentBank = calculateCompoundBalance(d.bankBalance, d.lastBankUpdate); if (amt > currentBank) throw "Funds"; t.update(userRef, { balance: d.balance + amt, bankBalance: currentBank - amt, lastBankUpdate: serverTimestamp() }); }); closeModal('withdraw'); document.getElementById('withdraw-amt').value = ''; showT('Банк', getTrans('withdraw_success')); } catch(e) { showT('Ошибка', e.message, '', null, true); } };
         
-        /* NFT LOGIC */
+        /* --- IMPROVED NFT LOGIC --- */
+        
+        // Filtering
+        window.renderFilterUI = () => {
+            // Highlight active sort btn
+            ['price_asc', 'price_desc', 'newest'].forEach(s => {
+                const btn = document.getElementById(`sort-btn-${s}`);
+                if (filterState.sort === s) { btn.classList.add('bg-white', 'text-black'); btn.classList.remove('bg-white/5', 'text-neutral-400'); }
+                else { btn.classList.remove('bg-white', 'text-black'); btn.classList.add('bg-white/5', 'text-neutral-400'); }
+            });
+            document.getElementById('filter-min-price').value = filterState.minPrice || '';
+            document.getElementById('filter-max-price').value = filterState.maxPrice || '';
+        };
+
+        window.setFilterSort = (sortMode) => { filterState.sort = sortMode; renderFilterUI(); };
+        window.resetFilters = () => { filterState = { sort: 'newest', minPrice: null, maxPrice: null }; renderFilterUI(); };
+        window.applyFilters = () => {
+             const min = parseFloat(document.getElementById('filter-min-price').value);
+             const max = parseFloat(document.getElementById('filter-max-price').value);
+             filterState.minPrice = isNaN(min) ? null : min;
+             filterState.maxPrice = isNaN(max) ? null : max;
+             
+             // Visual Dot
+             const hasFilters = filterState.minPrice !== null || filterState.maxPrice !== null || filterState.sort !== 'newest';
+             if (hasFilters) document.getElementById('filter-dot').classList.remove('hidden');
+             else document.getElementById('filter-dot').classList.add('hidden');
+             
+             closeModal('nft-filter');
+             loadNFTs();
+        };
+
         window.switchNftSub = (sub) => {
             document.getElementById('sub-tab-market').classList.add('hidden'); document.getElementById('sub-tab-studio').classList.add('hidden');
             document.getElementById('sub-tab-'+sub).classList.remove('hidden');
@@ -876,18 +996,13 @@
             loadNFTs();
         };
 
-        window.toggleSort = () => {
-            marketSortAsc = !marketSortAsc;
-            const icon = document.getElementById('sort-icon');
-            icon.style.transform = marketSortAsc ? 'rotate(0deg)' : 'rotate(180deg)';
-            loadNFTs();
-        };
-
         function getRandomColor() { const letters = '0123456789ABCDEF'; let color = '#'; for (let i = 0; i < 6; i++) { color += letters[Math.floor(Math.random() * 16)]; } return color; }
 
         window.doCreateNFT = async () => {
+            const btn = document.getElementById('btn-create-nft-action');
             if (myData.balance < 100) { closeModal('nft-create'); return showT('Ошибка', getTrans('error_fund'), '', null, true); }
-            closeModal('nft-create');
+            
+            btn.disabled = true; btn.innerText = '...';
             
             const randomIcon = iconsList[Math.floor(Math.random() * iconsList.length)];
             const randomPattern = iconsList[Math.floor(Math.random() * iconsList.length)];
@@ -911,33 +1026,57 @@
                         createdAt: serverTimestamp()
                     });
                 });
+                closeModal('nft-create');
                 showT('Успешно', getTrans('nft_created'), '-100 Đ');
-                loadNFTs();
             } catch (e) { showT('Ошибка', 'Error creating NFT', '', null, true); }
+            finally { btn.disabled = false; btn.innerText = getTrans('create'); }
         };
 
-        function renderNFTCard(nft, isMine, isMarket) {
-            const patternStyle = `background-image: url('${nft.pattern}'); background-size: 30px; filter: grayscale(100%) opacity(0.3);`;
-            const iconFilter = currentTheme === 'light' ? 'filter: invert(1);' : ''; // Adjust icon color based on theme if needed, though colored icons usually fine
+        function getRarity(id) {
+            const hash = id.split('').reduce((a,b)=>{a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);
+            const val = Math.abs(hash) % 100;
+            if (val < 5) return { t: "LEGENDARY", c: "linear-gradient(135deg, #FFD700, #FDB931)" }; // 5%
+            if (val < 20) return { t: "RARE", c: "linear-gradient(135deg, #00C9FF, #92FE9D)" }; // 15%
+            if (val < 50) return { t: "UNCOMMON", c: "rgba(255,255,255,0.2)" }; // 30%
+            return { t: "COMMON", c: "rgba(255,255,255,0.1)" };
+        }
+
+        function renderPremiumCard(nft, isMine, isMarket) {
+            const rarity = getRarity(nft.id);
+            const ownerAvatar = `https://ui-avatars.com/api/?background=random&color=fff&name=${nft.owner.charAt(0)}`;
+            const patternStyle = `background-image: url('${nft.pattern}'); background-size: 40px;`;
             
-            let actionBtn = '';
+            let btnHTML = '';
             if (isMine) {
-                actionBtn = `<button onclick="openSellModal('${nft.id}', ${nft.price})" class="absolute top-2 right-2 z-20 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-2 py-1 rounded-lg border border-white/10 hover:bg-white/20 transition-colors">${nft.price > 0 ? `Sell: ${nft.price} Đ` : 'Sell'}</button>`;
+                const sellText = nft.isForSale ? `Продается: ${nft.price} Đ` : 'Продать';
+                btnHTML = `<button onclick="openSellModal('${nft.id}', ${nft.price})" class="w-full py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-xl text-[10px] font-black uppercase tracking-wider transition-colors border border-white/10">${sellText}</button>`;
             } else if (isMarket) {
-                actionBtn = `<button onclick="buyNFT('${nft.id}', ${nft.price})" class="absolute bottom-2 left-1/2 -translate-x-1/2 w-[90%] z-20 bg-white text-black text-[10px] font-black py-2 rounded-lg hover:bg-neutral-200 transition-colors shadow-lg">BUY ${nft.price} Đ</button>`;
+                if (nft.ownerUid === auth.currentUser.uid) {
+                    btnHTML = `<button disabled class="w-full py-3 bg-white/5 rounded-xl text-[10px] font-bold uppercase tracking-wider text-neutral-500 cursor-not-allowed border border-white/5">Ваш лот</button>`;
+                } else {
+                    btnHTML = `<button onclick="buyNFT('${nft.id}', ${nft.price}, this)" class="w-full py-3 bg-white text-black hover:bg-neutral-200 rounded-xl text-[10px] font-black uppercase tracking-wider transition-colors shadow-lg">Купить за ${nft.price} Đ</button>`;
+                }
             }
 
             return `
-            <div class="nft-card group relative">
-                <div class="nft-bg" style="background-color: ${nft.bg}"></div>
-                <div class="nft-pattern" style="${patternStyle}"></div>
-                <div class="nft-shine"></div>
-                <div class="nft-icon-wrapper">
-                    <img src="${nft.icon}" class="nft-icon group-hover:scale-110">
+            <div class="nft-card-premium group">
+                <div class="nft-img-container">
+                    <div class="nft-img-bg" style="background-color: ${nft.bg}"></div>
+                    <div class="nft-img-pattern" style="${patternStyle}"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60"></div>
+                    <img src="${nft.icon}" class="nft-main-icon">
+                    <div class="nft-rarity-badge" style="background: ${rarity.c}; color: ${rarity.t === 'COMMON' || rarity.t === 'UNCOMMON' ? '#fff' : '#000'}">${rarity.t}</div>
                 </div>
-                ${nft.price > 0 && !isMarket ? `<div class="nft-price-tag">${nft.price} Đ</div>` : ''}
-                ${isMarket ? `<div class="absolute top-2 left-2 z-10 text-[9px] font-bold text-white/50 bg-black/40 px-1.5 py-0.5 rounded backdrop-blur-sm truncate max-w-[80px]">${nft.owner}</div>` : ''}
-                ${actionBtn}
+                <div class="nft-info-bar">
+                    <div class="flex justify-between items-center">
+                         <div class="nft-owner-pill">
+                             <img src="${ownerAvatar}" class="w-4 h-4 rounded-full">
+                             <span class="text-[9px] font-bold text-neutral-300 truncate max-w-[80px]">${nft.owner.split('@')[0]}</span>
+                         </div>
+                         ${!isMine && nft.isForSale ? `<div class="text-xs font-black text-orange-500">${nft.price} Đ</div>` : ''}
+                    </div>
+                    ${btnHTML}
+                </div>
             </div>`;
         }
 
@@ -951,32 +1090,63 @@
             const id = document.getElementById('sell-nft-id').value;
             const price = parseFloat(document.getElementById('sell-nft-price').value);
             if (price < 0) return;
+            const btn = document.getElementById('btn-sell-confirm');
+            btn.disabled = true; btn.innerText = '...';
+
             try {
-                await updateDoc(doc(db, "nfts", id), { price: price, isForSale: price > 0 });
+                // Ensure ownership before update
+                await runTransaction(db, async (t) => {
+                    const ref = doc(db, "nfts", id);
+                    const n = (await t.get(ref)).data();
+                    if(n.ownerUid !== auth.currentUser.uid) throw "Not owner";
+                    t.update(ref, { price: price, isForSale: price > 0 });
+                });
                 closeModal('nft-sell');
                 showT('Успешно', getTrans('nft_updated'));
-                loadNFTs();
             } catch (e) { showT('Ошибка', 'Error', '', null, true); }
+            finally { btn.disabled = false; btn.innerText = 'Сохранить'; }
         };
 
-        window.buyNFT = async (nftId, price) => {
-            if (myData.balance < price) return showT('Ошибка', getTrans('error_fund'), '', null, true);
+        window.buyNFT = async (nftId, expectedPrice, btnElem) => {
+            if (myData.balance < expectedPrice) return showT('Ошибка', getTrans('error_fund'), '', null, true);
+            
+            // Client-side lock
+            const originalText = btnElem.innerText;
+            btnElem.disabled = true; 
+            btnElem.innerHTML = '<div class="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin mx-auto"></div>';
+
             try {
                 await runTransaction(db, async (t) => {
                     const nftRef = doc(db, "nfts", nftId);
                     const nftDoc = await t.get(nftRef);
-                    if (!nftDoc.exists() || !nftDoc.data().isForSale) throw "Not for sale";
+                    if (!nftDoc.exists()) throw "NFT not found";
                     
+                    const nftData = nftDoc.data();
+                    
+                    // SECURITY CHECKS INSIDE TRANSACTION
+                    if (!nftData.isForSale) throw "Продано или снято с продажи";
+                    if (nftData.price !== expectedPrice) throw "Цена изменилась!";
+                    if (nftData.ownerUid === auth.currentUser.uid) throw "Вы уже владелец";
+
                     const buyerRef = doc(db, "users", auth.currentUser.uid);
-                    const sellerRef = doc(db, "users", nftDoc.data().ownerUid);
+                    const sellerRef = doc(db, "users", nftData.ownerUid);
+                    const buyerDoc = await t.get(buyerRef);
                     
-                    t.update(buyerRef, { balance: increment(-price) });
-                    t.update(sellerRef, { balance: increment(price) });
+                    if (buyerDoc.data().balance < expectedPrice) throw "Недостаточно средств";
+                    
+                    t.update(buyerRef, { balance: increment(-expectedPrice) });
+                    t.update(sellerRef, { balance: increment(expectedPrice) });
                     t.update(nftRef, { owner: auth.currentUser.email, ownerUid: auth.currentUser.uid, isForSale: false, price: 0 });
+                    
+                    // Log transaction
+                    const txRef = doc(collection(db, "transactions"));
+                    t.set(txRef, { from: auth.currentUser.email, to: nftData.owner, amount: expectedPrice, type: 'nft_buy', date: serverTimestamp(), parties: [auth.currentUser.email, nftData.owner] });
                 });
-                showT('Успешно', getTrans('nft_buy_ok'), `-${price} Đ`);
-                loadNFTs();
-            } catch (e) { showT('Ошибка', 'Transaction failed', '', null, true); }
+                showT('Успешно', getTrans('nft_buy_ok'), `-${expectedPrice} Đ`);
+            } catch (e) { 
+                showT('Ошибка', typeof e === 'string' ? e : 'Transaction failed', '', null, true);
+                btnElem.disabled = false; btnElem.innerText = originalText;
+            }
         };
 
         async function loadNFTs() {
@@ -988,8 +1158,9 @@
             grid.innerHTML = '<div class="col-span-2 text-center py-10"><div class="w-8 h-8 border-2 border-white/10 border-t-orange-500 rounded-full animate-spin mx-auto"></div></div>';
 
             let q;
+            // Fetch broadly then filter in memory for smooth UX on small datasets
             if (isMarket) {
-                q = query(collection(db, "nfts"), where("isForSale", "==", true)); // Firestore limits sorting with inequality filters sometimes, handle sort in JS
+                q = query(collection(db, "nfts"), where("isForSale", "==", true));
             } else {
                 q = query(collection(db, "nfts"), where("ownerUid", "==", auth.currentUser.uid));
             }
@@ -997,31 +1168,41 @@
             nftsUnsubscribe = onSnapshot(q, (snap) => {
                 let nfts = snap.docs.map(d => ({id: d.id, ...d.data()}));
                 
-                // Client-side filtering
-                if (isMarket && searchVal) {
+                // 1. Search Filter
+                if (searchVal) {
                     nfts = nfts.filter(n => n.id.toLowerCase().includes(searchVal) || n.owner.toLowerCase().includes(searchVal));
                 }
 
-                // Client-side sorting for market
                 if (isMarket) {
-                    nfts.sort((a, b) => marketSortAsc ? a.price - b.price : b.price - a.price);
+                    // 2. Price Range Filter
+                    if (filterState.minPrice !== null) nfts = nfts.filter(n => n.price >= filterState.minPrice);
+                    if (filterState.maxPrice !== null) nfts = nfts.filter(n => n.price <= filterState.maxPrice);
+
+                    // 3. Sorting
+                    if (filterState.sort === 'price_asc') nfts.sort((a, b) => a.price - b.price);
+                    else if (filterState.sort === 'price_desc') nfts.sort((a, b) => b.price - a.price);
+                    else nfts.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0)); // Newest
                 } else {
-                    nfts.sort((a, b) => b.createdAt - a.createdAt);
+                    // My Items always newest first
+                    nfts.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
                 }
 
                 if (nfts.length === 0) {
-                    grid.innerHTML = `<div class="col-span-2 text-center py-10 text-neutral-500 text-xs font-bold">Пусто... 🕸️</div>`;
+                    grid.innerHTML = `<div class="col-span-2 text-center py-10 flex flex-col items-center opacity-50"><img src="https://img.icons8.com/?size=100&id=11997&format=png&color=ffffff" class="w-12 h-12 mb-2 opacity-50"><p class="text-xs font-bold">Пусто...</p></div>`;
                     return;
                 }
 
-                grid.innerHTML = nfts.map(n => renderNFTCard(n, !isMarket, isMarket)).join('');
+                grid.innerHTML = nfts.map(n => renderPremiumCard(n, !isMarket, isMarket)).join('');
             });
         }
         
-        document.getElementById('nft-search').addEventListener('input', loadNFTs);
+        document.getElementById('nft-search').addEventListener('input', () => {
+             // Debounce slightly for search
+             clearTimeout(window.searchTimeout);
+             window.searchTimeout = setTimeout(loadNFTs, 300);
+        });
         
         /* SCANNER & MISC (Existing Logic) */
-        // ... (Send/Receive/Scanner logic preserved from previous version, omitted to save space but functionality is integrated via event listeners defined earlier)
         window.updateQR = () => { const email = auth.currentUser.email; let amt = parseFloat(document.getElementById('receive-amt-req').value); const container = document.getElementById('qrcode-container'); if(isNaN(amt)) amt = 0; const data = JSON.stringify({ t: "req", e: email, a: amt }); container.innerHTML = ''; new QRCode(container, { text: data, width: 180, height: 180, colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.M }); };
         document.getElementById('receive-amt-req').oninput = updateQR;
         window.startScannerV2 = () => { if (html5QrCode) return; html5QrCode = new Html5Qrcode("reader"); html5QrCode.start({ facingMode: "environment" }, { fps: 15, aspectRatio: window.innerHeight / window.innerWidth }, onScanSuccess, onScanError).catch(err => closeModal('scan')); };
@@ -1046,7 +1227,6 @@
         };
         window.copyRef = () => { navigator.clipboard.writeText(document.getElementById('ref-link').value); showT('Успешно', getTrans('link_copied')); };
         window.shareRef = async () => { if (navigator.share) { try { await navigator.share({ title: 'Doolcoin Wallet', text: 'Bonus!', url: document.getElementById('ref-link').value }); } catch (err) {} } else copyRef(); };
-        window.copyMyEmail = () => { navigator.clipboard.writeText(auth.currentUser.email); showT('Успешно', getTrans('addr_copied')); };
     </script>
 </body>
 </html>
