@@ -222,7 +222,10 @@
                         <img id="main-avatar" src="" class="w-10 h-10 rounded-full object-cover bg-black border-2 border-black">
                     </div>
                     <div class="flex flex-col justify-center">
-                        <p id="main-username" class="text-xs font-bold truncate max-w-[140px] leading-tight text-white">...</p>
+                        <div class="flex items-center gap-1">
+                            <p id="main-username" class="text-xs font-bold truncate max-w-[140px] leading-tight text-white">...</p>
+                            <img id="header-verified-icon" src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" class="w-3 h-3 hidden" title="Verified">
+                        </div>
                         <p class="text-[9px] font-black text-neutral-500 uppercase tracking-widest leading-tight" data-lang="profile">Профиль</p>
                     </div>
                 </div>
@@ -423,7 +426,7 @@
                                     </div>
                                     <span class="font-black text-sm tracking-widest text-white">DOOLCOIN</span>
                                 </div>
-                                <span class="text-[9px] font-mono text-neutral-500">v1.0.2</span>
+                                <span class="text-[9px] font-mono text-neutral-500">v1.0.3</span>
                             </div>
                             
                             <h3 class="text-xs font-bold text-white mb-2" data-lang="legal_title">Юридическая информация</h3>
@@ -459,6 +462,12 @@
                             <input type="file" id="avatar-input" class="hidden" accept="image/*">
                         </label>
                     </div>
+                    
+                    <!-- Verification Section -->
+                    <div id="profile-verification-status" class="mb-6 flex flex-col items-center min-h-[40px]">
+                        <!-- Injected via JS -->
+                    </div>
+
                     <p id="profile-email" class="text-xs text-neutral-500 font-bold mb-6 truncate px-2">...</p>
                     <button onclick="closeModal('profile')" class="w-full h-12 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer" data-lang="close">Закрыть</button>
                 </div>
@@ -717,8 +726,16 @@
 
         async function getUserInfo(email) {
             if (userCache[email]) return userCache[email];
-            let info = { avatar: `https://ui-avatars.com/api/?background=random&color=fff&name=${email.charAt(0).toUpperCase()}&size=128`, email: email };
-            try { const q = query(collection(db, "users"), where("email", "==", email)); const res = await getDocs(q); if (!res.empty) { const d = res.docs[0].data(); if (d.avatar) info.avatar = d.avatar; } } catch (e) {}
+            let info = { avatar: `https://ui-avatars.com/api/?background=random&color=fff&name=${email.charAt(0).toUpperCase()}&size=128`, email: email, isVerified: false };
+            try { 
+                const q = query(collection(db, "users"), where("email", "==", email)); 
+                const res = await getDocs(q); 
+                if (!res.empty) { 
+                    const d = res.docs[0].data(); 
+                    if (d.avatar) info.avatar = d.avatar; 
+                    if (d.isVerified) info.isVerified = true;
+                } 
+            } catch (e) {}
             userCache[email] = info; return info;
         }
 
@@ -772,7 +789,7 @@
                 const userRef = doc(db, "users", u.uid); const snap = await getDoc(userRef);
                 if (!snap.exists()) {
                     const email = u.email, emailLower = u.email.toLowerCase(), clientIP = await getClientIP();
-                    const userData = { email: email, lowercaseEmail: emailLower, balance: 10.0, bankBalance: 0, lastBankUpdate: Timestamp.now(), avatar: u.photoURL || '', refCount: 0, refEarned: 0, createdAt: Timestamp.now(), isBanned: false, ip: clientIP, referralStatus: 'none' };
+                    const userData = { email: email, lowercaseEmail: emailLower, balance: 10.0, bankBalance: 0, lastBankUpdate: Timestamp.now(), avatar: u.photoURL || '', refCount: 0, refEarned: 0, createdAt: Timestamp.now(), isBanned: false, ip: clientIP, referralStatus: 'none', isVerified: false };
                     const refEmail = localStorage.getItem('dool_ref');
                     if (refEmail && refEmail !== emailLower) {
                         try {
@@ -806,6 +823,28 @@
                 updateBankVisuals(d);
                 document.getElementById('ref-count').textContent = d.refCount || 0; document.getElementById('ref-earned').textContent = (d.refEarned || 0).toFixed(1);
                 const av = d.avatar || `https://ui-avatars.com/api/?background=random&color=fff&name=${u.email.charAt(0)}`; document.getElementById('main-avatar').src = av; document.getElementById('edit-avatar-img').src = av;
+                
+                // VERIFICATION UI UPDATE
+                const vIcon = document.getElementById('header-verified-icon');
+                const vSection = document.getElementById('profile-verification-status');
+                if (d.isVerified) {
+                    vIcon.classList.remove('hidden');
+                    vSection.innerHTML = `
+                        <div class="flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 px-4 py-2 rounded-xl">
+                            <img src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" class="w-5 h-5">
+                            <span class="text-xs font-bold text-blue-400 uppercase tracking-wider">Верифицирован</span>
+                        </div>
+                    `;
+                } else {
+                    vIcon.classList.add('hidden');
+                    vSection.innerHTML = `
+                        <button onclick="requestVerification()" class="flex items-center gap-2 bg-white/5 border border-white/10 hover:bg-white/10 px-4 py-2 rounded-xl transition-colors group cursor-pointer">
+                            <span class="text-xs font-bold text-neutral-400 group-hover:text-white uppercase tracking-wider">Получить галочку</span>
+                            <img src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" class="w-4 h-4 opacity-50 grayscale group-hover:grayscale-0 group-hover:opacity-100 transition-all">
+                        </button>
+                    `;
+                }
+
                 document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-loading').classList.add('hidden'); document.getElementById('view-main').classList.replace('hidden', 'flex'); switchTab('wallet'); document.getElementById('btn-login').disabled = false; document.getElementById('btn-register').disabled = false;
             });
             const qTx = query(collection(db, "transactions"), where("parties", "array-contains", u.email));
@@ -814,12 +853,28 @@
                 const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date); let html = '';
                 for (const tx of docs) {
                     const isSent = tx.from === u.email, partner = isSent ? tx.to : tx.from, dateStr = tx.date ? new Date(tx.date.toMillis()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
-                    html += `<div class="flex items-center justify-between p-4 rounded-[1.5rem] bg-white/[0.03] border border-white/5"><div class="flex items-center gap-3 overflow-hidden"><img id="av-${tx.date.toMillis()}" src="https://ui-avatars.com/api/?background=222&color=666&name=${partner.charAt(0)}" class="w-10 h-10 rounded-full bg-neutral-800 object-cover border border-white/5 shrink-0"><div class="min-w-0"><p class="text-[9px] font-black uppercase ${isSent ? 'text-neutral-500' : 'text-[#FF4D00]'} tracking-widest mb-0.5">${isSent ? 'To:' : 'From:'}</p><p class="text-[11px] font-bold text-white truncate w-32 leading-tight">${partner}</p></div></div><div class="text-right"><p class="text-sm font-black ${isSent ? 'text-white' : 'text-[#FF4D00]'}">${isSent ? '-' : '+'}${tx.amount.toFixed(1)}</p><p class="text-[9px] text-neutral-600 font-bold uppercase">${dateStr}</p></div></div>`;
-                    if(partner.includes('@')) getUserInfo(partner).then(inf => { const el = document.getElementById(`av-${tx.date.toMillis()}`); if(el) el.src = inf.avatar; });
+                    html += `<div class="flex items-center justify-between p-4 rounded-[1.5rem] bg-white/[0.03] border border-white/5"><div class="flex items-center gap-3 overflow-hidden"><img id="av-${tx.date.toMillis()}" src="https://ui-avatars.com/api/?background=222&color=666&name=${partner.charAt(0)}" class="w-10 h-10 rounded-full bg-neutral-800 object-cover border border-white/5 shrink-0"><div class="min-w-0"><p class="text-[9px] font-black uppercase ${isSent ? 'text-neutral-500' : 'text-[#FF4D00]'} tracking-widest mb-0.5">${isSent ? 'To:' : 'From:'}</p><div class="flex items-center gap-1"><p class="text-[11px] font-bold text-white truncate max-w-[120px] leading-tight">${partner}</p><img id="ver-${tx.date.toMillis()}" src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" class="w-3 h-3 hidden"></div></div></div><div class="text-right"><p class="text-sm font-black ${isSent ? 'text-white' : 'text-[#FF4D00]'}">${isSent ? '-' : '+'}${tx.amount.toFixed(1)}</p><p class="text-[9px] text-neutral-600 font-bold uppercase">${dateStr}</p></div></div>`;
+                    if(partner.includes('@')) getUserInfo(partner).then(inf => { 
+                        const el = document.getElementById(`av-${tx.date.toMillis()}`); if(el) el.src = inf.avatar; 
+                        if (inf.isVerified) { const vel = document.getElementById(`ver-${tx.date.toMillis()}`); if(vel) vel.classList.remove('hidden'); }
+                    });
                 }
                 list.innerHTML = html;
             });
         }
+        
+        window.requestVerification = async () => {
+             const btn = document.querySelector('#profile-verification-status button');
+             if(btn) btn.innerHTML = '<span class="text-xs font-bold animate-pulse text-white">Загрузка...</span>';
+             try {
+                await updateDoc(doc(db, "users", auth.currentUser.uid), { isVerified: true });
+                showT('Успешно', 'Вы верифицированы!');
+             } catch (e) {
+                showT('Ошибка', 'Не удалось верифицировать', '', null, true);
+                if(btn) btn.innerHTML = 'Ошибка';
+             }
+        };
+
         async function handleIncomingTransfer(myEmail, amountDiff) {
             try { const q = query(collection(db, "transactions"), where("to", "==", myEmail)); const snap = await getDocs(q); if (!snap.empty) { const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date); if (Math.abs(docs[0].amount - amountDiff) < 0.01) { if (docs[0].type === 'referral_bonus') showT('Bonus', getTrans('ref_desc'), `+${amountDiff.toFixed(1)} Đ`); else showT('Transfer', docs[0].from, `+${amountDiff.toFixed(1)} Đ`, docs[0].from); return; } } showT('Банк', getTrans('in_jar'), `+${amountDiff.toFixed(1)} Đ`); } catch(e) {}
         }
