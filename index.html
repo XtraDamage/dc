@@ -68,6 +68,8 @@
         .market-card:active { transform: scale(0.98); }
         .tag-service { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
         .tag-goods { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .market-img-container { width: 100%; aspect-ratio: 16/9; border-radius: 1rem; overflow: hidden; margin-bottom: 0.75rem; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; position: relative; }
+        .market-img { width: 100%; height: 100%; object-fit: cover; }
 
         /* --- LIGHT THEME FIXES --- */
         body.light-theme { background-color: #f0f2f5; color: #1a1a1a; }
@@ -416,6 +418,15 @@
                         <h2 class="text-2xl font-black text-white" data-lang="settings">Настройки</h2>
                     </div>
 
+                    <!-- Username Change -->
+                     <div class="bg-white/5 rounded-2xl p-4 border border-white/5">
+                        <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-2">Username (Уникальный)</p>
+                        <div class="flex gap-2">
+                            <input type="text" id="settings-username" placeholder="@username" class="flex-1 bg-transparent outline-none font-bold text-sm text-white placeholder:text-neutral-700">
+                            <button onclick="saveUsername()" class="px-4 py-2 bg-white text-black rounded-lg text-xs font-black uppercase hover:bg-neutral-200">OK</button>
+                        </div>
+                    </div>
+
                     <!-- Theme -->
                     <div>
                         <p class="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-3" data-lang="theme">Тема оформления</p>
@@ -456,7 +467,7 @@
                                     </div>
                                     <span class="font-black text-sm tracking-widest text-white">DOOLCOIN</span>
                                 </div>
-                                <span class="text-[9px] font-mono text-neutral-500">v1.1.0</span>
+                                <span class="text-[9px] font-mono text-neutral-500">v1.2.0</span>
                             </div>
                             
                             <h3 class="text-xs font-bold text-white mb-2" data-lang="legal_title">Юридическая информация</h3>
@@ -496,9 +507,11 @@
                         </label>
                     </div>
                     
-                    <div id="profile-verification-status" class="mb-6 flex flex-col items-center min-h-[40px]"></div>
+                    <div id="profile-verification-status" class="mb-4 flex flex-col items-center min-h-[40px]"></div>
 
+                    <p id="profile-username" class="text-lg text-white font-black mb-1">@...</p>
                     <p id="profile-email" class="text-xs text-neutral-500 font-bold mb-6 truncate px-2">...</p>
+                    
                     <button onclick="closeModal('profile')" class="w-full h-12 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer" data-lang="close">Закрыть</button>
                 </div>
             </div>
@@ -539,6 +552,20 @@
                         <div class="bg-white/5 rounded-2xl p-4 border border-white/5">
                             <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Название</p>
                             <input type="text" id="market-title" placeholder="Напр: Дизайн логотипа" class="w-full bg-transparent outline-none font-bold text-sm text-white placeholder:text-neutral-700">
+                        </div>
+
+                        <div class="bg-white/5 rounded-2xl p-4 border border-white/5">
+                            <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Картинка (URL или Загрузка)</p>
+                            <input type="url" id="market-img-url" placeholder="https://..." class="w-full bg-transparent outline-none font-bold text-xs text-white placeholder:text-neutral-700 mb-2">
+                             <div class="relative">
+                                <label class="flex items-center justify-center w-full h-10 border border-dashed border-white/20 rounded-xl cursor-pointer hover:bg-white/5">
+                                    <span class="text-[10px] text-neutral-400 font-bold uppercase">Загрузить файл (Сжатие)</span>
+                                    <input type="file" id="market-img-file" class="hidden" accept="image/*">
+                                </label>
+                            </div>
+                             <div id="market-img-preview-box" class="hidden mt-2 h-20 w-20 rounded-lg bg-black overflow-hidden border border-white/10">
+                                <img id="market-img-preview" class="w-full h-full object-cover">
+                            </div>
                         </div>
 
                         <div class="bg-white/5 rounded-2xl p-4 border border-white/5">
@@ -593,8 +620,8 @@
                     </div>
                     <div class="space-y-3">
                         <div class="bg-white/5 rounded-2xl p-4 border border-white/5 focus-within:border-orange-500/50 transition-colors">
-                            <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1" data-lang="recipient">Получатель</p>
-                            <input type="email" id="send-email" placeholder="email@example.com" class="w-full bg-transparent outline-none font-bold text-sm placeholder:text-neutral-700 text-white">
+                            <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1" data-lang="recipient">Получатель (Email или Username)</p>
+                            <input type="text" id="send-email" placeholder="@username или email" class="w-full bg-transparent outline-none font-bold text-sm placeholder:text-neutral-700 text-white">
                         </div>
                         <div class="bg-white/5 rounded-2xl p-4 border border-white/5 focus-within:border-orange-500/50 transition-colors">
                             <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1" data-lang="amount">Сумма (Мин 0.1)</p>
@@ -830,19 +857,38 @@
             }
         } catch(e) {}
 
-        async function getUserInfo(email) {
-            if (userCache[email]) return userCache[email];
-            let info = { avatar: `https://ui-avatars.com/api/?background=random&color=fff&name=${email.charAt(0).toUpperCase()}&size=128`, email: email, isVerified: false };
+        async function getUserInfo(emailOrUid) {
+            // Check cache by email
+            if (userCache[emailOrUid]) return userCache[emailOrUid];
+            
+            let info = { 
+                avatar: `https://ui-avatars.com/api/?background=random&color=fff&name=${emailOrUid.charAt(0).toUpperCase()}&size=128`, 
+                email: emailOrUid, 
+                username: emailOrUid.split('@')[0], 
+                isVerified: false 
+            };
+            
             try { 
-                const q = query(collection(db, "users"), where("email", "==", email)); 
-                const res = await getDocs(q); 
+                let q = query(collection(db, "users"), where("email", "==", emailOrUid)); 
+                let res = await getDocs(q); 
+                if(res.empty) {
+                     // Try finding by username just in case this is called with a username
+                     q = query(collection(db, "users"), where("username", "==", emailOrUid));
+                     res = await getDocs(q);
+                }
+
                 if (!res.empty) { 
                     const d = res.docs[0].data(); 
                     if (d.avatar) info.avatar = d.avatar; 
                     if (d.isVerified) info.isVerified = true;
+                    if (d.username) info.username = d.username;
+                    info.email = d.email; // Ensure correct email
                 } 
             } catch (e) {}
-            userCache[email] = info; return info;
+            
+            userCache[info.email] = info;
+            if(info.username) userCache[info.username] = info; // Cache by username too
+            return info;
         }
 
         window.openModal = (n) => {
@@ -863,7 +909,7 @@
 
         function getTrans(key) { return langData[currentLang][key] || key; }
         let toastTimeout;
-        window.showT = async (title, msg, amountStr = '', senderEmail = null, isError = false) => {
+        window.showT = async (title, msg, amountStr = '', senderInfo = null, isError = false) => {
             const t = document.getElementById('toast'), icon = document.getElementById('toast-icon-sys'), avImg = document.getElementById('toast-avatar'), amtEl = document.getElementById('toast-amount'), titleEl = document.getElementById('toast-title');
             clearTimeout(toastTimeout); t.classList.remove('active');
             setTimeout(async () => {
@@ -871,7 +917,11 @@
                 titleEl.textContent = displayTitle; document.getElementById('toast-msg').textContent = msg;
                 if (amountStr) { amtEl.textContent = amountStr; amtEl.classList.remove('hidden'); } else amtEl.classList.add('hidden');
                 avImg.className = "w-full h-full hidden"; avImg.style.filter = ''; 
-                if (senderEmail) { icon.classList.add('hidden'); avImg.classList.remove('hidden'); avImg.classList.add('object-cover'); const u = await getUserInfo(senderEmail); avImg.src = u.avatar; } 
+                if (senderInfo) { 
+                    icon.classList.add('hidden'); avImg.classList.remove('hidden'); avImg.classList.add('object-cover'); 
+                    const u = await getUserInfo(senderInfo); 
+                    avImg.src = u.avatar; 
+                } 
                 else {
                     let sysImg = null;
                     if (isError) sysImg = "https://img.icons8.com/?size=100&id=5PexHbhSpPcd&format=png&color=ffffff";
@@ -897,19 +947,36 @@
 
         onAuthStateChanged(auth, async (u) => {
             if (u) {
-                const userRef = doc(db, "users", u.uid); const snap = await getDoc(userRef);
-                if (!snap.exists()) {
+                const userRef = doc(db, "users", u.uid); 
+                let snap = await getDoc(userRef);
+                
+                // If user doesn't exist OR user has no username (migration)
+                if (!snap.exists() || !snap.data().username) {
                     const email = u.email, emailLower = u.email.toLowerCase(), clientIP = await getClientIP();
-                    const userData = { email: email, lowercaseEmail: emailLower, balance: 10.0, bankBalance: 0, lastBankUpdate: Timestamp.now(), avatar: u.photoURL || '', refCount: 0, refEarned: 0, createdAt: Timestamp.now(), isBanned: false, ip: clientIP, referralStatus: 'none', isVerified: false };
-                    const refEmail = localStorage.getItem('dool_ref');
-                    if (refEmail && refEmail !== emailLower) {
-                        try {
-                            let q = query(collection(db, "users"), where("lowercaseEmail", "==", refEmail)); let refSnap = await getDocs(q);
-                            if (refSnap.empty) { q = query(collection(db, "users"), where("email", "==", refEmail)); refSnap = await getDocs(q); }
-                            if (!refSnap.empty) { const referrerDoc = refSnap.docs[0], referrerData = referrerDoc.data(); if (referrerData.ip !== clientIP) { userData.referredBy = referrerData.email || refEmail; userData.referredByUid = referrerDoc.id; userData.referralStatus = 'pending'; } }
-                        } catch (err) {}
+                    let newData = {};
+                    
+                    if (!snap.exists()) {
+                        newData = { 
+                            email: email, lowercaseEmail: emailLower, balance: 10.0, bankBalance: 0, lastBankUpdate: Timestamp.now(), 
+                            avatar: u.photoURL || '', refCount: 0, refEarned: 0, createdAt: Timestamp.now(), 
+                            isBanned: false, ip: clientIP, referralStatus: 'none', isVerified: false,
+                            username: 'user' + u.uid.substring(0, 6).toLowerCase() // Default Username
+                        };
+                        // Referral Check
+                        const refEmail = localStorage.getItem('dool_ref');
+                        if (refEmail && refEmail !== emailLower) {
+                            try {
+                                let q = query(collection(db, "users"), where("lowercaseEmail", "==", refEmail)); let refSnap = await getDocs(q);
+                                if (refSnap.empty) { q = query(collection(db, "users"), where("email", "==", refEmail)); refSnap = await getDocs(q); }
+                                if (!refSnap.empty) { const referrerDoc = refSnap.docs[0], referrerData = referrerDoc.data(); if (referrerData.ip !== clientIP) { newData.referredBy = referrerData.email || refEmail; newData.referredByUid = referrerDoc.id; newData.referralStatus = 'pending'; } }
+                            } catch (err) {}
+                        }
+                        localStorage.removeItem('dool_ref'); 
+                        await setDoc(userRef, newData);
+                    } else {
+                        // Migration: Add username
+                        await updateDoc(userRef, { username: 'user' + u.uid.substring(0, 6).toLowerCase() });
                     }
-                    localStorage.removeItem('dool_ref'); await setDoc(userRef, userData);
                 }
                 startApp(u);
             } else {
@@ -922,9 +989,8 @@
         document.getElementById('btn-register').onclick = async () => { const btn = document.getElementById('btn-register'), email = document.getElementById('auth-email').value, pass = document.getElementById('auth-password').value; if (pass.length < 6) return showT('Ошибка', getTrans('error_pass_len'), '', null, true); btn.disabled = true; try { await createUserWithEmailAndPassword(auth, email, pass); } catch(e) { btn.disabled = false; showT('Ошибка', 'Error', '', null, true); } };
 
         function adjustBalanceSize(amountStr) { const el = document.getElementById('balance-val'), len = amountStr.length; el.classList.remove('text-5xl', 'text-4xl', 'text-3xl', 'text-2xl'); if (len > 12) el.classList.add('text-2xl'); else if (len > 9) el.classList.add('text-3xl'); else if (len > 7) el.classList.add('text-4xl'); else el.classList.add('text-5xl'); }
+        
         function startApp(u) {
-            document.getElementById('main-username').textContent = u.email; document.getElementById('profile-email').textContent = u.email; document.getElementById('my-email-addr').textContent = u.email;
-            const refLink = `${window.location.href.split('?')[0]}?ref=${u.email}`; document.getElementById('ref-link').value = refLink;
             onSnapshot(doc(db, "users", u.uid), async (snap) => {
                 const d = snap.data(); if (!d) return;
                 if (d.isBanned) { document.getElementById('view-loading').classList.add('hidden'); document.getElementById('view-main').classList.add('hidden'); document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-banned').classList.remove('hidden'); document.getElementById('view-banned').classList.add('flex'); document.getElementById('ban-text').textContent = d.banReason || "Blocked"; return; } 
@@ -933,8 +999,19 @@
                 myData = d; lastBal = d.balance; const balStr = d.balance.toFixed(2); const balEl = document.getElementById('balance-val'); balEl.textContent = balStr; adjustBalanceSize(balStr);
                 updateBankVisuals(d);
                 document.getElementById('ref-count').textContent = d.refCount || 0; document.getElementById('ref-earned').textContent = (d.refEarned || 0).toFixed(1);
-                const av = d.avatar || `https://ui-avatars.com/api/?background=random&color=fff&name=${u.email.charAt(0)}`; document.getElementById('main-avatar').src = av; document.getElementById('edit-avatar-img').src = av;
                 
+                // Profile & Header Updates
+                const av = d.avatar || `https://ui-avatars.com/api/?background=random&color=fff&name=${u.email.charAt(0)}`; 
+                document.getElementById('main-avatar').src = av; 
+                document.getElementById('edit-avatar-img').src = av;
+                document.getElementById('main-username').textContent = d.username ? `@${d.username}` : u.email;
+                document.getElementById('profile-username').textContent = d.username ? `@${d.username}` : '...';
+                document.getElementById('profile-email').textContent = u.email;
+                document.getElementById('my-email-addr').textContent = d.username || u.email;
+                document.getElementById('settings-username').value = d.username || '';
+
+                const refLink = `${window.location.href.split('?')[0]}?ref=${u.email}`; document.getElementById('ref-link').value = refLink;
+
                 const vIcon = document.getElementById('header-verified-icon');
                 const vSection = document.getElementById('profile-verification-status');
                 if (d.isVerified) {
@@ -962,18 +1039,45 @@
                 const list = document.getElementById('tx-history'); if (snap.empty) { list.innerHTML = `<p class="text-center text-neutral-600 text-[10px] uppercase font-bold py-4">...</p>`; return; }
                 const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date); let html = '';
                 for (const tx of docs) {
-                    const isSent = tx.from === u.email, partner = isSent ? tx.to : tx.from, dateStr = tx.date ? new Date(tx.date.toMillis()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
-                    html += `<div class="flex items-center justify-between p-4 rounded-[1.5rem] bg-white/[0.03] border border-white/5"><div class="flex items-center gap-3 overflow-hidden"><img id="av-${tx.date.toMillis()}" src="https://ui-avatars.com/api/?background=222&color=666&name=${partner.charAt(0)}" class="w-10 h-10 rounded-full bg-neutral-800 object-cover border border-white/5 shrink-0"><div class="min-w-0"><p class="text-[9px] font-black uppercase ${isSent ? 'text-neutral-500' : 'text-[#FF4D00]'} tracking-widest mb-0.5">${isSent ? 'To:' : 'From:'}</p><div class="flex items-center gap-1"><p class="text-[11px] font-bold text-white truncate max-w-[120px] leading-tight">${partner}</p><img id="ver-${tx.date.toMillis()}" src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" class="w-3 h-3 hidden"></div></div></div><div class="text-right"><p class="text-sm font-black ${isSent ? 'text-white' : 'text-[#FF4D00]'}">${isSent ? '-' : '+'}${tx.amount.toFixed(1)}</p><p class="text-[9px] text-neutral-600 font-bold uppercase">${dateStr}</p></div></div>`;
-                    if(partner.includes('@')) getUserInfo(partner).then(inf => { 
-                        const el = document.getElementById(`av-${tx.date.toMillis()}`); if(el) el.src = inf.avatar; 
-                        if (inf.isVerified) { const vel = document.getElementById(`ver-${tx.date.toMillis()}`); if(vel) vel.classList.remove('hidden'); }
-                    });
+                    const isSent = tx.from === u.email, partner = isSent ? tx.to : tx.from;
+                    // Try to show username if available in cache or fetch it
+                    let displayPartner = partner;
+                    
+                    const dateStr = tx.date ? new Date(tx.date.toMillis()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+                    html += `<div class="flex items-center justify-between p-4 rounded-[1.5rem] bg-white/[0.03] border border-white/5"><div class="flex items-center gap-3 overflow-hidden"><img id="av-${tx.date.toMillis()}" src="https://ui-avatars.com/api/?background=222&color=666&name=${partner.charAt(0)}" class="w-10 h-10 rounded-full bg-neutral-800 object-cover border border-white/5 shrink-0"><div class="min-w-0"><p class="text-[9px] font-black uppercase ${isSent ? 'text-neutral-500' : 'text-[#FF4D00]'} tracking-widest mb-0.5">${isSent ? 'To:' : 'From:'}</p><div class="flex items-center gap-1"><p id="name-${tx.date.toMillis()}" class="text-[11px] font-bold text-white truncate max-w-[120px] leading-tight">${displayPartner}</p><img id="ver-${tx.date.toMillis()}" src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" class="w-3 h-3 hidden"></div></div></div><div class="text-right"><p class="text-sm font-black ${isSent ? 'text-white' : 'text-[#FF4D00]'}">${isSent ? '-' : '+'}${tx.amount.toFixed(1)}</p><p class="text-[9px] text-neutral-600 font-bold uppercase">${dateStr}</p></div></div>`;
+                    
+                    // Lazy fetch user info
+                    if(partner.includes('@') || !partner.includes(' ')) {
+                        getUserInfo(partner).then(inf => { 
+                            const elAv = document.getElementById(`av-${tx.date.toMillis()}`); if(elAv) elAv.src = inf.avatar; 
+                            const elName = document.getElementById(`name-${tx.date.toMillis()}`); if(elName && inf.username) elName.textContent = '@' + inf.username;
+                            if (inf.isVerified) { const vel = document.getElementById(`ver-${tx.date.toMillis()}`); if(vel) vel.classList.remove('hidden'); }
+                        });
+                    }
                 }
                 list.innerHTML = html;
             });
         }
 
-        /* MARKET LOGIC */
+        /* USERNAME LOGIC */
+        window.saveUsername = async () => {
+            const inp = document.getElementById('settings-username');
+            const newName = inp.value.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
+            if(newName.length < 4) return showT('Ошибка', 'Минимум 4 символа', '', null, true);
+            
+            if(newName === myData.username) return showT('Инфо', 'Без изменений');
+
+            const q = query(collection(db, "users"), where("username", "==", newName));
+            const snap = await getDocs(q);
+            if(!snap.empty) return showT('Ошибка', 'Занят', '', null, true);
+
+            try {
+                await updateDoc(doc(db, "users", auth.currentUser.uid), { username: newName });
+                showT('Успешно', 'Username обновлен');
+            } catch(e) { showT('Ошибка', 'Error saving', '', null, true); }
+        };
+
+        /* MARKET IMAGE LOGIC */
         window.setMarketType = (type) => {
             const btnS = document.getElementById('type-service');
             const btnG = document.getElementById('type-goods');
@@ -993,29 +1097,76 @@
             document.getElementById('market-warning').classList.add('hidden');
         };
 
+        // Image handling
+        let marketImgBase64 = null;
+        document.getElementById('market-img-file').onchange = async (e) => {
+            const file = e.target.files[0];
+            if(!file) return;
+            
+            // Preview & Compress
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const maxWidth = 500; // Resize to max 500px width
+                    const scaleSize = maxWidth / img.width;
+                    canvas.width = maxWidth;
+                    canvas.height = img.height * scaleSize;
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    marketImgBase64 = canvas.toDataURL('image/jpeg', 0.7); // Compress
+                    document.getElementById('market-img-preview').src = marketImgBase64;
+                    document.getElementById('market-img-preview-box').classList.remove('hidden');
+                    document.getElementById('market-img-url').value = ''; // Clear URL if file selected
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        document.getElementById('market-img-url').oninput = (e) => {
+            if(e.target.value.length > 5) {
+                marketImgBase64 = null; // Clear file if URL provided
+                document.getElementById('market-img-preview').src = e.target.value;
+                document.getElementById('market-img-preview-box').classList.remove('hidden');
+            }
+        };
+
         document.getElementById('btn-create-offer').onclick = async () => {
             const title = document.getElementById('market-title').value.trim();
             const desc = document.getElementById('market-desc').value.trim();
             const price = parseFloat(document.getElementById('market-price').value);
             const type = document.getElementById('market-type').value;
+            const imgUrl = document.getElementById('market-img-url').value.trim();
 
             if(!title || !desc || !price || price < 0.1) return showT('Ошибка', getTrans('error_fill'), '', null, true);
             
+            // Use base64 from file OR url
+            const finalImage = marketImgBase64 || imgUrl || null;
+
             const btn = document.getElementById('btn-create-offer'); btn.disabled = true; btn.textContent = '...';
             try {
                 await addDoc(collection(db, "market_listings"), {
                     title, description: desc, price, type,
+                    image: finalImage,
                     authorEmail: auth.currentUser.email,
                     authorUid: auth.currentUser.uid,
                     createdAt: serverTimestamp()
                 });
                 closeModal('market-create');
+                // Reset form
                 document.getElementById('market-title').value = '';
                 document.getElementById('market-desc').value = '';
                 document.getElementById('market-price').value = '';
+                document.getElementById('market-img-url').value = '';
+                document.getElementById('market-img-preview-box').classList.add('hidden');
+                marketImgBase64 = null;
+
                 showT('Успешно', 'Лот создан');
                 loadMarketItems();
-            } catch(e) { showT('Ошибка', 'Не удалось создать', '', null, true); }
+            } catch(e) { showT('Ошибка', 'Не удалось создать (Image too big?)', '', null, true); console.error(e); }
             finally { btn.disabled = false; btn.textContent = 'Опубликовать'; }
         };
 
@@ -1035,7 +1186,6 @@
                     const item = docSnap.data();
                     item.id = docSnap.id;
                     marketCache.push(item);
-                    // Fetch author info for verification check
                     const authorInfo = await getUserInfo(item.authorEmail);
                     const isVer = authorInfo.isVerified;
                     const tagClass = item.type === 'service' ? 'tag-service' : 'tag-goods';
@@ -1043,6 +1193,7 @@
                     
                     html += `
                     <div onclick="viewMarketItem('${item.id}')" class="market-card p-4 rounded-[2rem] relative overflow-hidden group cursor-pointer">
+                        ${item.image ? `<div class="market-img-container"><img src="${item.image}" class="market-img"></div>` : ''}
                         <div class="flex items-start justify-between mb-2">
                              <div class="px-2 py-1 rounded-md text-[9px] font-black uppercase tracking-wider ${tagClass}">${tagText}</div>
                              ${isVer ? '<img src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" class="w-3 h-3" title="Verified Seller">' : ''}
@@ -1052,7 +1203,7 @@
                             <span class="text-lg font-black text-white">${item.price.toFixed(1)}</span>
                             <span class="text-xs font-black text-orange-500">Đ</span>
                         </div>
-                        <p class="text-[9px] text-neutral-500 font-bold mt-2 truncate">@${item.authorEmail.split('@')[0]}</p>
+                        <p class="text-[9px] text-neutral-500 font-bold mt-2 truncate">@${authorInfo.username || item.authorEmail.split('@')[0]}</p>
                     </div>`;
                 }
                 list.innerHTML = html;
@@ -1068,11 +1219,12 @@
             const isMe = auth.currentUser.email === item.authorEmail;
             
             container.innerHTML = `
+                ${item.image ? `<div class="w-full aspect-video rounded-2xl overflow-hidden bg-black mb-4 border border-white/10"><img src="${item.image}" class="w-full h-full object-contain"></div>` : ''}
                 <div class="flex items-center gap-3 mb-4">
                     <img src="${authorInfo.avatar}" class="w-12 h-12 rounded-full border border-white/10">
                     <div>
                         <div class="flex items-center gap-1">
-                            <p class="text-xs font-bold text-white">${item.authorEmail}</p>
+                            <p class="text-xs font-bold text-white">@${authorInfo.username || 'user'}</p>
                              ${authorInfo.isVerified ? '<img src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" class="w-3 h-3">' : ''}
                         </div>
                         <p class="text-[9px] text-neutral-500 font-bold uppercase">Продавец</p>
@@ -1134,7 +1286,6 @@
                     }); 
                     closeModal('send'); 
                     showT('Покупка', `Вы купили: ${item.title}`, `-${amt.toFixed(1)} Đ`);
-                    // Maybe open a modal saying "Contact seller at [email]"
                     setTimeout(() => alert(`Оплата прошла успешно!\nСвяжитесь с продавцом: ${to}`), 500);
                  } catch (e) { showT('Ошибка', e.message, '', null, true); } 
                  finally { 
@@ -1144,9 +1295,6 @@
                  }
             };
         };
-        
-        // Save original send logic to restore it
-        window.originalSendLogic = document.getElementById('btn-do-send').onclick;
         
         window.requestVerification = async () => {
              const btn = document.querySelector('#profile-verification-status button');
@@ -1185,25 +1333,71 @@
         window.stopScannerV2 = () => { if (html5QrCode) { html5QrCode.stop().then(() => { html5QrCode.clear(); html5QrCode = null; }).catch(err => console.log(err)); } };
         function openProposalModal(data) { openModal('send'); document.getElementById('send-email').value = data.e; if (data.a > 0) { document.getElementById('send-amt').value = data.a; document.getElementById('send-amt').readOnly = true; document.getElementById('send-email').readOnly = true; document.getElementById('proposal-notice').classList.remove('hidden'); } }
         
-        // This is the default send handler. It is assigned to window.originalSendLogic above.
-        // We re-declare it here properly to ensure it works on initial load.
+        // --- NEW SEND HANDLER SUPPORTING USERNAMES ---
         const defaultSendHandler = async () => {
-            const to = document.getElementById('send-email').value.trim().toLowerCase(), amt = parseFloat(document.getElementById('send-amt').value), myEmail = auth.currentUser.email;
-            if (to === myEmail) return showT('Ошибка', getTrans('error_self'), '', null, true); if (!amt || amt < 0.1) return showT('Ошибка', getTrans('error_min'), '', null, true); if (amt > myData.balance) return showT('Ошибка', getTrans('error_fund'), '', null, true);
+            let toInput = document.getElementById('send-email').value.trim();
+            const amt = parseFloat(document.getElementById('send-amt').value);
+            const myEmail = auth.currentUser.email;
+
+            if (!toInput) return showT('Ошибка', getTrans('error_fill'), '', null, true);
+            if (!amt || amt < 0.1) return showT('Ошибка', getTrans('error_min'), '', null, true); 
+            if (amt > myData.balance) return showT('Ошибка', getTrans('error_fund'), '', null, true);
+
+            // Clean input (remove @ if present)
+            toInput = toInput.replace('@', '').toLowerCase();
+
             const btn = document.getElementById('btn-do-send'); btn.disabled = true; btn.textContent = '...';
             try {
-                const q = query(collection(db, "users"), where("email", "==", to)); const res = await getDocs(q); if (res.empty) throw new Error("User not found");
+                let targetUser = null;
+                // 1. Try finding by username
+                let q = query(collection(db, "users"), where("username", "==", toInput));
+                let res = await getDocs(q);
+                
+                // 2. If not found, try by email
+                if (res.empty) {
+                     q = query(collection(db, "users"), where("email", "==", toInput)); // Try exact match (could be case sensitive in some setups, but here we saved lowercaseEmail)
+                     res = await getDocs(q);
+                     if(res.empty) {
+                        q = query(collection(db, "users"), where("lowercaseEmail", "==", toInput));
+                        res = await getDocs(q);
+                     }
+                }
+
+                if (res.empty) throw new Error("Пользователь не найден");
+                
+                targetUser = res.docs[0].data();
+                const targetEmail = targetUser.email;
+
+                if (targetEmail === myEmail) throw new Error(getTrans('error_self'));
+
                 await runTransaction(db, async (t) => {
                     const senderRef = doc(db, "users", auth.currentUser.uid), sData = (await t.get(senderRef)).data();
                     if (sData.balance < amt) throw new Error("Funds");
-                    t.update(senderRef, { balance: increment(-amt) }); t.update(res.docs[0].ref, { balance: increment(amt) });
-                    const txRef = doc(collection(db, "transactions")); t.set(txRef, { from: myEmail, to: to, amount: amt, date: Timestamp.now(), parties: [myEmail, to] });
-                    if (sData.referralStatus === 'pending' && sData.referredBy && sData.referredByUid && to !== sData.referredBy) {
-                        t.update(doc(db, "users", sData.referredByUid), { balance: increment(10), refCount: increment(1), refEarned: increment(10) }); t.update(senderRef, { referralStatus: 'paid' });
+                    
+                    t.update(senderRef, { balance: increment(-amt) }); 
+                    t.update(res.docs[0].ref, { balance: increment(amt) });
+                    
+                    const txRef = doc(collection(db, "transactions")); 
+                    t.set(txRef, { 
+                        from: myEmail, 
+                        to: targetEmail, 
+                        amount: amt, 
+                        date: Timestamp.now(), 
+                        parties: [myEmail, targetEmail] 
+                    });
+
+                    // Referral Logic
+                    if (sData.referralStatus === 'pending' && sData.referredBy && sData.referredByUid && targetEmail !== sData.referredBy) {
+                        t.update(doc(db, "users", sData.referredByUid), { balance: increment(10), refCount: increment(1), refEarned: increment(10) }); 
+                        t.update(senderRef, { referralStatus: 'paid' });
                         t.set(doc(collection(db, "transactions")), { from: 'System (Ref)', to: sData.referredBy, amount: 10.0, date: Timestamp.now(), parties: [sData.referredBy], type: 'referral_bonus' });
                     }
-                }); closeModal('send'); showT('Успешно', `${getTrans('sent_to')} ${to}`, `-${amt.toFixed(1)} Đ`);
-            } catch (e) { showT('Ошибка', e.message, '', null, true); } finally { btn.disabled = false; btn.textContent = getTrans('send_action'); }
+                }); 
+                
+                closeModal('send'); 
+                showT('Успешно', `${getTrans('sent_to')} @${targetUser.username || targetEmail}`, `-${amt.toFixed(1)} Đ`);
+            } catch (e) { showT('Ошибка', e.message, '', null, true); } 
+            finally { btn.disabled = false; btn.textContent = getTrans('send_action'); }
         };
         
         document.getElementById('btn-do-send').onclick = defaultSendHandler;
