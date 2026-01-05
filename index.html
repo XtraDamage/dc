@@ -5,7 +5,7 @@
     <link rel="icon" href="https://raw.githubusercontent.com/ShalfeyArt/admin/refs/heads/main/icon2.png" type="image/png" media="(prefers-color-scheme: dark)">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Doolcoin Wallet</title>
+    <title>Doolcoin Wallet & Market</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -13,7 +13,7 @@
     <style>
         /* BASE & RESET */
         * { -webkit-user-select: none; -moz-user-select: none; user-select: none; -webkit-touch-callout: none; box-sizing: border-box; }
-        input { -webkit-user-select: text !important; -moz-user-select: text !important; user-select: text !important; }
+        input, textarea { -webkit-user-select: text !important; -moz-user-select: text !important; user-select: text !important; }
         img { -webkit-user-drag: none; user-drag: none; pointer-events: none; }
         body { background-color: #050505; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; height: 100dvh; display: flex; justify-content: center; align-items: center; overflow: hidden; transition: background-color 0.4s ease, color 0.4s ease; }
         
@@ -63,57 +63,57 @@
         .swipe-zone { width: 100%; height: 32px; display: flex; align-items: center; justify-content: center; cursor: grab; touch-action: none; }
         .swipe-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 10px; }
 
+        /* MARKET STYLES */
+        .market-card { background: linear-gradient(160deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); border: 1px solid rgba(255,255,255,0.05); transition: transform 0.2s; }
+        .market-card:active { transform: scale(0.98); }
+        .tag-service { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+        .tag-goods { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+
         /* --- LIGHT THEME FIXES --- */
         body.light-theme { background-color: #f0f2f5; color: #1a1a1a; }
         body.light-theme #app { background-color: #ffffff; border-color: rgba(0,0,0,0.05); box-shadow: 0 20px 60px rgba(0,0,0,0.08); }
         
-        /* Override all white text in light mode */
         body.light-theme .text-white { color: #111827 !important; }
         body.light-theme .text-neutral-500 { color: #6b7280; }
         body.light-theme .text-neutral-400 { color: #4b5563; }
         
-        /* Cards & Panels */
         body.light-theme .dool-card { background: #f9fafb; border-color: rgba(0,0,0,0.06); }
         body.light-theme .glass-panel { background: #f3f4f6; border-color: rgba(0,0,0,0.08); color: #000; }
+        body.light-theme .market-card { background: #fff; border-color: rgba(0,0,0,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         
-        /* Inputs & Form Elements */
-        body.light-theme input { color: #111 !important; }
+        body.light-theme input, body.light-theme textarea, body.light-theme select { color: #111 !important; background: rgba(0,0,0,0.04); }
         body.light-theme input::placeholder { color: #9ca3af !important; }
         body.light-theme .bg-white\/5 { background-color: rgba(0,0,0,0.04); }
         body.light-theme .bg-white\/10 { background-color: rgba(0,0,0,0.08); }
         body.light-theme .border-white\/10 { border-color: rgba(0,0,0,0.1); }
         body.light-theme .border-white\/5 { border-color: rgba(0,0,0,0.06); }
         
-        /* Modal Content Backgrounds */
         body.light-theme #modal-send-content, 
         body.light-theme #modal-receive-content,
         body.light-theme #modal-deposit-content,
         body.light-theme #modal-withdraw-content,
-        body.light-theme #modal-settings-content { background-color: #ffffff; color: #000; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); }
+        body.light-theme #modal-settings-content,
+        body.light-theme #modal-market-create-content,
+        body.light-theme #modal-market-item-content { background-color: #ffffff; color: #000; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); }
         
-        /* Toast Light */
         body.light-theme #toast { background: rgba(255,255,255,0.98); border-color: rgba(0,0,0,0.08); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1); }
         body.light-theme #toast-msg { color: #111; }
         
-        /* Icons Inversion for Visibility */
         body.light-theme .settings-icon, 
         body.light-theme .logout-icon,
         body.light-theme .nav-icon { filter: invert(1) brightness(0.2); }
-        /* Keep Active Nav Icon Orange */
         body.light-theme .nav-icon-active { filter: brightness(0) saturate(100%) invert(32%) sepia(98%) saturate(2329%) hue-rotate(358deg) brightness(101%) contrast(106%) !important; opacity: 1 !important; }
         
         body.light-theme .swipe-handle { background: #e5e7eb; }
         body.light-theme nav { background: rgba(255,255,255,0.9); border-color: rgba(0,0,0,0.05); }
 
-        /* QR Card in Light Mode */
         body.light-theme .qr-card-premium { background: linear-gradient(180deg, #f3f4f6 0%, #ffffff 100%); border-color: rgba(0,0,0,0.1); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1); }
         
-        /* ABOUT CARD (PREMIUM) */
         .about-card {
             position: relative;
             background: linear-gradient(160deg, #111, #000);
             border-radius: 24px;
-            padding: 2px; /* For border gradient */
+            padding: 2px;
             overflow: hidden;
         }
         .about-card::before {
@@ -231,11 +231,9 @@
                 </div>
                 
                 <div class="flex items-center gap-2">
-                    <!-- SETTINGS -->
                     <button onclick="openModal('settings')" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer">
                         <img src="https://img.icons8.com/?size=100&id=xyFoc6U1Hu3c&format=png&color=ffffff" class="w-5 h-5 opacity-80 settings-icon" alt="Settings">
                     </button>
-                    <!-- LOGOUT -->
                     <button id="btn-logout" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer">
                         <img src="https://img.icons8.com/?size=100&id=5HW1YsFkzHio&format=png&color=ffffff" class="w-5 h-5 opacity-80 logout-icon" alt="Logout">
                     </button>
@@ -279,6 +277,35 @@
                                 <div class="w-8 h-8 border-2 border-white/10 border-t-orange-500 rounded-full animate-spin mx-auto mb-4"></div>
                                 <p class="text-[10px] font-bold text-neutral-600 uppercase tracking-widest" data-lang="loading">Загрузка...</p>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MARKET -->
+                <div id="tab-market" class="tab-content space-y-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-black text-white" data-lang="market_title">P2P Рынок</h2>
+                            <p class="text-[10px] text-neutral-500 font-bold uppercase tracking-wider" data-lang="market_subtitle">Товары и Услуги</p>
+                        </div>
+                        <button onclick="openModal('market-create')" class="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center text-black hover:bg-orange-400 transition-colors shadow-lg shadow-orange-500/20">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                        </button>
+                    </div>
+
+                    <div id="market-warning" class="bg-orange-500/10 border border-orange-500/20 rounded-2xl p-4 hidden">
+                        <p class="text-[10px] text-orange-200 leading-relaxed font-medium">
+                            <span class="font-bold text-orange-500 uppercase text-[9px] block mb-1">⚠️ Дисклеймер</span>
+                            Платформа не несет ответственности за сделки. Покупайте только у проверенных продавцов.
+                            <button onclick="acceptMarketWarn()" class="underline text-white ml-1 cursor-pointer">Понятно</button>
+                        </p>
+                    </div>
+
+                    <div id="market-list" class="grid grid-cols-2 gap-3 pb-10">
+                        <!-- Items will be injected here -->
+                        <div class="col-span-2 text-center py-10">
+                            <div class="w-8 h-8 border-2 border-white/10 border-t-orange-500 rounded-full animate-spin mx-auto mb-4"></div>
+                            <p class="text-[10px] font-bold text-neutral-600 uppercase tracking-widest">Загрузка лотов...</p>
                         </div>
                     </div>
                 </div>
@@ -362,15 +389,18 @@
             </main>
 
             <!-- NAV -->
-            <nav class="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[360px] h-16 bg-[#111]/90 backdrop-blur-xl border border-white/10 rounded-[2rem] flex items-center justify-around px-2 z-50 shadow-2xl transition-colors duration-300">
+            <nav class="absolute bottom-6 left-1/2 -translate-x-1/2 w-[95%] max-w-[380px] h-16 bg-[#111]/90 backdrop-blur-xl border border-white/10 rounded-[2rem] flex items-center justify-around px-2 z-50 shadow-2xl transition-colors duration-300">
                 <button onclick="switchTab('wallet')" id="nav-wallet" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-orange-500 cursor-pointer">
-                    <img src="https://img.icons8.com/?size=100&id=Pv8alVtwvuFB&format=png&color=ffffff" class="w-9 h-9 nav-icon nav-icon-active" alt="Wallet">
+                    <img src="https://img.icons8.com/?size=100&id=Pv8alVtwvuFB&format=png&color=ffffff" class="w-8 h-8 nav-icon nav-icon-active" alt="Wallet">
+                </button>
+                <button onclick="switchTab('market')" id="nav-market" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
+                    <img src="https://img.icons8.com/?size=100&id=LwNLQyWraKTr&format=png&color=ffffff" class="w-8 h-8 nav-icon" alt="Market">
                 </button>
                 <button onclick="switchTab('bank')" id="nav-bank" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
-                     <img src="https://img.icons8.com/?size=100&id=MRDxs37r5Fp9&format=png&color=ffffff" class="w-9 h-9 nav-icon" alt="Bank">
+                     <img src="https://img.icons8.com/?size=100&id=MRDxs37r5Fp9&format=png&color=ffffff" class="w-8 h-8 nav-icon" alt="Bank">
                 </button>
                 <button onclick="switchTab('referrals')" id="nav-referrals" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
-                    <img src="https://img.icons8.com/?size=100&id=N9EwPosvU1Rm&format=png&color=ffffff" class="w-9 h-9 nav-icon" alt="Referrals">
+                    <img src="https://img.icons8.com/?size=100&id=N9EwPosvU1Rm&format=png&color=ffffff" class="w-8 h-8 nav-icon" alt="Referrals">
                 </button>
             </nav>
         </div>
@@ -426,12 +456,15 @@
                                     </div>
                                     <span class="font-black text-sm tracking-widest text-white">DOOLCOIN</span>
                                 </div>
-                                <span class="text-[9px] font-mono text-neutral-500">v1.0.3</span>
+                                <span class="text-[9px] font-mono text-neutral-500">v1.1.0</span>
                             </div>
                             
                             <h3 class="text-xs font-bold text-white mb-2" data-lang="legal_title">Юридическая информация</h3>
                             <p class="text-[10px] text-neutral-400 font-medium leading-relaxed mb-4 text-justify" data-lang="legal_text">
-                                Doolcoin (Đ) — это внутриигровая условная единица. Она не является платёжным средством, электронной валютой или ценной бумагой. Đ не имеет реальной денежной стоимости и не гарантирует возможности обмена на фиатные деньги. Все операции носят исключительно развлекательный характер.
+                                Doolcoin (Đ) — это внутриигровая единица. Не является валютой. 
+                                Платформа предоставляет P2P доску объявлений, но не является участником сделок. 
+                                Мы не несем ответственности за действия пользователей, качество товаров/услуг или финансовые потери.
+                                Все сделки совершаются на страх и риск пользователей.
                             </p>
                             
                             <div class="h-[1px] bg-white/10 w-full mb-3"></div>
@@ -463,10 +496,7 @@
                         </label>
                     </div>
                     
-                    <!-- Verification Section -->
-                    <div id="profile-verification-status" class="mb-6 flex flex-col items-center min-h-[40px]">
-                        <!-- Injected via JS -->
-                    </div>
+                    <div id="profile-verification-status" class="mb-6 flex flex-col items-center min-h-[40px]"></div>
 
                     <p id="profile-email" class="text-xs text-neutral-500 font-bold mb-6 truncate px-2">...</p>
                     <button onclick="closeModal('profile')" class="w-full h-12 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer" data-lang="close">Закрыть</button>
@@ -486,6 +516,62 @@
                         <p class="text-2xl font-black text-white">+10.00 Đ</p>
                     </div>
                     <button onclick="closeModal('invited-info')" class="w-full h-12 bg-white text-black rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-neutral-200 transition-colors cursor-pointer">Отлично</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MARKET CREATE MODAL -->
+        <div id="modal-market-create" onclick="if(event.target===this) closeModal('market-create')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
+            <div class="bg-[#0f0f0f] border-t border-white/10 rounded-t-[2.5rem] p-0 transform translate-y-full transition-transform duration-300" id="modal-market-create-content">
+                <div class="swipe-zone"><div class="swipe-handle"></div></div>
+                <div class="p-8 pb-10 max-h-[85vh] overflow-y-auto">
+                    <h2 class="text-2xl font-black mb-6 text-white" data-lang="create_offer">Создать лот</h2>
+                    
+                    <div class="space-y-4">
+                        <!-- Type -->
+                        <div class="flex p-1 bg-white/5 rounded-xl">
+                            <button onclick="setMarketType('service')" id="type-service" class="flex-1 py-3 rounded-lg text-xs font-black uppercase transition-all bg-white text-black">Услуга</button>
+                            <button onclick="setMarketType('goods')" id="type-goods" class="flex-1 py-3 rounded-lg text-xs font-black uppercase transition-all text-neutral-500">Товар</button>
+                        </div>
+                        <input type="hidden" id="market-type" value="service">
+
+                        <!-- Fields -->
+                        <div class="bg-white/5 rounded-2xl p-4 border border-white/5">
+                            <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Название</p>
+                            <input type="text" id="market-title" placeholder="Напр: Дизайн логотипа" class="w-full bg-transparent outline-none font-bold text-sm text-white placeholder:text-neutral-700">
+                        </div>
+
+                        <div class="bg-white/5 rounded-2xl p-4 border border-white/5">
+                            <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Описание</p>
+                            <textarea id="market-desc" rows="3" placeholder="Опишите детально..." class="w-full bg-transparent outline-none font-bold text-sm text-white placeholder:text-neutral-700 resize-none"></textarea>
+                        </div>
+
+                        <div class="bg-white/5 rounded-2xl p-4 border border-white/5">
+                            <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Цена (Đ)</p>
+                            <div class="flex items-center gap-2">
+                                <input type="number" id="market-price" placeholder="0.0" class="w-full bg-transparent outline-none font-black text-3xl placeholder:text-neutral-700 text-white">
+                                <span class="text-xl font-black text-orange-500">Đ</span>
+                            </div>
+                        </div>
+
+                        <div class="text-[10px] text-neutral-500 leading-tight">
+                            Размещая объявление, вы подтверждаете, что услуга/товар не нарушает законов.
+                        </div>
+
+                        <button id="btn-create-offer" class="w-full h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer">Опубликовать</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MARKET ITEM VIEW/BUY MODAL -->
+        <div id="modal-market-item" onclick="if(event.target===this) closeModal('market-item')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
+            <div class="bg-[#0f0f0f] border-t border-white/10 rounded-t-[2.5rem] p-0 transform translate-y-full transition-transform duration-300" id="modal-market-item-content">
+                <div class="swipe-zone"><div class="swipe-handle"></div></div>
+                <div class="p-8 pb-10">
+                    <div id="market-item-details" class="space-y-4">
+                        <!-- Content injected via JS -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -621,7 +707,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, query, where, runTransaction, Timestamp, increment, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, query, where, runTransaction, Timestamp, increment, getDocs, serverTimestamp, addDoc, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyBoFuGY-SSmcGHPGzuWZbdGFeI9_aaAKs8", authDomain: "doolcoinwallet.firebaseapp.com", projectId: "doolcoinwallet", storageBucket: "doolcoinwallet.firebasestorage.app", messagingSenderId: "473549726148", appId: "1:473549726148:web:87663b4944330c0df58491" };
         const app = initializeApp(firebaseConfig);
@@ -633,32 +719,37 @@
             ru: {
                 total_balance: "Общий баланс", send: "Отправить", receive: "Получить", history: "История операций", loading: "Загрузка...", invite_friend: "Пригласи друга", ref_desc: "Получи", your_link: "Ваша ссылка", friends: "Друзей", earned: "Заработано", staking: "Стейкинг", in_jar: "В банке", profile: "Профиль", wallet_future: "Кошелек будущего", or: "Или", login: "Войти", create: "Создать", settings: "Настройки", theme: "Тема оформления", theme_light: "Светлая", theme_dark: "Тёмная", language: "Язык", your_profile: "Ваш Профиль", close: "Закрыть", send_title: "Перевод", recipient: "Получатель", amount: "Сумма (Мин 0.1)", cancel: "Отмена", send_action: "Отправить", show_qr: "Покажите этот код отправителю", req_amount: "Предложить сумму", your_addr: "Ваш адрес", deposit_title: "Положить в банку", deposit_action: "Положить", withdraw_title: "Достать из банки", withdraw_action: "Достать", scanning: "Сканирование", access_denied: "Доступ ограничен", password_ph: "Пароль", deposit_success: "Депозит успешен", withdraw_success: "Вывод успешен", addr_copied: "Адрес скопирован", link_copied: "Ссылка скопирована", sent_to: "Отправлено", error_fill: "Заполните поля", error_pass_len: "Пароль < 6 символов", error_self: "Нельзя отправить себе", error_min: "Минимум 0.1 Đ", error_fund: "Недостаточно средств",
                 legal_title: "Юридическая информация",
-                legal_text: "Doolcoin (Đ) — это внутриигровая условная единица. Она не является платёжным средством, электронной валютой или ценной бумагой. Đ не имеет реальной денежной стоимости и не гарантирует возможности обмена на фиатные деньги. Все операции носят исключительно развлекательный характер.",
-                any: "Любая"
+                legal_text: "Doolcoin (Đ) — это внутриигровая условная единица. Она не является платёжным средством, электронной валютой или ценной бумагой. Платформа предоставляет функционал P2P доски объявлений, но не является стороной сделок и не несет ответственности за качество товаров/услуг или честность пользователей. Все операции носят развлекательный характер и совершаются на страх и риск пользователя.",
+                any: "Любая",
+                market_title: "P2P Рынок", market_subtitle: "Товары и Услуги", create_offer: "Создать лот", buy: "Купить"
             },
             en: {
                 total_balance: "Total Balance", send: "Send", receive: "Receive", history: "Transaction History", loading: "Loading...", invite_friend: "Invite a Friend", ref_desc: "Get", your_link: "Your Link", friends: "Friends", earned: "Earned", staking: "Staking", in_jar: "In Bank", profile: "Profile", wallet_future: "Wallet of the Future", or: "Or", login: "Log In", create: "Create", settings: "Settings", theme: "Theme", theme_light: "Light", theme_dark: "Dark", language: "Language", your_profile: "Your Profile", close: "Close", send_title: "Transfer", recipient: "Recipient", amount: "Amount (Min 0.1)", cancel: "Cancel", send_action: "Send", show_qr: "Show this code to sender", req_amount: "Request Amount", your_addr: "Your Address", deposit_title: "Deposit to Bank", deposit_action: "Deposit", withdraw_title: "Withdraw from Bank", withdraw_action: "Withdraw", scanning: "Scanning", access_denied: "Access Denied", password_ph: "Password", deposit_success: "Deposit successful", withdraw_success: "Withdrawal successful", addr_copied: "Address copied", link_copied: "Link copied", sent_to: "Sent to", error_fill: "Fill all fields", error_pass_len: "Password < 6 chars", error_self: "Cannot send to self", error_min: "Minimum 0.1 Đ", error_fund: "Insufficient funds",
                 legal_title: "Legal Information",
-                legal_text: "Doolcoin (Đ) is an in-game virtual unit. It is not a means of payment, electronic currency, or security. Đ has no real monetary value and does not guarantee exchangeability for fiat money. All operations are exclusively for entertainment purposes.",
-                any: "Any"
+                legal_text: "Doolcoin (Đ) is an in-game virtual unit. It is not a means of payment, electronic currency, or security. The platform provides a P2P marketplace board but is not a party to transactions and is not liable for quality or user honesty. All operations are for entertainment purposes only and at your own risk.",
+                any: "Any",
+                market_title: "P2P Market", market_subtitle: "Goods & Services", create_offer: "Create Listing", buy: "Buy"
             },
             es: {
-                total_balance: "Saldo Total", send: "Enviar", receive: "Recibir", history: "Historial", loading: "Cargando...", invite_friend: "Invitar Amigo", ref_desc: "Obtén", your_link: "Tu Enlace", friends: "Amigos", earned: "Ganado", staking: "Staking", in_jar: "En Banco", profile: "Perfil", wallet_future: "Billetera del Futuro", or: "O", login: "Entrar", create: "Crear", settings: "Ajustes", theme: "Tema", theme_light: "Claro", theme_dark: "Oscuro", language: "Idioma", your_profile: "Tu Perfil", close: "Cerrar", send_title: "Transferir", recipient: "Destinatario", amount: "Cantidad (Mín 0.1)", cancel: "Cancelar", send_action: "Enviar", show_qr: "Muestra este código", req_amount: "Solicitar Cantidad", your_addr: "Tu Dirección", deposit_title: "Depositar", deposit_action: "Depositar", withdraw_title: "Retirar", withdraw_action: "Retirar", scanning: "Escaneando", access_denied: "Acceso Denegado", password_ph: "Contraseña", deposit_success: "Depósito exitoso", withdraw_success: "Retiro exitoso", addr_copied: "Dirección copiada", link_copied: "Enlace copiado", sent_to: "Enviado a", error_fill: "Rellena los campos", error_pass_len: "Contraseña < 6 carac.", error_self: "No puedes enviarte a ti", error_min: "Mínimo 0.1 Đ", error_fund: "Fondos insuficientes",
+                 total_balance: "Saldo Total", send: "Enviar", receive: "Recibir", history: "Historial", loading: "Cargando...", invite_friend: "Invitar Amigo", ref_desc: "Obtén", your_link: "Tu Enlace", friends: "Amigos", earned: "Ganado", staking: "Staking", in_jar: "En Banco", profile: "Perfil", wallet_future: "Billetera del Futuro", or: "O", login: "Entrar", create: "Crear", settings: "Ajustes", theme: "Tema", theme_light: "Claro", theme_dark: "Oscuro", language: "Idioma", your_profile: "Tu Perfil", close: "Cerrar", send_title: "Transferir", recipient: "Destinatario", amount: "Cantidad (Mín 0.1)", cancel: "Cancelar", send_action: "Enviar", show_qr: "Muestra este código", req_amount: "Solicitar Cantidad", your_addr: "Tu Dirección", deposit_title: "Depositar", deposit_action: "Depositar", withdraw_title: "Retirar", withdraw_action: "Retirar", scanning: "Escaneando", access_denied: "Acceso Denegado", password_ph: "Contraseña", deposit_success: "Depósito exitoso", withdraw_success: "Retiro exitoso", addr_copied: "Dirección copiada", link_copied: "Enlace copiado", sent_to: "Enviado a", error_fill: "Rellena los campos", error_pass_len: "Contraseña < 6 carac.", error_self: "No puedes enviarte a ti", error_min: "Mínimo 0.1 Đ", error_fund: "Fondos insuficientes",
                 legal_title: "Información Legal",
-                legal_text: "Doolcoin (Đ) es una unidad virtual del juego. No es un medio de pago, moneda electrónica o valor. Đ no tiene valor monetario real y no garantiza el intercambio por dinero fiduciario. Todas las operaciones son exclusivamente para entretenimiento.",
-                any: "Cualquier"
+                legal_text: "Doolcoin (Đ) es una unidad virtual del juego. No es moneda legal. La plataforma ofrece un mercado P2P pero no es responsable de las transacciones ni de la calidad de los bienes. Todo uso es bajo su propio riesgo.",
+                any: "Cualquier",
+                market_title: "Mercado P2P", market_subtitle: "Bienes y Servicios", create_offer: "Crear Oferta", buy: "Comprar"
             },
             uk: {
                 total_balance: "Загальний баланс", send: "Надіслати", receive: "Отримати", history: "Історія операцій", loading: "Завантаження...", invite_friend: "Запроси друга", ref_desc: "Отримай", your_link: "Ваше посилання", friends: "Друзів", earned: "Зароблено", staking: "Стейкінг", in_jar: "У банку", profile: "Профіль", wallet_future: "Гаманець майбутнього", or: "Або", login: "Увійти", create: "Створити", settings: "Налаштування", theme: "Тема оформлення", theme_light: "Світла", theme_dark: "Темна", language: "Мова", your_profile: "Ваш Профіль", close: "Закрити", send_title: "Переказ", recipient: "Отримувач", amount: "Сума (Мін 0.1)", cancel: "Скасувати", send_action: "Надіслати", show_qr: "Покажіть цей код", req_amount: "Запитати суму", your_addr: "Ваша адреса", deposit_title: "Покласти в банку", deposit_action: "Покласти", withdraw_title: "Дістати з банки", withdraw_action: "Дістати", scanning: "Сканування", access_denied: "Доступ обмежено", password_ph: "Пароль", deposit_success: "Депозит успішний", withdraw_success: "Виведення успішне", addr_copied: "Адресу скопійовано", link_copied: "Посилання скопійовано", sent_to: "Надіслано", error_fill: "Заповніть поля", error_pass_len: "Пароль < 6 символів", error_self: "Не можна собі", error_min: "Мін 0.1 Đ", error_fund: "Недостатньо коштів",
                 legal_title: "Юридична інформація",
-                legal_text: "Doolcoin (Đ) — це внутрішньоігрова умовна одиниця. Вона не є платіжним засобом, електронною валютою або цінним папером. Đ не має реальної грошової вартості і не гарантує обміну на фіатні гроші. Всі операції носять виключно розважальний характер.",
-                any: "Будь-яка"
+                legal_text: "Doolcoin (Đ) — це ігрова одиниця. Платформа надає P2P ринок, але не несе відповідальності за угоди. Ви використовуєте сервіс на свій страх і ризик.",
+                any: "Будь-яка",
+                market_title: "P2P Ринок", market_subtitle: "Товари та Послуги", create_offer: "Створити лот", buy: "Купити"
             },
             fr: {
                 total_balance: "Solde Total", send: "Envoyer", receive: "Recevoir", history: "Historique", loading: "Chargement...", invite_friend: "Inviter un ami", ref_desc: "Obtenez", your_link: "Votre lien", friends: "Amis", earned: "Gagné", staking: "Staking", in_jar: "En Banque", profile: "Profil", wallet_future: "Portefeuille du futur", or: "Ou", login: "Connexion", create: "Créer", settings: "Paramètres", theme: "Thème", theme_light: "Clair", theme_dark: "Sombre", language: "Langue", your_profile: "Votre Profil", close: "Fermer", send_title: "Transfert", recipient: "Destinataire", amount: "Montant (Min 0.1)", cancel: "Annuler", send_action: "Envoyer", show_qr: "Montrez ce code", req_amount: "Demander montant", your_addr: "Votre adresse", deposit_title: "Dépôt", deposit_action: "Déposer", withdraw_title: "Retrait", withdraw_action: "Retirer", scanning: "Scanner", access_denied: "Accès refusé", password_ph: "Mot de passe", deposit_success: "Dépôt réussi", withdraw_success: "Retrait réussi", addr_copied: "Adresse copiée", link_copied: "Lien copié", sent_to: "Envoyé à", error_fill: "Remplir les champs", error_pass_len: "Mot de passe < 6 car.", error_self: "Impossible d'envoyer à soi-même", error_min: "Min 0.1 Đ", error_fund: "Fonds insuffisants",
                 legal_title: "Information Légale",
-                legal_text: "Doolcoin (Đ) est une unité virtuelle de jeu. Ce n'est pas un moyen de paiement, une monnaie électronique ou un titre. Đ n'a aucune valeur monétaire réelle et ne garantit pas l'échange contre de la monnaie fiduciaire. Toutes les opérations sont exclusivement à des fins de divertissement.",
-                any: "Toute"
+                legal_text: "Doolcoin (Đ) est une unité de jeu. La plateforme n'est pas responsable des transactions P2P.",
+                any: "Toute",
+                market_title: "Marché P2P", market_subtitle: "Biens & Services", create_offer: "Créer une offre", buy: "Acheter"
             }
         };
 
@@ -715,13 +806,28 @@
             handle.addEventListener('touchmove', (e) => { if(!isDragging) return; currentY = e.touches[0].clientY; const diff = currentY - startY; if(diff > 0) content.style.transform = `translateY(${diff}px)`; }, {passive: true});
             handle.addEventListener('touchend', (e) => { isDragging = false; const diff = currentY - startY; content.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'; if(diff > 120) closeModal(modalName); else content.style.transform = ''; });
         }
-        ['send', 'receive', 'deposit', 'withdraw', 'settings'].forEach(initSwipeClose);
+        ['send', 'receive', 'deposit', 'withdraw', 'settings', 'market-create', 'market-item'].forEach(initSwipeClose);
 
-        function showRefButton(email) { const btn = document.getElementById('auth-ref-btn'); if(btn) btn.classList.remove('hidden'); }
+        function showRefButton(email) { 
+            const btn = document.getElementById('auth-ref-btn'); 
+            if(btn) {
+                btn.classList.remove('hidden');
+                // BUG FIX: Set the email text immediately
+                const invText = document.getElementById('invited-by-email');
+                if(invText) invText.textContent = email;
+            }
+        }
         try {
             const urlParams = new URLSearchParams(window.location.search), refParam = urlParams.get('ref');
-            if (refParam) { window.history.replaceState({}, document.title, window.location.pathname); localStorage.setItem('dool_ref', refParam.toLowerCase()); showRefButton(refParam); } 
-            else { const savedRef = localStorage.getItem('dool_ref'); if (savedRef) showRefButton(savedRef); }
+            if (refParam) { 
+                window.history.replaceState({}, document.title, window.location.pathname); 
+                localStorage.setItem('dool_ref', refParam.toLowerCase()); 
+                showRefButton(refParam); 
+            } 
+            else { 
+                const savedRef = localStorage.getItem('dool_ref'); 
+                if (savedRef) showRefButton(savedRef); 
+            }
         } catch(e) {}
 
         async function getUserInfo(email) {
@@ -742,14 +848,14 @@
         window.openModal = (n) => {
             const m = document.getElementById('modal-'+n), c = document.getElementById(`modal-${n}-content`);
             if(!m || !c) return; m.classList.remove('hidden'); void m.offsetWidth; m.classList.remove('opacity-0');
-            if(['send', 'receive', 'deposit', 'withdraw', 'settings'].includes(n)) { c.style.transform = ''; setTimeout(() => c.classList.remove('translate-y-full'), 10); } else if(n !== 'scan') c.classList.remove('scale-90');
+            if(['send', 'receive', 'deposit', 'withdraw', 'settings', 'market-create', 'market-item'].includes(n)) { c.style.transform = ''; setTimeout(() => c.classList.remove('translate-y-full'), 10); } else if(n !== 'scan') c.classList.remove('scale-90');
             if(n === 'receive') updateQR(); if(n === 'scan') startScannerV2();
         };
 
         window.closeModal = (n) => {
             const m = document.getElementById('modal-'+n), c = document.getElementById(`modal-${n}-content`);
             if(!m || !c) return; m.classList.add('opacity-0');
-            if(['send', 'receive', 'deposit', 'withdraw', 'settings'].includes(n)) c.classList.add('translate-y-full'); else if(n !== 'scan') c.classList.add('scale-90');
+            if(['send', 'receive', 'deposit', 'withdraw', 'settings', 'market-create', 'market-item'].includes(n)) c.classList.add('translate-y-full'); else if(n !== 'scan') c.classList.add('scale-90');
             if(n === 'scan') stopScannerV2(); if(n === 'send') clearSendForm(); setTimeout(() => m.classList.add('hidden'), 300);
         };
 
@@ -782,6 +888,11 @@
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); document.getElementById('tab-'+tab).classList.add('active');
             document.querySelectorAll('.nav-icon').forEach(img => { img.style.filter = ''; if(currentTheme === 'light') img.style.filter = 'invert(0.8)'; img.style.opacity = '0.5'; img.classList.remove('nav-icon-active'); });
             const activeImg = document.getElementById('nav-'+tab).querySelector('img'); activeImg.style.opacity = '1'; activeImg.style.filter = 'brightness(0) saturate(100%) invert(32%) sepia(98%) saturate(2329%) hue-rotate(358deg) brightness(101%) contrast(106%)'; activeImg.classList.add('nav-icon-active');
+            
+            if(tab === 'market') {
+                if(!localStorage.getItem('dool_market_warn')) document.getElementById('market-warning').classList.remove('hidden');
+                loadMarketItems();
+            }
         };
 
         onAuthStateChanged(auth, async (u) => {
@@ -824,7 +935,6 @@
                 document.getElementById('ref-count').textContent = d.refCount || 0; document.getElementById('ref-earned').textContent = (d.refEarned || 0).toFixed(1);
                 const av = d.avatar || `https://ui-avatars.com/api/?background=random&color=fff&name=${u.email.charAt(0)}`; document.getElementById('main-avatar').src = av; document.getElementById('edit-avatar-img').src = av;
                 
-                // VERIFICATION UI UPDATE
                 const vIcon = document.getElementById('header-verified-icon');
                 const vSection = document.getElementById('profile-verification-status');
                 if (d.isVerified) {
@@ -862,6 +972,181 @@
                 list.innerHTML = html;
             });
         }
+
+        /* MARKET LOGIC */
+        window.setMarketType = (type) => {
+            const btnS = document.getElementById('type-service');
+            const btnG = document.getElementById('type-goods');
+            const inp = document.getElementById('market-type');
+            inp.value = type;
+            if(type === 'service') {
+                btnS.classList.replace('text-neutral-500', 'text-black'); btnS.classList.add('bg-white');
+                btnG.classList.replace('text-black', 'text-neutral-500'); btnG.classList.remove('bg-white');
+            } else {
+                btnG.classList.replace('text-neutral-500', 'text-black'); btnG.classList.add('bg-white');
+                btnS.classList.replace('text-black', 'text-neutral-500'); btnS.classList.remove('bg-white');
+            }
+        };
+
+        window.acceptMarketWarn = () => {
+            localStorage.setItem('dool_market_warn', 'true');
+            document.getElementById('market-warning').classList.add('hidden');
+        };
+
+        document.getElementById('btn-create-offer').onclick = async () => {
+            const title = document.getElementById('market-title').value.trim();
+            const desc = document.getElementById('market-desc').value.trim();
+            const price = parseFloat(document.getElementById('market-price').value);
+            const type = document.getElementById('market-type').value;
+
+            if(!title || !desc || !price || price < 0.1) return showT('Ошибка', getTrans('error_fill'), '', null, true);
+            
+            const btn = document.getElementById('btn-create-offer'); btn.disabled = true; btn.textContent = '...';
+            try {
+                await addDoc(collection(db, "market_listings"), {
+                    title, description: desc, price, type,
+                    authorEmail: auth.currentUser.email,
+                    authorUid: auth.currentUser.uid,
+                    createdAt: serverTimestamp()
+                });
+                closeModal('market-create');
+                document.getElementById('market-title').value = '';
+                document.getElementById('market-desc').value = '';
+                document.getElementById('market-price').value = '';
+                showT('Успешно', 'Лот создан');
+                loadMarketItems();
+            } catch(e) { showT('Ошибка', 'Не удалось создать', '', null, true); }
+            finally { btn.disabled = false; btn.textContent = 'Опубликовать'; }
+        };
+
+        let marketCache = [];
+        async function loadMarketItems() {
+            const list = document.getElementById('market-list');
+            try {
+                const q = query(collection(db, "market_listings"), orderBy('createdAt', 'desc'), limit(50));
+                const snap = await getDocs(q);
+                if(snap.empty) {
+                     list.innerHTML = `<div class="col-span-2 text-center py-10 opacity-50"><p class="text-[10px] font-bold uppercase">Тут пока пусто</p></div>`;
+                     return;
+                }
+                let html = '';
+                marketCache = [];
+                for(const docSnap of snap.docs) {
+                    const item = docSnap.data();
+                    item.id = docSnap.id;
+                    marketCache.push(item);
+                    // Fetch author info for verification check
+                    const authorInfo = await getUserInfo(item.authorEmail);
+                    const isVer = authorInfo.isVerified;
+                    const tagClass = item.type === 'service' ? 'tag-service' : 'tag-goods';
+                    const tagText = item.type === 'service' ? 'Услуга' : 'Товар';
+                    
+                    html += `
+                    <div onclick="viewMarketItem('${item.id}')" class="market-card p-4 rounded-[2rem] relative overflow-hidden group cursor-pointer">
+                        <div class="flex items-start justify-between mb-2">
+                             <div class="px-2 py-1 rounded-md text-[9px] font-black uppercase tracking-wider ${tagClass}">${tagText}</div>
+                             ${isVer ? '<img src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" class="w-3 h-3" title="Verified Seller">' : ''}
+                        </div>
+                        <h3 class="text-sm font-bold text-white mb-1 leading-tight line-clamp-2 h-10">${item.title}</h3>
+                        <div class="flex items-baseline gap-1 mt-2">
+                            <span class="text-lg font-black text-white">${item.price.toFixed(1)}</span>
+                            <span class="text-xs font-black text-orange-500">Đ</span>
+                        </div>
+                        <p class="text-[9px] text-neutral-500 font-bold mt-2 truncate">@${item.authorEmail.split('@')[0]}</p>
+                    </div>`;
+                }
+                list.innerHTML = html;
+            } catch(e) { console.error(e); }
+        }
+
+        window.viewMarketItem = async (id) => {
+            const item = marketCache.find(i => i.id === id);
+            if(!item) return;
+            openModal('market-item');
+            const authorInfo = await getUserInfo(item.authorEmail);
+            const container = document.getElementById('market-item-details');
+            const isMe = auth.currentUser.email === item.authorEmail;
+            
+            container.innerHTML = `
+                <div class="flex items-center gap-3 mb-4">
+                    <img src="${authorInfo.avatar}" class="w-12 h-12 rounded-full border border-white/10">
+                    <div>
+                        <div class="flex items-center gap-1">
+                            <p class="text-xs font-bold text-white">${item.authorEmail}</p>
+                             ${authorInfo.isVerified ? '<img src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" class="w-3 h-3">' : ''}
+                        </div>
+                        <p class="text-[9px] text-neutral-500 font-bold uppercase">Продавец</p>
+                    </div>
+                </div>
+                <div class="bg-white/5 rounded-2xl p-5 border border-white/5">
+                    <div class="flex justify-between items-start mb-2">
+                         <span class="px-2 py-1 rounded-md text-[9px] font-black uppercase tracking-wider ${item.type === 'service' ? 'tag-service' : 'tag-goods'}">${item.type === 'service' ? 'Услуга' : 'Товар'}</span>
+                         <div class="flex items-center gap-1">
+                            <span class="text-2xl font-black text-white">${item.price.toFixed(1)}</span>
+                            <span class="text-lg font-black text-orange-500">Đ</span>
+                         </div>
+                    </div>
+                    <h2 class="text-xl font-black text-white mb-3 leading-tight">${item.title}</h2>
+                    <p class="text-xs text-neutral-400 font-medium leading-relaxed whitespace-pre-wrap">${item.description}</p>
+                </div>
+                ${!isMe ? `
+                <button onclick="buyMarketItem('${item.id}')" class="w-full h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+                    Купить за ${item.price.toFixed(1)} Đ
+                </button>
+                <p class="text-[9px] text-neutral-600 text-center mt-2 leading-tight">Нажимая кнопку, вы переводите средства продавцу. <br>Платформа не несет ответственности.</p>
+                ` : `<button onclick="closeModal('market-item')" class="w-full h-14 bg-white/5 text-neutral-400 rounded-2xl font-bold text-xs uppercase tracking-wider">Это ваше объявление</button>`}
+            `;
+        };
+
+        window.buyMarketItem = (id) => {
+            const item = marketCache.find(i => i.id === id);
+            if(!item) return;
+            // Pre-fill send modal with special logic
+            closeModal('market-item');
+            openModal('send');
+            document.getElementById('send-email').value = item.authorEmail;
+            document.getElementById('send-amt').value = item.price;
+            document.getElementById('send-email').readOnly = true;
+            document.getElementById('send-amt').readOnly = true;
+            document.getElementById('proposal-notice').classList.remove('hidden');
+            document.getElementById('proposal-notice').querySelector('p').textContent = `Покупка: ${item.title}`;
+            document.getElementById('btn-do-send').onclick = async () => {
+                // Modified send logic for market
+                 const to = item.authorEmail;
+                 const amt = item.price;
+                 const myEmail = auth.currentUser.email;
+                 if (amt > myData.balance) return showT('Ошибка', getTrans('error_fund'), '', null, true);
+                 
+                 const btn = document.getElementById('btn-do-send'); btn.disabled = true; btn.textContent = '...';
+                 try {
+                    const q = query(collection(db, "users"), where("email", "==", to)); const res = await getDocs(q); if (res.empty) throw new Error("User not found");
+                    await runTransaction(db, async (t) => {
+                        const senderRef = doc(db, "users", auth.currentUser.uid), sData = (await t.get(senderRef)).data();
+                        if (sData.balance < amt) throw new Error("Funds");
+                        t.update(senderRef, { balance: increment(-amt) }); t.update(res.docs[0].ref, { balance: increment(amt) });
+                        const txRef = doc(collection(db, "transactions")); 
+                        t.set(txRef, { 
+                            from: myEmail, to: to, amount: amt, date: Timestamp.now(), parties: [myEmail, to],
+                            type: 'market_buy',
+                            marketItemId: item.id,
+                            marketItemTitle: item.title
+                        });
+                    }); 
+                    closeModal('send'); 
+                    showT('Покупка', `Вы купили: ${item.title}`, `-${amt.toFixed(1)} Đ`);
+                    // Maybe open a modal saying "Contact seller at [email]"
+                    setTimeout(() => alert(`Оплата прошла успешно!\nСвяжитесь с продавцом: ${to}`), 500);
+                 } catch (e) { showT('Ошибка', e.message, '', null, true); } 
+                 finally { 
+                     btn.disabled = false; btn.textContent = getTrans('send_action'); 
+                     // Restore default send button behavior
+                     document.getElementById('btn-do-send').onclick = window.originalSendLogic;
+                 }
+            };
+        };
+        
+        // Save original send logic to restore it
+        window.originalSendLogic = document.getElementById('btn-do-send').onclick;
         
         window.requestVerification = async () => {
              const btn = document.querySelector('#profile-verification-status button');
@@ -876,7 +1161,15 @@
         };
 
         async function handleIncomingTransfer(myEmail, amountDiff) {
-            try { const q = query(collection(db, "transactions"), where("to", "==", myEmail)); const snap = await getDocs(q); if (!snap.empty) { const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date); if (Math.abs(docs[0].amount - amountDiff) < 0.01) { if (docs[0].type === 'referral_bonus') showT('Bonus', getTrans('ref_desc'), `+${amountDiff.toFixed(1)} Đ`); else showT('Transfer', docs[0].from, `+${amountDiff.toFixed(1)} Đ`, docs[0].from); return; } } showT('Банк', getTrans('in_jar'), `+${amountDiff.toFixed(1)} Đ`); } catch(e) {}
+            try { const q = query(collection(db, "transactions"), where("to", "==", myEmail)); const snap = await getDocs(q); if (!snap.empty) { const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date); 
+                const tx = docs[0];
+                if (Math.abs(tx.amount - amountDiff) < 0.01) { 
+                    if (tx.type === 'referral_bonus') showT('Bonus', getTrans('ref_desc'), `+${amountDiff.toFixed(1)} Đ`); 
+                    else if (tx.type === 'market_buy') showT('Продажа', `Покупка: ${tx.marketItemTitle}`, `+${amountDiff.toFixed(1)} Đ`, tx.from);
+                    else showT('Transfer', tx.from, `+${amountDiff.toFixed(1)} Đ`, tx.from); 
+                    return; 
+                } 
+            } showT('Банк', getTrans('in_jar'), `+${amountDiff.toFixed(1)} Đ`); } catch(e) {}
         }
         document.getElementById('avatar-input').onchange = (e) => { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = async (ev) => { try { await updateDoc(doc(db, "users", auth.currentUser.uid), { avatar: ev.target.result }); showT('Profile', 'Updated'); } catch { showT('Error', 'Failed', '', null, true); } }; reader.readAsDataURL(file); };
         function calculateCompoundBalance(stored, lastUpdate) { if (!stored || stored <= 0 || !lastUpdate) return stored || 0; const diffWeeks = (new Date() - lastUpdate.toDate()) / (1000 * 60 * 60 * 24 * 7); return stored * Math.pow(1.05, diffWeeks); }
@@ -891,7 +1184,10 @@
         const onScanError = () => {};
         window.stopScannerV2 = () => { if (html5QrCode) { html5QrCode.stop().then(() => { html5QrCode.clear(); html5QrCode = null; }).catch(err => console.log(err)); } };
         function openProposalModal(data) { openModal('send'); document.getElementById('send-email').value = data.e; if (data.a > 0) { document.getElementById('send-amt').value = data.a; document.getElementById('send-amt').readOnly = true; document.getElementById('send-email').readOnly = true; document.getElementById('proposal-notice').classList.remove('hidden'); } }
-        document.getElementById('btn-do-send').onclick = async () => {
+        
+        // This is the default send handler. It is assigned to window.originalSendLogic above.
+        // We re-declare it here properly to ensure it works on initial load.
+        const defaultSendHandler = async () => {
             const to = document.getElementById('send-email').value.trim().toLowerCase(), amt = parseFloat(document.getElementById('send-amt').value), myEmail = auth.currentUser.email;
             if (to === myEmail) return showT('Ошибка', getTrans('error_self'), '', null, true); if (!amt || amt < 0.1) return showT('Ошибка', getTrans('error_min'), '', null, true); if (amt > myData.balance) return showT('Ошибка', getTrans('error_fund'), '', null, true);
             const btn = document.getElementById('btn-do-send'); btn.disabled = true; btn.textContent = '...';
@@ -909,6 +1205,10 @@
                 }); closeModal('send'); showT('Успешно', `${getTrans('sent_to')} ${to}`, `-${amt.toFixed(1)} Đ`);
             } catch (e) { showT('Ошибка', e.message, '', null, true); } finally { btn.disabled = false; btn.textContent = getTrans('send_action'); }
         };
+        
+        document.getElementById('btn-do-send').onclick = defaultSendHandler;
+        window.originalSendLogic = defaultSendHandler;
+
         window.copyRef = () => { navigator.clipboard.writeText(document.getElementById('ref-link').value); showT('Успешно', getTrans('link_copied')); };
         window.shareRef = async () => { if (navigator.share) { try { await navigator.share({ title: 'Doolcoin Wallet', text: 'Bonus!', url: document.getElementById('ref-link').value }); } catch (err) {} } else copyRef(); };
         document.getElementById('btn-logout').onclick = () => signOut(auth);
