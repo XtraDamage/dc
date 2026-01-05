@@ -63,70 +63,57 @@
         .swipe-zone { width: 100%; height: 32px; display: flex; align-items: center; justify-content: center; cursor: grab; touch-action: none; }
         .swipe-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 10px; }
 
+        /* AVATAR FRAMES */
+        .frame-none { border: 2px solid rgba(255,255,255,0.1); }
+        .frame-neon { border: 2px solid #00f3ff; box-shadow: 0 0 10px #00f3ff, inset 0 0 10px #00f3ff; }
+        .frame-gold { border: 2px solid #ffd700; box-shadow: 0 0 10px #ffd700; background: linear-gradient(45deg, #ffd700, #ffaa00); padding: 2px; }
+        .frame-vip { border: 2px solid transparent; background: linear-gradient(white, white) padding-box, linear-gradient(45deg, #FF4D00, #FF005C) border-box; }
+        .frame-ruby { border: 2px solid #ff0055; box-shadow: 0 0 15px #ff0055; }
+        .frame-rainbow { border: 2px solid transparent; animation: rotate 2s linear infinite; background: linear-gradient(white, white) padding-box, linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet) border-box; }
+
         /* --- LIGHT THEME FIXES --- */
         body.light-theme { background-color: #f0f2f5; color: #1a1a1a; }
         body.light-theme #app { background-color: #ffffff; border-color: rgba(0,0,0,0.05); box-shadow: 0 20px 60px rgba(0,0,0,0.08); }
-        
-        /* Override all white text in light mode */
         body.light-theme .text-white { color: #111827 !important; }
         body.light-theme .text-neutral-500 { color: #6b7280; }
         body.light-theme .text-neutral-400 { color: #4b5563; }
-        
-        /* Cards & Panels */
         body.light-theme .dool-card { background: #f9fafb; border-color: rgba(0,0,0,0.06); }
         body.light-theme .glass-panel { background: #f3f4f6; border-color: rgba(0,0,0,0.08); color: #000; }
-        
-        /* Inputs & Form Elements */
         body.light-theme input { color: #111 !important; }
         body.light-theme input::placeholder { color: #9ca3af !important; }
         body.light-theme .bg-white\/5 { background-color: rgba(0,0,0,0.04); }
         body.light-theme .bg-white\/10 { background-color: rgba(0,0,0,0.08); }
         body.light-theme .border-white\/10 { border-color: rgba(0,0,0,0.1); }
         body.light-theme .border-white\/5 { border-color: rgba(0,0,0,0.06); }
-        
-        /* Modal Content Backgrounds */
         body.light-theme #modal-send-content, 
         body.light-theme #modal-receive-content,
         body.light-theme #modal-deposit-content,
         body.light-theme #modal-withdraw-content,
         body.light-theme #modal-settings-content { background-color: #ffffff; color: #000; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); }
-        
-        /* Toast Light */
         body.light-theme #toast { background: rgba(255,255,255,0.98); border-color: rgba(0,0,0,0.08); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1); }
         body.light-theme #toast-msg { color: #111; }
-        
-        /* Icons Inversion for Visibility */
         body.light-theme .settings-icon, 
         body.light-theme .logout-icon,
         body.light-theme .nav-icon { filter: invert(1) brightness(0.2); }
-        /* Keep Active Nav Icon Orange */
         body.light-theme .nav-icon-active { filter: brightness(0) saturate(100%) invert(32%) sepia(98%) saturate(2329%) hue-rotate(358deg) brightness(101%) contrast(106%) !important; opacity: 1 !important; }
-        
         body.light-theme .swipe-handle { background: #e5e7eb; }
         body.light-theme nav { background: rgba(255,255,255,0.9); border-color: rgba(0,0,0,0.05); }
-
-        /* QR Card in Light Mode */
         body.light-theme .qr-card-premium { background: linear-gradient(180deg, #f3f4f6 0%, #ffffff 100%); border-color: rgba(0,0,0,0.1); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1); }
-        
-        /* ABOUT CARD (PREMIUM) */
-        .about-card {
-            position: relative;
-            background: linear-gradient(160deg, #111, #000);
-            border-radius: 24px;
-            padding: 2px; /* For border gradient */
-            overflow: hidden;
-        }
-        .about-card::before {
-            content: ""; position: absolute; inset: 0;
-            background: linear-gradient(45deg, rgba(255, 77, 0, 0.5), transparent, rgba(255, 77, 0, 0.2));
-            border-radius: 24px; -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
-        }
-        .about-inner { background: #0a0a0a; border-radius: 22px; padding: 20px; position: relative; height: 100%; }
         body.light-theme .about-inner { background: #fff; }
+        
+        .about-card { position: relative; background: linear-gradient(160deg, #111, #000); border-radius: 24px; padding: 2px; overflow: hidden; }
+        .about-card::before { content: ""; position: absolute; inset: 0; background: linear-gradient(45deg, rgba(255, 77, 0, 0.5), transparent, rgba(255, 77, 0, 0.2)); border-radius: 24px; -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
+        .about-inner { background: #0a0a0a; border-radius: 22px; padding: 20px; position: relative; height: 100%; }
         
         .lang-btn.active { border: 1px solid #FF4D00; color: #FF4D00; background: rgba(255, 77, 0, 0.05); }
         .theme-btn.active { border: 1px solid #FF4D00; opacity: 1; transform: scale(1); }
         .theme-btn { opacity: 0.6; transform: scale(0.96); transition: all 0.2s; }
+        .shop-cat-btn.active { background: #fff; color: #000; }
+        .shop-cat-btn { background: rgba(255,255,255,0.05); color: #888; }
+        body.light-theme .shop-cat-btn.active { background: #000; color: #fff; }
+        
+        .vip-badge-anim { animation: pulseGlow 2s infinite; }
+        @keyframes pulseGlow { 0% { box-shadow: 0 0 0 0 rgba(255, 77, 0, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(255, 77, 0, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 77, 0, 0); } }
 
     </style>
 </head>
@@ -166,9 +153,7 @@
             </div>
             <h2 class="text-2xl font-black text-white mb-3 uppercase tracking-wide relative z-10" data-lang="access_denied">Доступ ограничен</h2>
             <div class="bg-white/5 border border-white/10 rounded-2xl p-4 w-full max-w-[280px] mb-8 relative z-10">
-                <p id="ban-text" class="text-neutral-400 text-center text-xs font-bold leading-relaxed">
-                    Ваш аккаунт был заблокирован администрацией.
-                </p>
+                <p id="ban-text" class="text-neutral-400 text-center text-xs font-bold leading-relaxed">Ваш аккаунт был заблокирован.</p>
             </div>
         </div>
 
@@ -191,17 +176,14 @@
             
             <div class="space-y-3 relative z-10">
                 <button id="btn-google" class="w-full h-14 bg-white text-black rounded-2xl font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-3 transition-all active:scale-95 cursor-pointer relative overflow-hidden group">
-                    <div class="absolute inset-0 bg-neutral-200 opacity-0 group-hover:opacity-10 transition-opacity"></div>
                     <svg width="24" height="24" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.84.81-.81z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
                     <span>Google</span>
                 </button>
-
                 <div class="flex items-center gap-4 py-2">
                     <div class="h-[1px] bg-white/10 flex-1"></div>
                     <span class="text-[10px] text-neutral-600 font-bold uppercase tracking-widest" data-lang="or">Или</span>
                     <div class="h-[1px] bg-white/10 flex-1"></div>
                 </div>
-
                 <div class="glass-panel rounded-3xl p-1.5 space-y-1.5">
                     <input type="email" id="auth-email" placeholder="Email" class="w-full bg-transparent text-white px-5 py-3.5 outline-none placeholder:text-neutral-600 font-bold">
                     <div class="h-[1px] bg-white/5 mx-5"></div>
@@ -223,7 +205,9 @@
                     </div>
                     <div class="flex flex-col justify-center">
                         <div class="flex items-center gap-1">
-                            <p id="main-username" class="text-xs font-bold truncate max-w-[140px] leading-tight text-white">...</p>
+                            <!-- Status Icon Inject -->
+                            <img id="header-status-icon" src="" class="w-3 h-3 hidden">
+                            <p id="main-username" class="text-xs font-bold truncate max-w-[120px] leading-tight text-white">...</p>
                             <img id="header-verified-icon" src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" class="w-3 h-3 hidden" title="Verified">
                         </div>
                         <p class="text-[9px] font-black text-neutral-500 uppercase tracking-widest leading-tight" data-lang="profile">Профиль</p>
@@ -231,11 +215,9 @@
                 </div>
                 
                 <div class="flex items-center gap-2">
-                    <!-- SETTINGS -->
                     <button onclick="openModal('settings')" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer">
                         <img src="https://img.icons8.com/?size=100&id=xyFoc6U1Hu3c&format=png&color=ffffff" class="w-5 h-5 opacity-80 settings-icon" alt="Settings">
                     </button>
-                    <!-- LOGOUT -->
                     <button id="btn-logout" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer">
                         <img src="https://img.icons8.com/?size=100&id=5HW1YsFkzHio&format=png&color=ffffff" class="w-5 h-5 opacity-80 logout-icon" alt="Logout">
                     </button>
@@ -248,7 +230,6 @@
                     <div class="dool-card rounded-[2.5rem] p-6 sm:p-8 relative overflow-hidden group">
                         <div class="absolute inset-0 gradient-bg opacity-[0.03] group-hover:opacity-[0.05] transition-opacity duration-500"></div>
                         <div class="absolute -right-12 -top-12 w-48 h-48 bg-[#FF4D00] rounded-full blur-[80px] opacity-20"></div>
-                        
                         <div class="relative z-10 flex flex-col items-center justify-center py-6">
                             <span class="text-[10px] font-bold text-neutral-500 uppercase tracking-[0.2em] mb-2" data-lang="total_balance">Общий баланс</span>
                             <div class="w-full flex items-baseline justify-center gap-1 mb-2 px-2">
@@ -256,7 +237,6 @@
                                 <span class="text-2xl font-black gradient-text leading-none mb-1 self-end pb-1">Đ</span>
                             </div>
                         </div>
-
                         <div class="flex gap-3 mt-4 relative z-10">
                             <button onclick="openModal('send')" class="flex-1 h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 active:scale-95 transition-all shadow-lg shadow-white/5 cursor-pointer flex flex-col items-center justify-center">
                                 <span data-lang="send">Отправить</span>
@@ -269,7 +249,6 @@
                             </button>
                         </div>
                     </div>
-
                     <div class="space-y-4">
                         <div class="flex items-center justify-between px-2">
                             <h3 class="text-[11px] font-black text-neutral-500 uppercase tracking-widest" data-lang="history">История операций</h3>
@@ -277,7 +256,75 @@
                         <div id="tx-history" class="space-y-2 pb-10">
                             <div class="text-center py-10">
                                 <div class="w-8 h-8 border-2 border-white/10 border-t-orange-500 rounded-full animate-spin mx-auto mb-4"></div>
-                                <p class="text-[10px] font-bold text-neutral-600 uppercase tracking-widest" data-lang="loading">Загрузка...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BANK -->
+                <div id="tab-bank" class="tab-content space-y-6">
+                    <div class="text-center pt-4 pb-2">
+                        <h2 class="text-xl font-black uppercase tracking-widest text-neutral-400" data-lang="staking">Стейкинг</h2>
+                        <p class="text-[10px] text-orange-500 font-bold uppercase tracking-widest" id="bank-rate-display">+5% в неделю ⌛</p>
+                    </div>
+                   <div class="bank-stack-container">
+                        <img src="https://emojigraph.org/media/facebook/jar_1fad9.png" class="bank-layer-bottom">
+                        <img src="https://emojigraph.org/media/google/fire_1f525.png" class="bank-layer-fire">
+                        <img src="https://emojigraph.org/media/facebook/jar_1fad9.png" class="bank-layer-top">
+                    </div>
+                    <div class="dool-card rounded-[2.5rem] p-6 sm:p-8 text-center relative overflow-hidden">
+                        <div class="absolute inset-0 bg-orange-500/5"></div>
+                        <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-2 relative z-10" data-lang="in_jar">В банке</p>
+                        <div class="flex items-center justify-center gap-2 relative z-10">
+                            <h2 id="bank-balance-val" class="text-4xl font-black text-white">0.0</h2>
+                            <span class="text-xl font-black text-orange-500">Đ</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="openModal('deposit')" class="h-20 glass-panel rounded-[2rem] flex flex-col items-center justify-center gap-1 hover:bg-white/10 transition-colors border border-white/10">
+                            <img src="https://img.icons8.com/?size=100&id=8P1z54VQlHYr&format=png&color=000000" class="w-12 h-12 settings-icon" alt="Deposit">
+                        </button>
+                        <button onclick="openModal('withdraw')" class="h-20 glass-panel rounded-[2rem] flex flex-col items-center justify-center gap-1 hover:bg-white/10 transition-colors border border-white/10">
+                             <img src="https://img.icons8.com/?size=100&id=qRJUAI2xNkqe&format=png&color=000000" class="w-12 h-12 settings-icon" alt="Withdraw">
+                        </button>
+                    </div>
+                </div>
+
+                <!-- SHOP -->
+                <div id="tab-shop" class="tab-content space-y-5">
+                    <div class="flex items-center gap-2 overflow-x-auto hide-scroll pb-2">
+                        <button onclick="switchShopCat('statuses')" class="shop-cat-btn active px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider flex-shrink-0">Статусы</button>
+                        <button onclick="switchShopCat('frames')" class="shop-cat-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider flex-shrink-0">Рамки</button>
+                        <button onclick="switchShopCat('vip')" class="shop-cat-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider flex-shrink-0">VIP</button>
+                    </div>
+
+                    <!-- Statuses -->
+                    <div id="shop-cat-statuses" class="shop-view grid grid-cols-2 gap-3">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <!-- Frames -->
+                    <div id="shop-cat-frames" class="shop-view hidden grid grid-cols-2 gap-3">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <!-- VIP -->
+                    <div id="shop-cat-vip" class="shop-view hidden">
+                        <div class="dool-card p-6 rounded-[2.5rem] relative overflow-hidden border border-yellow-500/30">
+                            <div class="absolute inset-0 bg-yellow-500/5"></div>
+                            <div class="absolute -right-10 -top-10 w-40 h-40 bg-yellow-500/20 blur-[60px] rounded-full"></div>
+                            <div class="relative z-10 flex flex-col items-center text-center">
+                                <img src="https://img.icons8.com/?size=100&id=lYomyAXAzDXK&format=png&color=ffffff" class="w-16 h-16 mb-4 drop-shadow-[0_0_15px_rgba(255,215,0,0.5)]">
+                                <h2 class="text-2xl font-black text-white mb-2">VIP STATUS</h2>
+                                <p class="text-xs text-neutral-400 font-medium mb-6 leading-relaxed">
+                                    • +10% стейкинг (вместо 5%)<br>
+                                    • x2 награда за рефералов<br>
+                                    • Золотая рамка в транзакциях<br>
+                                    • Эксклюзивные предметы
+                                </p>
+                                <button onclick="buyVip()" id="btn-buy-vip" class="w-full h-12 bg-yellow-500 text-black font-black text-xs uppercase tracking-wider rounded-xl hover:bg-yellow-400 transition-colors shadow-lg shadow-yellow-500/20">
+                                    Подписаться (100 Đ/мес)
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -289,9 +336,8 @@
                         <div class="absolute top-0 right-0 w-32 h-32 gradient-bg blur-[60px] opacity-20"></div>
                         <h3 class="text-2xl font-black mb-2 relative z-10 text-white" data-lang="invite_friend">Пригласи друга</h3>
                         <p class="text-neutral-500 text-xs mb-8 leading-relaxed max-w-[80%] relative z-10">
-                            <span data-lang="ref_desc">Получи</span> <span class="text-white font-bold">10.00 Đ</span>
+                            <span data-lang="ref_desc">Получи</span> <span class="text-white font-bold" id="ref-reward-amt">10.00 Đ</span>
                         </p>
-                        
                         <div class="bg-black/40 border border-white/5 p-4 rounded-2xl space-y-3 relative z-10 backdrop-blur-sm">
                             <div class="flex items-center justify-between gap-4">
                                 <div class="flex-1 min-w-0">
@@ -309,7 +355,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="grid grid-cols-2 gap-3">
                         <div class="dool-card p-5 rounded-[2rem] flex flex-col items-center justify-center gap-1 aspect-square">
                             <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center mb-2 text-neutral-400">
@@ -327,66 +372,34 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- BANK -->
-                <div id="tab-bank" class="tab-content space-y-6">
-                    <div class="text-center pt-4 pb-2">
-                        <h2 class="text-xl font-black uppercase tracking-widest text-neutral-400" data-lang="staking">Стейкинг</h2>
-                        <p class="text-[10px] text-orange-500 font-bold uppercase tracking-widest">+5% в неделю ⌛</p>
-                    </div>
-
-                   <div class="bank-stack-container">
-                        <img src="https://emojigraph.org/media/facebook/jar_1fad9.png" class="bank-layer-bottom">
-                        <img src="https://emojigraph.org/media/google/fire_1f525.png" class="bank-layer-fire">
-                        <img src="https://emojigraph.org/media/facebook/jar_1fad9.png" class="bank-layer-top">
-                    </div>
-
-                    <div class="dool-card rounded-[2.5rem] p-6 sm:p-8 text-center relative overflow-hidden">
-                        <div class="absolute inset-0 bg-orange-500/5"></div>
-                        <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-2 relative z-10" data-lang="in_jar">В банке</p>
-                        <div class="flex items-center justify-center gap-2 relative z-10">
-                            <h2 id="bank-balance-val" class="text-4xl font-black text-white">0.0</h2>
-                            <span class="text-xl font-black text-orange-500">Đ</span>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <button onclick="openModal('deposit')" class="h-20 glass-panel rounded-[2rem] flex flex-col items-center justify-center gap-1 hover:bg-white/10 transition-colors border border-white/10">
-                            <img src="https://img.icons8.com/?size=100&id=8P1z54VQlHYr&format=png&color=000000" class="w-12 h-12 settings-icon" alt="Deposit">
-                        </button>
-                        <button onclick="openModal('withdraw')" class="h-20 glass-panel rounded-[2rem] flex flex-col items-center justify-center gap-1 hover:bg-white/10 transition-colors border border-white/10">
-                             <img src="https://img.icons8.com/?size=100&id=qRJUAI2xNkqe&format=png&color=000000" class="w-12 h-12 settings-icon" alt="Withdraw">
-                        </button>
-                    </div>
-                </div>
             </main>
 
             <!-- NAV -->
-            <nav class="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[360px] h-16 bg-[#111]/90 backdrop-blur-xl border border-white/10 rounded-[2rem] flex items-center justify-around px-2 z-50 shadow-2xl transition-colors duration-300">
+            <nav class="absolute bottom-6 left-1/2 -translate-x-1/2 w-[95%] max-w-[380px] h-16 bg-[#111]/90 backdrop-blur-xl border border-white/10 rounded-[2rem] flex items-center justify-around px-2 z-50 shadow-2xl transition-colors duration-300">
                 <button onclick="switchTab('wallet')" id="nav-wallet" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-orange-500 cursor-pointer">
-                    <img src="https://img.icons8.com/?size=100&id=Pv8alVtwvuFB&format=png&color=ffffff" class="w-9 h-9 nav-icon nav-icon-active" alt="Wallet">
+                    <img src="https://img.icons8.com/?size=100&id=Pv8alVtwvuFB&format=png&color=ffffff" class="w-7 h-7 nav-icon nav-icon-active" alt="Wallet">
                 </button>
                 <button onclick="switchTab('bank')" id="nav-bank" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
-                     <img src="https://img.icons8.com/?size=100&id=MRDxs37r5Fp9&format=png&color=ffffff" class="w-9 h-9 nav-icon" alt="Bank">
+                     <img src="https://img.icons8.com/?size=100&id=MRDxs37r5Fp9&format=png&color=ffffff" class="w-7 h-7 nav-icon" alt="Bank">
+                </button>
+                 <button onclick="switchTab('shop')" id="nav-shop" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
+                     <img src="https://img.icons8.com/?size=100&id=undefined&format=png&color=ffffff" class="w-7 h-7 nav-icon" alt="Shop" onerror="this.src='https://img.icons8.com/?size=100&id=rM11tT5g72b9&format=png&color=ffffff'">
                 </button>
                 <button onclick="switchTab('referrals')" id="nav-referrals" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
-                    <img src="https://img.icons8.com/?size=100&id=N9EwPosvU1Rm&format=png&color=ffffff" class="w-9 h-9 nav-icon" alt="Referrals">
+                    <img src="https://img.icons8.com/?size=100&id=N9EwPosvU1Rm&format=png&color=ffffff" class="w-7 h-7 nav-icon" alt="Referrals">
                 </button>
             </nav>
         </div>
 
-        <!-- SETTINGS MODAL (REDESIGNED) -->
+        <!-- SETTINGS MODAL -->
         <div id="modal-settings" onclick="if(event.target===this) closeModal('settings')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
             <div class="bg-[#0f0f0f] border-t border-white/10 rounded-t-[2.5rem] p-0 transform translate-y-full transition-transform duration-300" id="modal-settings-content">
                 <div class="swipe-zone"><div class="swipe-handle"></div></div>
-                
                 <div class="p-8 pb-10 space-y-8 overflow-y-auto max-h-[80vh]">
                     <div class="flex items-center gap-3 mb-2">
                         <img src="https://img.icons8.com/?size=100&id=xyFoc6U1Hu3c&format=png&color=ffffff" class="w-8 h-8 settings-icon">
                         <h2 class="text-2xl font-black text-white" data-lang="settings">Настройки</h2>
                     </div>
-
-                    <!-- Theme -->
                     <div>
                         <p class="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-3" data-lang="theme">Тема оформления</p>
                         <div class="grid grid-cols-2 gap-3">
@@ -400,8 +413,6 @@
                             </button>
                         </div>
                     </div>
-
-                    <!-- Language -->
                     <div>
                         <div class="flex items-center gap-2 mb-3">
                             <img src="https://img.icons8.com/?size=100&id=ya6K4D74SdP6&format=png&color=ffffff" class="w-4 h-4 settings-icon">
@@ -411,12 +422,8 @@
                             <button onclick="setLanguage('ru')" class="lang-btn h-10 bg-white/5 rounded-xl font-bold text-xs text-white" data-lang-code="ru">Русский</button>
                             <button onclick="setLanguage('en')" class="lang-btn h-10 bg-white/5 rounded-xl font-bold text-xs text-white" data-lang-code="en">English</button>
                             <button onclick="setLanguage('es')" class="lang-btn h-10 bg-white/5 rounded-xl font-bold text-xs text-white" data-lang-code="es">Español</button>
-                            <button onclick="setLanguage('uk')" class="lang-btn h-10 bg-white/5 rounded-xl font-bold text-xs text-white" data-lang-code="uk">Українська</button>
-                            <button onclick="setLanguage('fr')" class="lang-btn h-10 bg-white/5 rounded-xl font-bold text-xs text-white" data-lang-code="fr">Français</button>
                         </div>
                     </div>
-
-                    <!-- About Card Redesigned -->
                     <div class="about-card">
                         <div class="about-inner">
                             <div class="flex items-center justify-between mb-4">
@@ -426,35 +433,26 @@
                                     </div>
                                     <span class="font-black text-sm tracking-widest text-white">DOOLCOIN</span>
                                 </div>
-                                <span class="text-[9px] font-mono text-neutral-500">v1.0.3</span>
+                                <span class="text-[9px] font-mono text-neutral-500">v1.1.0</span>
                             </div>
-                            
                             <h3 class="text-xs font-bold text-white mb-2" data-lang="legal_title">Юридическая информация</h3>
                             <p class="text-[10px] text-neutral-400 font-medium leading-relaxed mb-4 text-justify" data-lang="legal_text">
-                                Doolcoin (Đ) — это внутриигровая условная единица. Она не является платёжным средством, электронной валютой или ценной бумагой. Đ не имеет реальной денежной стоимости и не гарантирует возможности обмена на фиатные деньги. Все операции носят исключительно развлекательный характер.
+                                Doolcoin (Đ) — это внутриигровая условная единица. Она не является платёжным средством.
                             </p>
-                            
-                            <div class="h-[1px] bg-white/10 w-full mb-3"></div>
-                            
-                            <div class="flex justify-between items-center">
-                                <span class="text-[9px] text-neutral-600">© 2026 Doolcoin Inc.</span>
-                                <a href="https://icons8.com" target="_blank" class="text-[9px] font-bold text-orange-500 hover:text-white transition-colors flex items-center gap-1">
-                                    <span>Icons by Icons8</span>
-                                </a>
-                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- PROFILE -->
+        <!-- PROFILE (SELF) -->
         <div id="modal-profile" onclick="if(event.target===this) closeModal('profile')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col items-center justify-center p-8 opacity-0 transition-opacity duration-300">
             <div class="w-full max-w-xs transform scale-90 transition-transform duration-300" id="modal-profile-content">
                 <div class="bg-[#111] border border-white/10 p-8 rounded-[2.5rem] text-center shadow-2xl dool-card">
                     <h2 class="text-xl font-black mb-6 text-white" data-lang="your_profile">Ваш Профиль</h2>
                     <div class="relative inline-block mb-6 group">
-                        <div class="p-1 gradient-bg rounded-full">
+                        <div class="p-1 rounded-full relative" id="profile-frame-container">
+                             <!-- Frame styles injected here -->
                             <img id="edit-avatar-img" src="" class="w-24 h-24 rounded-full object-cover border-4 border-[#111] bg-neutral-900">
                         </div>
                         <label class="absolute bottom-0 right-0 bg-white text-black w-8 h-8 flex items-center justify-center rounded-full cursor-pointer hover:scale-110 transition-transform shadow-lg">
@@ -462,14 +460,30 @@
                             <input type="file" id="avatar-input" class="hidden" accept="image/*">
                         </label>
                     </div>
-                    
-                    <!-- Verification Section -->
-                    <div id="profile-verification-status" class="mb-6 flex flex-col items-center min-h-[40px]">
-                        <!-- Injected via JS -->
-                    </div>
-
+                    <div id="profile-verification-status" class="mb-6 flex flex-col items-center min-h-[40px]"></div>
                     <p id="profile-email" class="text-xs text-neutral-500 font-bold mb-6 truncate px-2">...</p>
                     <button onclick="closeModal('profile')" class="w-full h-12 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer" data-lang="close">Закрыть</button>
+                </div>
+            </div>
+        </div>
+
+         <!-- PROFILE (OTHER USER) -->
+         <div id="modal-user-profile" onclick="if(event.target===this) closeModal('user-profile')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col items-center justify-center p-8 opacity-0 transition-opacity duration-300">
+            <div class="w-full max-w-xs transform scale-90 transition-transform duration-300" id="modal-user-profile-content">
+                <div class="bg-[#111] border border-white/10 p-8 rounded-[2.5rem] text-center shadow-2xl dool-card relative overflow-hidden">
+                    <div id="other-profile-bg-glow" class="absolute inset-0 bg-transparent"></div>
+                    <h2 class="text-xl font-black mb-6 text-white relative z-10">Профиль</h2>
+                    <div class="relative inline-block mb-6 z-10">
+                        <div class="p-1 rounded-full relative" id="other-profile-frame">
+                            <img id="other-profile-avatar" src="" class="w-24 h-24 rounded-full object-cover border-4 border-[#111] bg-neutral-900">
+                        </div>
+                        <div id="other-profile-vip-badge" class="hidden absolute -top-2 -right-2 w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center border-2 border-[#111] shadow-lg">
+                             <img src="https://img.icons8.com/?size=100&id=lYomyAXAzDXK&format=png&color=ffffff" class="w-5 h-5">
+                        </div>
+                    </div>
+                    <div id="other-profile-badges" class="mb-4 flex flex-col items-center gap-2 relative z-10 min-h-[30px]"></div>
+                    <p id="other-profile-email" class="text-xs text-neutral-500 font-bold mb-6 truncate px-2 relative z-10">...</p>
+                    <button onclick="closeModal('user-profile')" class="w-full h-12 bg-white text-black rounded-xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer relative z-10">Закрыть</button>
                 </div>
             </div>
         </div>
@@ -633,33 +647,36 @@
             ru: {
                 total_balance: "Общий баланс", send: "Отправить", receive: "Получить", history: "История операций", loading: "Загрузка...", invite_friend: "Пригласи друга", ref_desc: "Получи", your_link: "Ваша ссылка", friends: "Друзей", earned: "Заработано", staking: "Стейкинг", in_jar: "В банке", profile: "Профиль", wallet_future: "Кошелек будущего", or: "Или", login: "Войти", create: "Создать", settings: "Настройки", theme: "Тема оформления", theme_light: "Светлая", theme_dark: "Тёмная", language: "Язык", your_profile: "Ваш Профиль", close: "Закрыть", send_title: "Перевод", recipient: "Получатель", amount: "Сумма (Мин 0.1)", cancel: "Отмена", send_action: "Отправить", show_qr: "Покажите этот код отправителю", req_amount: "Предложить сумму", your_addr: "Ваш адрес", deposit_title: "Положить в банку", deposit_action: "Положить", withdraw_title: "Достать из банки", withdraw_action: "Достать", scanning: "Сканирование", access_denied: "Доступ ограничен", password_ph: "Пароль", deposit_success: "Депозит успешен", withdraw_success: "Вывод успешен", addr_copied: "Адрес скопирован", link_copied: "Ссылка скопирована", sent_to: "Отправлено", error_fill: "Заполните поля", error_pass_len: "Пароль < 6 символов", error_self: "Нельзя отправить себе", error_min: "Минимум 0.1 Đ", error_fund: "Недостаточно средств",
                 legal_title: "Юридическая информация",
-                legal_text: "Doolcoin (Đ) — это внутриигровая условная единица. Она не является платёжным средством, электронной валютой или ценной бумагой. Đ не имеет реальной денежной стоимости и не гарантирует возможности обмена на фиатные деньги. Все операции носят исключительно развлекательный характер.",
+                legal_text: "Doolcoin (Đ) — это внутриигровая условная единица. Она не является платёжным средством.",
                 any: "Любая"
             },
             en: {
                 total_balance: "Total Balance", send: "Send", receive: "Receive", history: "Transaction History", loading: "Loading...", invite_friend: "Invite a Friend", ref_desc: "Get", your_link: "Your Link", friends: "Friends", earned: "Earned", staking: "Staking", in_jar: "In Bank", profile: "Profile", wallet_future: "Wallet of the Future", or: "Or", login: "Log In", create: "Create", settings: "Settings", theme: "Theme", theme_light: "Light", theme_dark: "Dark", language: "Language", your_profile: "Your Profile", close: "Close", send_title: "Transfer", recipient: "Recipient", amount: "Amount (Min 0.1)", cancel: "Cancel", send_action: "Send", show_qr: "Show this code to sender", req_amount: "Request Amount", your_addr: "Your Address", deposit_title: "Deposit to Bank", deposit_action: "Deposit", withdraw_title: "Withdraw from Bank", withdraw_action: "Withdraw", scanning: "Scanning", access_denied: "Access Denied", password_ph: "Password", deposit_success: "Deposit successful", withdraw_success: "Withdrawal successful", addr_copied: "Address copied", link_copied: "Link copied", sent_to: "Sent to", error_fill: "Fill all fields", error_pass_len: "Password < 6 chars", error_self: "Cannot send to self", error_min: "Minimum 0.1 Đ", error_fund: "Insufficient funds",
                 legal_title: "Legal Information",
-                legal_text: "Doolcoin (Đ) is an in-game virtual unit. It is not a means of payment, electronic currency, or security. Đ has no real monetary value and does not guarantee exchangeability for fiat money. All operations are exclusively for entertainment purposes.",
+                legal_text: "Doolcoin (Đ) is an in-game virtual unit. It is not a means of payment.",
                 any: "Any"
             },
             es: {
                 total_balance: "Saldo Total", send: "Enviar", receive: "Recibir", history: "Historial", loading: "Cargando...", invite_friend: "Invitar Amigo", ref_desc: "Obtén", your_link: "Tu Enlace", friends: "Amigos", earned: "Ganado", staking: "Staking", in_jar: "En Banco", profile: "Perfil", wallet_future: "Billetera del Futuro", or: "O", login: "Entrar", create: "Crear", settings: "Ajustes", theme: "Tema", theme_light: "Claro", theme_dark: "Oscuro", language: "Idioma", your_profile: "Tu Perfil", close: "Cerrar", send_title: "Transferir", recipient: "Destinatario", amount: "Cantidad (Mín 0.1)", cancel: "Cancelar", send_action: "Enviar", show_qr: "Muestra este código", req_amount: "Solicitar Cantidad", your_addr: "Tu Dirección", deposit_title: "Depositar", deposit_action: "Depositar", withdraw_title: "Retirar", withdraw_action: "Retirar", scanning: "Escaneando", access_denied: "Acceso Denegado", password_ph: "Contraseña", deposit_success: "Depósito exitoso", withdraw_success: "Retiro exitoso", addr_copied: "Dirección copiada", link_copied: "Enlace copiado", sent_to: "Enviado a", error_fill: "Rellena los campos", error_pass_len: "Contraseña < 6 carac.", error_self: "No puedes enviarte a ti", error_min: "Mínimo 0.1 Đ", error_fund: "Fondos insuficientes",
                 legal_title: "Información Legal",
-                legal_text: "Doolcoin (Đ) es una unidad virtual del juego. No es un medio de pago, moneda electrónica o valor. Đ no tiene valor monetario real y no garantiza el intercambio por dinero fiduciario. Todas las operaciones son exclusivamente para entretenimiento.",
+                legal_text: "Doolcoin (Đ) es una unidad virtual del juego. No es un medio de pago.",
                 any: "Cualquier"
-            },
-            uk: {
-                total_balance: "Загальний баланс", send: "Надіслати", receive: "Отримати", history: "Історія операцій", loading: "Завантаження...", invite_friend: "Запроси друга", ref_desc: "Отримай", your_link: "Ваше посилання", friends: "Друзів", earned: "Зароблено", staking: "Стейкінг", in_jar: "У банку", profile: "Профіль", wallet_future: "Гаманець майбутнього", or: "Або", login: "Увійти", create: "Створити", settings: "Налаштування", theme: "Тема оформлення", theme_light: "Світла", theme_dark: "Темна", language: "Мова", your_profile: "Ваш Профіль", close: "Закрити", send_title: "Переказ", recipient: "Отримувач", amount: "Сума (Мін 0.1)", cancel: "Скасувати", send_action: "Надіслати", show_qr: "Покажіть цей код", req_amount: "Запитати суму", your_addr: "Ваша адреса", deposit_title: "Покласти в банку", deposit_action: "Покласти", withdraw_title: "Дістати з банки", withdraw_action: "Дістати", scanning: "Сканування", access_denied: "Доступ обмежено", password_ph: "Пароль", deposit_success: "Депозит успішний", withdraw_success: "Виведення успішне", addr_copied: "Адресу скопійовано", link_copied: "Посилання скопійовано", sent_to: "Надіслано", error_fill: "Заповніть поля", error_pass_len: "Пароль < 6 символів", error_self: "Не можна собі", error_min: "Мін 0.1 Đ", error_fund: "Недостатньо коштів",
-                legal_title: "Юридична інформація",
-                legal_text: "Doolcoin (Đ) — це внутрішньоігрова умовна одиниця. Вона не є платіжним засобом, електронною валютою або цінним папером. Đ не має реальної грошової вартості і не гарантує обміну на фіатні гроші. Всі операції носять виключно розважальний характер.",
-                any: "Будь-яка"
-            },
-            fr: {
-                total_balance: "Solde Total", send: "Envoyer", receive: "Recevoir", history: "Historique", loading: "Chargement...", invite_friend: "Inviter un ami", ref_desc: "Obtenez", your_link: "Votre lien", friends: "Amis", earned: "Gagné", staking: "Staking", in_jar: "En Banque", profile: "Profil", wallet_future: "Portefeuille du futur", or: "Ou", login: "Connexion", create: "Créer", settings: "Paramètres", theme: "Thème", theme_light: "Clair", theme_dark: "Sombre", language: "Langue", your_profile: "Votre Profil", close: "Fermer", send_title: "Transfert", recipient: "Destinataire", amount: "Montant (Min 0.1)", cancel: "Annuler", send_action: "Envoyer", show_qr: "Montrez ce code", req_amount: "Demander montant", your_addr: "Votre adresse", deposit_title: "Dépôt", deposit_action: "Déposer", withdraw_title: "Retrait", withdraw_action: "Retirer", scanning: "Scanner", access_denied: "Accès refusé", password_ph: "Mot de passe", deposit_success: "Dépôt réussi", withdraw_success: "Retrait réussi", addr_copied: "Adresse copiée", link_copied: "Lien copié", sent_to: "Envoyé à", error_fill: "Remplir les champs", error_pass_len: "Mot de passe < 6 car.", error_self: "Impossible d'envoyer à soi-même", error_min: "Min 0.1 Đ", error_fund: "Fonds insuffisants",
-                legal_title: "Information Légale",
-                legal_text: "Doolcoin (Đ) est une unité virtuelle de jeu. Ce n'est pas un moyen de paiement, une monnaie électronique ou un titre. Đ n'a aucune valeur monétaire réelle et ne garantit pas l'échange contre de la monnaie fiduciaire. Toutes les opérations sont exclusivement à des fins de divertissement.",
-                any: "Toute"
             }
+        };
+
+        const SHOP_ITEMS = {
+            statuses: [
+                { id: 'st_1', price: 100, icon: 'https://img.icons8.com/?size=100&id=gyydQdagCNpx&format=png&color=ffffff', name: 'Verified' },
+                { id: 'st_2', price: 50, icon: 'https://img.icons8.com/?size=100&id=Ej0geAye72Ww&format=png&color=ffffff', name: 'Star' },
+                { id: 'st_3', price: 200, icon: 'https://img.icons8.com/?size=100&id=KSeAEidQMwj7&format=png&color=ffffff', name: 'Crown' },
+                { id: 'st_4', price: 500, icon: 'https://img.icons8.com/?size=100&id=lENVboWQwCcF&format=png&color=ffffff', name: 'Diamond' },
+            ],
+            frames: [
+                { id: 'fr_neon', price: 50, class: 'frame-neon', icon: 'https://img.icons8.com/?size=100&id=FAzkSnxW9rRH&format=png&color=ffffff', name: 'Neon' },
+                { id: 'fr_gold', price: 200, class: 'frame-gold', icon: 'https://img.icons8.com/?size=100&id=FAzkSnxW9rRH&format=png&color=FFD700', name: 'Gold' },
+                { id: 'fr_ruby', price: 200, class: 'frame-ruby', icon: 'https://img.icons8.com/?size=100&id=FAzkSnxW9rRH&format=png&color=FF0055', name: 'Ruby' },
+                { id: 'fr_rain', price: 500, class: 'frame-rainbow', icon: 'https://img.icons8.com/?size=100&id=FAzkSnxW9rRH&format=png&color=00FF00', name: 'Rainbow' }
+            ]
         };
 
         let currentLang = localStorage.getItem('dool_lang') || 'ru';
@@ -726,7 +743,7 @@
 
         async function getUserInfo(email) {
             if (userCache[email]) return userCache[email];
-            let info = { avatar: `https://ui-avatars.com/api/?background=random&color=fff&name=${email.charAt(0).toUpperCase()}&size=128`, email: email, isVerified: false };
+            let info = { avatar: `https://ui-avatars.com/api/?background=random&color=fff&name=${email.charAt(0).toUpperCase()}&size=128`, email: email, isVerified: false, isVip: false, activeStatus: null, activeFrame: null };
             try { 
                 const q = query(collection(db, "users"), where("email", "==", email)); 
                 const res = await getDocs(q); 
@@ -734,12 +751,23 @@
                     const d = res.docs[0].data(); 
                     if (d.avatar) info.avatar = d.avatar; 
                     if (d.isVerified) info.isVerified = true;
+                    if (d.isVip) info.isVip = true;
+                    if (d.activeStatus) info.activeStatus = d.activeStatus;
+                    if (d.activeFrame) info.activeFrame = d.activeFrame;
                 } 
             } catch (e) {}
             userCache[email] = info; return info;
         }
 
         window.openModal = (n) => {
+            // Bug fix: Fill invite email
+            if (n === 'invited-info') {
+                const el = document.getElementById('invited-by-email');
+                if (myData && myData.referredBy) el.textContent = myData.referredBy;
+                else if (localStorage.getItem('dool_ref')) el.textContent = localStorage.getItem('dool_ref');
+                else el.textContent = 'Unknown';
+            }
+
             const m = document.getElementById('modal-'+n), c = document.getElementById(`modal-${n}-content`);
             if(!m || !c) return; m.classList.remove('hidden'); void m.offsetWidth; m.classList.remove('opacity-0');
             if(['send', 'receive', 'deposit', 'withdraw', 'settings'].includes(n)) { c.style.transform = ''; setTimeout(() => c.classList.remove('translate-y-full'), 10); } else if(n !== 'scan') c.classList.remove('scale-90');
@@ -782,6 +810,7 @@
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); document.getElementById('tab-'+tab).classList.add('active');
             document.querySelectorAll('.nav-icon').forEach(img => { img.style.filter = ''; if(currentTheme === 'light') img.style.filter = 'invert(0.8)'; img.style.opacity = '0.5'; img.classList.remove('nav-icon-active'); });
             const activeImg = document.getElementById('nav-'+tab).querySelector('img'); activeImg.style.opacity = '1'; activeImg.style.filter = 'brightness(0) saturate(100%) invert(32%) sepia(98%) saturate(2329%) hue-rotate(358deg) brightness(101%) contrast(106%)'; activeImg.classList.add('nav-icon-active');
+            if(tab === 'shop') renderShop();
         };
 
         onAuthStateChanged(auth, async (u) => {
@@ -789,7 +818,12 @@
                 const userRef = doc(db, "users", u.uid); const snap = await getDoc(userRef);
                 if (!snap.exists()) {
                     const email = u.email, emailLower = u.email.toLowerCase(), clientIP = await getClientIP();
-                    const userData = { email: email, lowercaseEmail: emailLower, balance: 10.0, bankBalance: 0, lastBankUpdate: Timestamp.now(), avatar: u.photoURL || '', refCount: 0, refEarned: 0, createdAt: Timestamp.now(), isBanned: false, ip: clientIP, referralStatus: 'none', isVerified: false };
+                    const userData = { 
+                        email: email, lowercaseEmail: emailLower, balance: 10.0, bankBalance: 0, lastBankUpdate: Timestamp.now(), 
+                        avatar: u.photoURL || '', refCount: 0, refEarned: 0, createdAt: Timestamp.now(), isBanned: false, ip: clientIP, 
+                        referralStatus: 'none', isVerified: false, isVip: false, 
+                        inventory: { statuses: [], frames: [] }, activeStatus: null, activeFrame: null
+                    };
                     const refEmail = localStorage.getItem('dool_ref');
                     if (refEmail && refEmail !== emailLower) {
                         try {
@@ -811,57 +845,250 @@
         document.getElementById('btn-register').onclick = async () => { const btn = document.getElementById('btn-register'), email = document.getElementById('auth-email').value, pass = document.getElementById('auth-password').value; if (pass.length < 6) return showT('Ошибка', getTrans('error_pass_len'), '', null, true); btn.disabled = true; try { await createUserWithEmailAndPassword(auth, email, pass); } catch(e) { btn.disabled = false; showT('Ошибка', 'Error', '', null, true); } };
 
         function adjustBalanceSize(amountStr) { const el = document.getElementById('balance-val'), len = amountStr.length; el.classList.remove('text-5xl', 'text-4xl', 'text-3xl', 'text-2xl'); if (len > 12) el.classList.add('text-2xl'); else if (len > 9) el.classList.add('text-3xl'); else if (len > 7) el.classList.add('text-4xl'); else el.classList.add('text-5xl'); }
+        
         function startApp(u) {
             document.getElementById('main-username').textContent = u.email; document.getElementById('profile-email').textContent = u.email; document.getElementById('my-email-addr').textContent = u.email;
             const refLink = `${window.location.href.split('?')[0]}?ref=${u.email}`; document.getElementById('ref-link').value = refLink;
+            
+            // Auto-check VIP expiry
+            checkVipExpiry(u.uid);
+
             onSnapshot(doc(db, "users", u.uid), async (snap) => {
                 const d = snap.data(); if (!d) return;
-                if (d.isBanned) { document.getElementById('view-loading').classList.add('hidden'); document.getElementById('view-main').classList.add('hidden'); document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-banned').classList.remove('hidden'); document.getElementById('view-banned').classList.add('flex'); document.getElementById('ban-text').textContent = d.banReason || "Blocked"; return; } 
-                else { document.getElementById('view-banned').classList.add('hidden'); document.getElementById('view-banned').classList.remove('flex'); }
-                if (lastBal !== null && d.balance > lastBal) handleIncomingTransfer(u.email, d.balance - lastBal);
-                myData = d; lastBal = d.balance; const balStr = d.balance.toFixed(2); const balEl = document.getElementById('balance-val'); balEl.textContent = balStr; adjustBalanceSize(balStr);
-                updateBankVisuals(d);
-                document.getElementById('ref-count').textContent = d.refCount || 0; document.getElementById('ref-earned').textContent = (d.refEarned || 0).toFixed(1);
-                const av = d.avatar || `https://ui-avatars.com/api/?background=random&color=fff&name=${u.email.charAt(0)}`; document.getElementById('main-avatar').src = av; document.getElementById('edit-avatar-img').src = av;
+                myData = d; 
                 
-                // VERIFICATION UI UPDATE
+                if (d.isBanned) { 
+                    document.getElementById('view-loading').classList.add('hidden'); 
+                    document.getElementById('view-main').classList.add('hidden'); 
+                    document.getElementById('view-auth').classList.add('hidden'); 
+                    document.getElementById('view-banned').classList.remove('hidden'); 
+                    document.getElementById('view-banned').classList.add('flex'); 
+                    document.getElementById('ban-text').textContent = d.banReason || "Blocked"; 
+                    return; 
+                } else { 
+                    document.getElementById('view-banned').classList.add('hidden'); 
+                    document.getElementById('view-banned').classList.remove('flex'); 
+                }
+                
+                if (lastBal !== null && d.balance > lastBal) handleIncomingTransfer(u.email, d.balance - lastBal);
+                lastBal = d.balance; 
+                const balStr = d.balance.toFixed(2); 
+                const balEl = document.getElementById('balance-val'); 
+                balEl.textContent = balStr; 
+                adjustBalanceSize(balStr);
+                
+                updateBankVisuals(d);
+                
+                document.getElementById('ref-count').textContent = d.refCount || 0; 
+                document.getElementById('ref-earned').textContent = (d.refEarned || 0).toFixed(1);
+                
+                // VIP Updates
+                document.getElementById('bank-rate-display').textContent = d.isVip ? '+10% в неделю (VIP) 💎' : '+5% в неделю ⌛';
+                document.getElementById('ref-reward-amt').textContent = d.isVip ? '20.00 Đ (VIP)' : '10.00 Đ';
+
+                const av = d.avatar || `https://ui-avatars.com/api/?background=random&color=fff&name=${u.email.charAt(0)}`; 
+                document.getElementById('main-avatar').src = av; 
+                document.getElementById('edit-avatar-img').src = av;
+
+                // Frame Update
+                const frameContainer = document.getElementById('profile-frame-container');
+                frameContainer.className = "p-1 rounded-full relative " + (d.activeFrame && d.activeFrame !== 'none' ? getFrameClass(d.activeFrame) : "gradient-bg");
+
+                // Status Icon Update
+                const statusIcon = document.getElementById('header-status-icon');
+                if (d.activeStatus) {
+                   const sItem = SHOP_ITEMS.statuses.find(x => x.id === d.activeStatus);
+                   if (sItem) { statusIcon.src = sItem.icon; statusIcon.classList.remove('hidden'); }
+                   else if(d.activeStatus === 'vip_status') { statusIcon.src = "https://img.icons8.com/?size=100&id=lYomyAXAzDXK&format=png&color=ffffff"; statusIcon.classList.remove('hidden'); }
+                   else statusIcon.classList.add('hidden');
+                } else {
+                   statusIcon.classList.add('hidden');
+                }
+
+                // Verification UI
                 const vIcon = document.getElementById('header-verified-icon');
                 const vSection = document.getElementById('profile-verification-status');
                 if (d.isVerified) {
                     vIcon.classList.remove('hidden');
-                    vSection.innerHTML = `
-                        <div class="flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 px-4 py-2 rounded-xl">
-                            <img src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" class="w-5 h-5">
-                            <span class="text-xs font-bold text-blue-400 uppercase tracking-wider">Верифицирован</span>
-                        </div>
-                    `;
+                    vSection.innerHTML = `<div class="flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 px-4 py-2 rounded-xl"><img src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" class="w-5 h-5"><span class="text-xs font-bold text-blue-400 uppercase tracking-wider">Верифицирован</span></div>`;
                 } else {
                     vIcon.classList.add('hidden');
-                    vSection.innerHTML = `
-                        <button onclick="requestVerification()" class="flex items-center gap-2 bg-white/5 border border-white/10 hover:bg-white/10 px-4 py-2 rounded-xl transition-colors group cursor-pointer">
-                            <span class="text-xs font-bold text-neutral-400 group-hover:text-white uppercase tracking-wider">Получить галочку</span>
-                            <img src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" class="w-4 h-4 opacity-50 grayscale group-hover:grayscale-0 group-hover:opacity-100 transition-all">
-                        </button>
-                    `;
+                    vSection.innerHTML = `<button onclick="requestVerification()" class="flex items-center gap-2 bg-white/5 border border-white/10 hover:bg-white/10 px-4 py-2 rounded-xl transition-colors group cursor-pointer"><span class="text-xs font-bold text-neutral-400 group-hover:text-white uppercase tracking-wider">Получить галочку</span><img src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" class="w-4 h-4 opacity-50 grayscale group-hover:grayscale-0 group-hover:opacity-100 transition-all"></button>`;
                 }
 
-                document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-loading').classList.add('hidden'); document.getElementById('view-main').classList.replace('hidden', 'flex'); switchTab('wallet'); document.getElementById('btn-login').disabled = false; document.getElementById('btn-register').disabled = false;
+                document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-loading').classList.add('hidden'); document.getElementById('view-main').classList.replace('hidden', 'flex'); 
+                document.getElementById('btn-login').disabled = false; document.getElementById('btn-register').disabled = false;
+                
+                // If user has pending invite modal
+                if (d.referralStatus === 'pending') showRefButton();
             });
+
             const qTx = query(collection(db, "transactions"), where("parties", "array-contains", u.email));
             onSnapshot(qTx, async (snap) => {
                 const list = document.getElementById('tx-history'); if (snap.empty) { list.innerHTML = `<p class="text-center text-neutral-600 text-[10px] uppercase font-bold py-4">...</p>`; return; }
                 const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date); let html = '';
                 for (const tx of docs) {
                     const isSent = tx.from === u.email, partner = isSent ? tx.to : tx.from, dateStr = tx.date ? new Date(tx.date.toMillis()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
-                    html += `<div class="flex items-center justify-between p-4 rounded-[1.5rem] bg-white/[0.03] border border-white/5"><div class="flex items-center gap-3 overflow-hidden"><img id="av-${tx.date.toMillis()}" src="https://ui-avatars.com/api/?background=222&color=666&name=${partner.charAt(0)}" class="w-10 h-10 rounded-full bg-neutral-800 object-cover border border-white/5 shrink-0"><div class="min-w-0"><p class="text-[9px] font-black uppercase ${isSent ? 'text-neutral-500' : 'text-[#FF4D00]'} tracking-widest mb-0.5">${isSent ? 'To:' : 'From:'}</p><div class="flex items-center gap-1"><p class="text-[11px] font-bold text-white truncate max-w-[120px] leading-tight">${partner}</p><img id="ver-${tx.date.toMillis()}" src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" class="w-3 h-3 hidden"></div></div></div><div class="text-right"><p class="text-sm font-black ${isSent ? 'text-white' : 'text-[#FF4D00]'}">${isSent ? '-' : '+'}${tx.amount.toFixed(1)}</p><p class="text-[9px] text-neutral-600 font-bold uppercase">${dateStr}</p></div></div>`;
+                    html += `<div class="flex items-center justify-between p-4 rounded-[1.5rem] bg-white/[0.03] border border-white/5"><div class="flex items-center gap-3 overflow-hidden cursor-pointer active:opacity-60 transition-opacity" onclick="openUserProfile('${partner}')"><div class="relative"><img id="av-${tx.date.toMillis()}" src="https://ui-avatars.com/api/?background=222&color=666&name=${partner.charAt(0)}" class="w-10 h-10 rounded-full bg-neutral-800 object-cover border border-white/5 shrink-0 relative z-10"><div id="frame-tx-${tx.date.toMillis()}" class="absolute -inset-1 rounded-full z-0 hidden"></div></div><div class="min-w-0"><p class="text-[9px] font-black uppercase ${isSent ? 'text-neutral-500' : 'text-[#FF4D00]'} tracking-widest mb-0.5">${isSent ? 'To:' : 'From:'}</p><div class="flex items-center gap-1"><p class="text-[11px] font-bold text-white truncate max-w-[120px] leading-tight">${partner}</p><img id="ver-${tx.date.toMillis()}" src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" class="w-3 h-3 hidden"></div></div></div><div class="text-right"><p class="text-sm font-black ${isSent ? 'text-white' : 'text-[#FF4D00]'}">${isSent ? '-' : '+'}${tx.amount.toFixed(1)}</p><p class="text-[9px] text-neutral-600 font-bold uppercase">${dateStr}</p></div></div>`;
                     if(partner.includes('@')) getUserInfo(partner).then(inf => { 
                         const el = document.getElementById(`av-${tx.date.toMillis()}`); if(el) el.src = inf.avatar; 
                         if (inf.isVerified) { const vel = document.getElementById(`ver-${tx.date.toMillis()}`); if(vel) vel.classList.remove('hidden'); }
+                        // Show frame in history
+                        const fel = document.getElementById(`frame-tx-${tx.date.toMillis()}`);
+                        if (inf.isVip) { fel.classList.remove('hidden'); fel.className = "absolute -inset-[3px] rounded-full z-0 frame-vip"; } // VIP Gold Frame
+                        else if (inf.activeFrame) { fel.classList.remove('hidden'); fel.className = "absolute -inset-[2px] rounded-full z-0 " + getFrameClass(inf.activeFrame); }
                     });
                 }
                 list.innerHTML = html;
             });
         }
+        
+        // SHOP FUNCTIONS
+        window.switchShopCat = (cat) => {
+            document.querySelectorAll('.shop-view').forEach(e => e.classList.add('hidden'));
+            document.getElementById('shop-cat-'+cat).classList.remove('hidden');
+            document.querySelectorAll('.shop-cat-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        };
+
+        window.renderShop = () => {
+            if (!myData) return;
+            const inv = myData.inventory || { statuses: [], frames: [] };
+            
+            // Render Statuses
+            const statusContainer = document.getElementById('shop-cat-statuses');
+            let sHtml = '';
+            SHOP_ITEMS.statuses.forEach(item => {
+                const owned = inv.statuses.includes(item.id);
+                const equipped = myData.activeStatus === item.id;
+                sHtml += `<div class="dool-card p-4 rounded-3xl flex flex-col items-center gap-2 border ${equipped ? 'border-orange-500' : 'border-white/5'}"><img src="${item.icon}" class="w-10 h-10 mb-2"><p class="font-bold text-xs">${item.name}</p>${owned ? `<button onclick="equipItem('status', '${item.id}')" class="w-full py-2 rounded-xl text-[10px] font-black uppercase ${equipped ? 'bg-orange-500 text-black' : 'bg-white/10 text-white'}">${equipped ? 'Выбрано' : 'Выбрать'}</button>` : `<button onclick="buyItem('status', '${item.id}', ${item.price})" class="w-full py-2 bg-white text-black rounded-xl text-[10px] font-black uppercase hover:bg-neutral-200">Купить ${item.price}</button>`}</div>`;
+            });
+            // VIP Status item
+            if (myData.isVip) {
+                const equipped = myData.activeStatus === 'vip_status';
+                sHtml += `<div class="dool-card p-4 rounded-3xl flex flex-col items-center gap-2 border ${equipped ? 'border-orange-500' : 'border-white/5'} relative overflow-hidden"><div class="absolute inset-0 bg-yellow-500/10"></div><img src="https://img.icons8.com/?size=100&id=lYomyAXAzDXK&format=png&color=ffffff" class="w-10 h-10 mb-2 relative z-10"><p class="font-bold text-xs relative z-10">VIP Badge</p><button onclick="equipItem('status', 'vip_status')" class="w-full py-2 rounded-xl text-[10px] font-black uppercase relative z-10 ${equipped ? 'bg-orange-500 text-black' : 'bg-yellow-500 text-black'}">${equipped ? 'Выбрано' : 'VIP Free'}</button></div>`;
+            }
+            statusContainer.innerHTML = sHtml;
+
+            // Render Frames
+            const frameContainer = document.getElementById('shop-cat-frames');
+            let fHtml = '';
+            SHOP_ITEMS.frames.forEach(item => {
+                const owned = inv.frames.includes(item.id);
+                const equipped = myData.activeFrame === item.id;
+                fHtml += `<div class="dool-card p-4 rounded-3xl flex flex-col items-center gap-2 border ${equipped ? 'border-orange-500' : 'border-white/5'}"><div class="w-12 h-12 rounded-full ${item.class} mb-2 bg-neutral-900"></div><p class="font-bold text-xs">${item.name}</p>${owned ? `<button onclick="equipItem('frame', '${item.id}')" class="w-full py-2 rounded-xl text-[10px] font-black uppercase ${equipped ? 'bg-orange-500 text-black' : 'bg-white/10 text-white'}">${equipped ? 'Выбрано' : 'Выбрать'}</button>` : `<button onclick="buyItem('frame', '${item.id}', ${item.price})" class="w-full py-2 bg-white text-black rounded-xl text-[10px] font-black uppercase hover:bg-neutral-200">Купить ${item.price}</button>`}</div>`;
+            });
+            // VIP Frame item
+            if (myData.isVip) {
+                 const equipped = myData.activeFrame === 'vip_frame';
+                 fHtml += `<div class="dool-card p-4 rounded-3xl flex flex-col items-center gap-2 border ${equipped ? 'border-orange-500' : 'border-white/5'} relative overflow-hidden"><div class="absolute inset-0 bg-yellow-500/10"></div><div class="w-12 h-12 rounded-full frame-vip mb-2 bg-neutral-900 relative z-10"></div><p class="font-bold text-xs relative z-10">VIP Gold</p><button onclick="equipItem('frame', 'vip_frame')" class="w-full py-2 rounded-xl text-[10px] font-black uppercase relative z-10 ${equipped ? 'bg-orange-500 text-black' : 'bg-yellow-500 text-black'}">${equipped ? 'Выбрано' : 'VIP Free'}</button></div>`;
+            }
+            frameContainer.innerHTML = fHtml;
+            
+            // VIP Button Update
+            const vipBtn = document.getElementById('btn-buy-vip');
+            if(myData.isVip) {
+                vipBtn.disabled = true;
+                vipBtn.textContent = "VIP Активен";
+                vipBtn.classList.replace('bg-yellow-500', 'bg-green-500');
+            }
+        };
+
+        window.buyItem = async (type, id, price) => {
+            if (price > myData.balance) return showT('Ошибка', getTrans('error_fund'), '', null, true);
+            try {
+                await runTransaction(db, async (t) => {
+                    const ref = doc(db, "users", auth.currentUser.uid);
+                    const d = (await t.get(ref)).data();
+                    if(d.balance < price) throw "Funds";
+                    const inv = d.inventory || { statuses: [], frames: [] };
+                    if (type === 'status') inv.statuses.push(id);
+                    else inv.frames.push(id);
+                    t.update(ref, { balance: d.balance - price, inventory: inv });
+                });
+                showT('Магазин', 'Покупка успешна', `-${price} Đ`);
+                renderShop();
+            } catch (e) { showT('Ошибка', 'Error', '', null, true); }
+        };
+
+        window.equipItem = async (type, id) => {
+             try {
+                const update = {};
+                if (type === 'status') update.activeStatus = id;
+                else update.activeFrame = id;
+                await updateDoc(doc(db, "users", auth.currentUser.uid), update);
+                showT('Магазин', 'Предмет выбран');
+                renderShop();
+            } catch (e) { showT('Ошибка', 'Error', '', null, true); }
+        };
+
+        window.buyVip = async () => {
+            if (myData.balance < 100) return showT('Ошибка', getTrans('error_fund'), '', null, true);
+            try {
+                const expiry = new Date();
+                expiry.setMonth(expiry.getMonth() + 1);
+                await runTransaction(db, async (t) => {
+                    const ref = doc(db, "users", auth.currentUser.uid);
+                    const d = (await t.get(ref)).data();
+                    if(d.balance < 100) throw "Funds";
+                    t.update(ref, { balance: d.balance - 100, isVip: true, vipExpiry: Timestamp.fromDate(expiry) });
+                });
+                showT('VIP', 'Подписка оформлена!', '-100 Đ');
+                renderShop();
+            } catch (e) { showT('Ошибка', 'Error', '', null, true); }
+        };
+
+        async function checkVipExpiry(uid) {
+            try {
+                const ref = doc(db, "users", uid);
+                const d = (await getDoc(ref)).data();
+                if (d.isVip && d.vipExpiry) {
+                    const now = new Date();
+                    if (now > d.vipExpiry.toDate()) {
+                        // Expired
+                        if (d.balance >= 100) {
+                             const newExpiry = new Date(); newExpiry.setMonth(newExpiry.getMonth() + 1);
+                             await updateDoc(ref, { balance: increment(-100), vipExpiry: Timestamp.fromDate(newExpiry) });
+                             showT('VIP', 'Подписка продлена', '-100 Đ');
+                        } else {
+                             await updateDoc(ref, { isVip: false, activeFrame: (d.activeFrame === 'vip_frame' ? 'none' : d.activeFrame), activeStatus: (d.activeStatus === 'vip_status' ? null : d.activeStatus) });
+                             showT('VIP', 'Подписка истекла');
+                        }
+                    }
+                }
+            } catch(e) {}
+        }
+        
+        function getFrameClass(id) {
+            const f = SHOP_ITEMS.frames.find(x => x.id === id);
+            return f ? f.class : 'frame-none';
+        }
+
+        window.openUserProfile = async (email) => {
+            if(email === auth.currentUser.email) return openModal('profile');
+            const u = await getUserInfo(email);
+            document.getElementById('other-profile-avatar').src = u.avatar;
+            document.getElementById('other-profile-email').textContent = u.email;
+            
+            // Frame
+            const frameDiv = document.getElementById('other-profile-frame');
+            if (u.isVip) frameDiv.className = "p-1 rounded-full relative bg-gradient-to-r from-yellow-400 to-orange-500 vip-badge-anim";
+            else if (u.activeFrame) frameDiv.className = "p-1 rounded-full relative " + getFrameClass(u.activeFrame);
+            else frameDiv.className = "p-1 rounded-full relative gradient-bg";
+
+            // VIP Badge
+            const vipBadge = document.getElementById('other-profile-vip-badge');
+            if(u.isVip) vipBadge.classList.remove('hidden'); else vipBadge.classList.add('hidden');
+
+            // Badges Container
+            const badges = document.getElementById('other-profile-badges');
+            let bHtml = '';
+            if(u.isVerified) bHtml += `<div class="flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 px-3 py-1 rounded-lg"><img src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" class="w-4 h-4"><span class="text-[10px] font-bold text-blue-400 uppercase">Verified</span></div>`;
+            if(u.isVip) bHtml += `<div class="flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/20 px-3 py-1 rounded-lg"><img src="https://img.icons8.com/?size=100&id=lYomyAXAzDXK&format=png&color=ffffff" class="w-4 h-4"><span class="text-[10px] font-bold text-yellow-500 uppercase">VIP Member</span></div>`;
+            badges.innerHTML = bHtml;
+
+            openModal('user-profile');
+        };
         
         window.requestVerification = async () => {
              const btn = document.querySelector('#profile-verification-status button');
@@ -879,7 +1106,15 @@
             try { const q = query(collection(db, "transactions"), where("to", "==", myEmail)); const snap = await getDocs(q); if (!snap.empty) { const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date); if (Math.abs(docs[0].amount - amountDiff) < 0.01) { if (docs[0].type === 'referral_bonus') showT('Bonus', getTrans('ref_desc'), `+${amountDiff.toFixed(1)} Đ`); else showT('Transfer', docs[0].from, `+${amountDiff.toFixed(1)} Đ`, docs[0].from); return; } } showT('Банк', getTrans('in_jar'), `+${amountDiff.toFixed(1)} Đ`); } catch(e) {}
         }
         document.getElementById('avatar-input').onchange = (e) => { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = async (ev) => { try { await updateDoc(doc(db, "users", auth.currentUser.uid), { avatar: ev.target.result }); showT('Profile', 'Updated'); } catch { showT('Error', 'Failed', '', null, true); } }; reader.readAsDataURL(file); };
-        function calculateCompoundBalance(stored, lastUpdate) { if (!stored || stored <= 0 || !lastUpdate) return stored || 0; const diffWeeks = (new Date() - lastUpdate.toDate()) / (1000 * 60 * 60 * 24 * 7); return stored * Math.pow(1.05, diffWeeks); }
+        
+        // Updated Banking Logic for VIP
+        function calculateCompoundBalance(stored, lastUpdate) { 
+            if (!stored || stored <= 0 || !lastUpdate) return stored || 0; 
+            const diffWeeks = (new Date() - lastUpdate.toDate()) / (1000 * 60 * 60 * 24 * 7); 
+            const rate = (myData && myData.isVip) ? 1.10 : 1.05; // 10% for VIP, 5% Normal
+            return stored * Math.pow(rate, diffWeeks); 
+        }
+        
         function updateBankVisuals(d) { const bankBal = calculateCompoundBalance(d.bankBalance, d.lastBankUpdate); document.getElementById('bank-balance-val').textContent = bankBal.toFixed(1); const fire = document.querySelector('.bank-layer-fire'); if (fire) fire.style.opacity = bankBal >= 0.1 ? '1' : '0'; }
         setInterval(() => { if(myData) updateBankVisuals(myData); }, 1000);
         document.getElementById('btn-do-deposit').onclick = async () => { const amt = parseFloat(document.getElementById('deposit-amt').value); if (!amt || amt < 0.1) return showT('Ошибка', getTrans('error_min'), '', null, true); if (amt > myData.balance) return showT('Ошибка', getTrans('error_fund'), '', null, true); try { const userRef = doc(db, "users", auth.currentUser.uid); await runTransaction(db, async (t) => { const d = (await t.get(userRef)).data(); const newWalletBal = d.balance - amt; if(newWalletBal < 0) throw "Funds"; t.update(userRef, { balance: newWalletBal, bankBalance: calculateCompoundBalance(d.bankBalance, d.lastBankUpdate) + amt, lastBankUpdate: serverTimestamp() }); }); closeModal('deposit'); document.getElementById('deposit-amt').value = ''; showT('Банк', getTrans('deposit_success')); } catch(e) { showT('Ошибка', e.message, '', null, true); } };
@@ -902,9 +1137,13 @@
                     if (sData.balance < amt) throw new Error("Funds");
                     t.update(senderRef, { balance: increment(-amt) }); t.update(res.docs[0].ref, { balance: increment(amt) });
                     const txRef = doc(collection(db, "transactions")); t.set(txRef, { from: myEmail, to: to, amount: amt, date: Timestamp.now(), parties: [myEmail, to] });
+                    // Referral Logic Updated for VIP
                     if (sData.referralStatus === 'pending' && sData.referredBy && sData.referredByUid && to !== sData.referredBy) {
-                        t.update(doc(db, "users", sData.referredByUid), { balance: increment(10), refCount: increment(1), refEarned: increment(10) }); t.update(senderRef, { referralStatus: 'paid' });
-                        t.set(doc(collection(db, "transactions")), { from: 'System (Ref)', to: sData.referredBy, amount: 10.0, date: Timestamp.now(), parties: [sData.referredBy], type: 'referral_bonus' });
+                        const referrerData = (await t.get(doc(db, "users", sData.referredByUid))).data();
+                        const reward = (referrerData && referrerData.isVip) ? 20.0 : 10.0; // VIP gets double reward
+                        t.update(doc(db, "users", sData.referredByUid), { balance: increment(reward), refCount: increment(1), refEarned: increment(reward) }); 
+                        t.update(senderRef, { referralStatus: 'paid' });
+                        t.set(doc(collection(db, "transactions")), { from: 'System (Ref)', to: sData.referredBy, amount: reward, date: Timestamp.now(), parties: [sData.referredBy], type: 'referral_bonus' });
                     }
                 }); closeModal('send'); showT('Успешно', `${getTrans('sent_to')} ${to}`, `-${amt.toFixed(1)} Đ`);
             } catch (e) { showT('Ошибка', e.message, '', null, true); } finally { btn.disabled = false; btn.textContent = getTrans('send_action'); }
