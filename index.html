@@ -104,7 +104,8 @@
         body.light-theme #modal-settings-content,
         body.light-theme #modal-nft-create-content,
         body.light-theme #modal-public-profile-content,
-        body.light-theme #modal-nft-view-content { background-color: #ffffff; color: #000; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); }
+        body.light-theme #modal-nft-view-content,
+        body.light-theme #modal-confirm-content { background-color: #ffffff; color: #000; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); }
         
         body.light-theme #toast { background: rgba(255,255,255,0.98); border-color: rgba(0,0,0,0.08); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1); }
         body.light-theme #toast-msg { color: #111; }
@@ -415,7 +416,7 @@
                         <div class="about-inner">
                             <div class="flex items-center justify-between mb-4">
                                 <div class="flex items-center gap-2"><div class="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center"><span class="font-black text-black">Đ</span></div><span class="font-black text-sm tracking-widest text-white">DOOLCOIN</span></div>
-                                <span class="text-[9px] font-mono text-neutral-500">v1.1.0 (NFT)</span>
+                                <span class="text-[9px] font-mono text-neutral-500">v1.2.0 (Verified)</span>
                             </div>
                             <h3 class="text-xs font-bold text-white mb-2" data-lang="legal_title">Юридическая информация</h3>
                             <p class="text-[10px] text-neutral-400 font-medium leading-relaxed mb-4 text-justify" data-lang="legal_text">Doolcoin (Đ) — это внутриигровая условная единица. Не является платёжным средством.</p>
@@ -427,7 +428,26 @@
             </div>
         </div>
 
-        <!-- PUBLIC PROFILE MODAL (NEW) -->
+        <!-- CONFIRM MODAL (NEW) -->
+        <div id="modal-confirm" class="hidden absolute inset-0 z-[130] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
+            <div class="bg-[#111] border-t border-white/10 rounded-t-[2.5rem] p-8 pb-10 transform translate-y-full transition-transform duration-300" id="modal-confirm-content">
+                 <h2 id="confirm-title" class="text-xl font-black mb-2 text-white">Подтвердите</h2>
+                 <p id="confirm-msg" class="text-xs text-neutral-400 font-bold mb-6">Вы уверены?</p>
+                 
+                 <!-- Input for listing -->
+                 <div id="confirm-input-container" class="hidden mb-6 bg-white/5 rounded-2xl p-4 border border-white/5">
+                    <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Цена (Đ)</p>
+                    <input type="number" id="confirm-input" class="w-full bg-transparent outline-none font-black text-2xl text-white" placeholder="0.0">
+                 </div>
+
+                 <div class="flex gap-3">
+                    <button onclick="closeConfirm()" class="flex-1 h-14 bg-white/5 text-neutral-400 rounded-2xl font-bold text-xs uppercase tracking-wider cursor-pointer">Отмена</button>
+                    <button id="btn-confirm-yes" class="flex-[2] h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer">Да</button>
+                 </div>
+            </div>
+        </div>
+
+        <!-- PUBLIC PROFILE MODAL -->
         <div id="modal-public-profile" onclick="if(event.target===this) closeModal('public-profile')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
              <div class="bg-[#0f0f0f] border-t border-white/10 rounded-t-[2.5rem] p-0 transform translate-y-full transition-transform duration-300 h-[85vh] flex flex-col" id="modal-public-profile-content">
                 <div class="swipe-zone shrink-0"><div class="swipe-handle"></div></div>
@@ -620,7 +640,7 @@
             handle.addEventListener('touchmove', (e) => { if(!isDragging) return; currentY = e.touches[0].clientY; const diff = currentY - startY; if(diff > 0) content.style.transform = `translateY(${diff}px)`; }, {passive: true});
             handle.addEventListener('touchend', (e) => { isDragging = false; const diff = currentY - startY; content.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'; if(diff > 120) closeModal(modalName); else content.style.transform = ''; });
         }
-        ['send', 'receive', 'deposit', 'withdraw', 'settings', 'nft-create', 'public-profile'].forEach(initSwipeClose);
+        ['send', 'receive', 'deposit', 'withdraw', 'settings', 'nft-create', 'public-profile', 'confirm'].forEach(initSwipeClose);
 
         // --- USER INFO & CACHE ---
         async function getUserInfo(email) {
@@ -638,17 +658,46 @@
         window.openModal = (n) => {
             const m = document.getElementById('modal-'+n), c = document.getElementById(`modal-${n}-content`);
             if(!m || !c) return; m.classList.remove('hidden'); void m.offsetWidth; m.classList.remove('opacity-0');
-            if(['send', 'receive', 'deposit', 'withdraw', 'settings', 'nft-create', 'public-profile'].includes(n)) { c.style.transform = ''; setTimeout(() => c.classList.remove('translate-y-full'), 10); } else if(n !== 'scan') c.classList.remove('scale-90');
+            if(['send', 'receive', 'deposit', 'withdraw', 'settings', 'nft-create', 'public-profile', 'confirm'].includes(n)) { c.style.transform = ''; setTimeout(() => c.classList.remove('translate-y-full'), 10); } else if(n !== 'scan') c.classList.remove('scale-90');
             if(n === 'receive') updateQR(); if(n === 'scan') startScannerV2();
         };
 
         window.closeModal = (n) => {
             const m = document.getElementById('modal-'+n), c = document.getElementById(`modal-${n}-content`);
             if(!m || !c) return; m.classList.add('opacity-0');
-            if(['send', 'receive', 'deposit', 'withdraw', 'settings', 'nft-create', 'public-profile'].includes(n)) c.classList.add('translate-y-full'); else if(n !== 'scan') c.classList.add('scale-90');
+            if(['send', 'receive', 'deposit', 'withdraw', 'settings', 'nft-create', 'public-profile', 'confirm'].includes(n)) c.classList.add('translate-y-full'); else if(n !== 'scan') c.classList.add('scale-90');
             if(n === 'scan') stopScannerV2(); if(n === 'send') clearSendForm(); setTimeout(() => m.classList.add('hidden'), 300);
         };
         
+        let confirmCallback = null;
+        window.showConfirm = (title, msg, type, callback) => {
+            document.getElementById('confirm-title').textContent = title;
+            document.getElementById('confirm-msg').textContent = msg;
+            const inputContainer = document.getElementById('confirm-input-container');
+            const input = document.getElementById('confirm-input');
+            
+            if (type === 'input') {
+                inputContainer.classList.remove('hidden');
+                input.value = '';
+                setTimeout(() => input.focus(), 300);
+            } else {
+                inputContainer.classList.add('hidden');
+            }
+            
+            confirmCallback = callback;
+            openModal('confirm');
+        };
+        
+        window.closeConfirm = () => { closeModal('confirm'); confirmCallback = null; };
+        
+        document.getElementById('btn-confirm-yes').onclick = () => {
+             if (confirmCallback) {
+                 const input = document.getElementById('confirm-input');
+                 confirmCallback(input.value);
+             }
+             closeConfirm();
+        };
+
         function clearSendForm() { setTimeout(() => { document.getElementById('send-amt').value = ''; document.getElementById('send-email').value = ''; document.getElementById('send-amt').readOnly = false; document.getElementById('send-email').readOnly = false; document.getElementById('proposal-notice').classList.add('hidden'); document.getElementById('btn-do-send').textContent = "Отправить"; }, 300); }
         let toastTimeout;
         window.showT = async (title, msg, amountStr = '', senderEmail = null, isError = false) => {
@@ -681,32 +730,25 @@
 
         // --- NFT SYSTEM LOGIC ---
         
-        // 1. Image Hashing (Perceptual Hash Simplified)
         async function computeImageHash(imgElement) {
             const canvas = document.getElementById('hash-canvas');
             const ctx = canvas.getContext('2d');
             ctx.drawImage(imgElement, 0, 0, 16, 16);
             const imageData = ctx.getImageData(0, 0, 16, 16).data;
             let total = 0;
-            for(let i=0; i<imageData.length; i+=4) total += imageData[i]; // Grayscale simplified (using R channel)
+            for(let i=0; i<imageData.length; i+=4) total += imageData[i];
             const avg = total / (16*16);
             let hash = '';
-            for(let i=0; i<imageData.length; i+=4) {
-                hash += (imageData[i] >= avg) ? '1' : '0';
-            }
+            for(let i=0; i<imageData.length; i+=4) { hash += (imageData[i] >= avg) ? '1' : '0'; }
             return hash;
         }
 
-        // 2. Similarity Check
         function checkSimilarity(hash1, hash2) {
             let matches = 0;
-            for(let i=0; i<hash1.length; i++) {
-                if(hash1[i] === hash2[i]) matches++;
-            }
+            for(let i=0; i<hash1.length; i++) { if(hash1[i] === hash2[i]) matches++; }
             return (matches / hash1.length);
         }
 
-        // 3. Create NFT
         window.previewNftImage = (input) => {
             const file = input.files[0];
             if(file) {
@@ -731,15 +773,9 @@
             btn.disabled = true; btn.textContent = 'Проверка...';
 
             try {
-                // Generate Hash
                 const myHash = await computeImageHash(img);
-                
-                // Anti-Plagiarism Check
-                // Note: In a real production app, this should be done server-side or with optimized querying.
-                // Here we fetch existing NFT hashes. Limiting to 100 for prototype performance.
                 const q = query(collection(db, "nfts")); 
                 const querySnapshot = await getDocs(q);
-                
                 let isPlagiarized = false;
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
@@ -755,12 +791,11 @@
                     return;
                 }
 
-                // Upload
                 btn.textContent = 'Минтинг...';
                 await setDoc(doc(collection(db, "nfts")), {
                     owner: auth.currentUser.email,
                     name: name,
-                    image: img.src, // Base64
+                    image: img.src, 
                     hash: myHash,
                     price: 0,
                     isListed: false,
@@ -782,7 +817,6 @@
             }
         };
 
-        // 4. NFT Tabs Logic
         window.switchNftSubTab = (tab) => {
             document.getElementById('nft-sub-market').classList.remove('active');
             document.getElementById('nft-sub-inventory').classList.remove('active');
@@ -805,10 +839,16 @@
             container.innerHTML = '';
             
             if(snap.empty) { container.innerHTML = '<p class="col-span-2 text-center text-neutral-600 text-[10px] font-bold uppercase mt-10">Магазин пуст</p>'; return; }
-
-            snap.forEach(doc => {
-                const d = doc.data();
-                if(d.owner === auth.currentUser.email) return; // Don't show own items in market
+            
+            // Create array of promises to fetch users
+            const docs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            
+            for(const d of docs) {
+                if(d.owner === auth.currentUser.email) continue;
+                
+                const userInfo = await getUserInfo(d.owner);
+                const verifiedHtml = userInfo.isVerified ? `<img src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" class="w-3 h-3" title="Verified">` : '';
+                
                 const el = document.createElement('div'); el.className = 'nft-card';
                 el.innerHTML = `
                     <img src="${d.image}" class="nft-image">
@@ -817,12 +857,15 @@
                             <p class="nft-title">${d.name}</p>
                             <p class="nft-price">${d.price} Đ</p>
                         </div>
-                        <p class="text-[9px] text-neutral-500 truncate mb-2">By: ${d.owner}</p>
-                        <button onclick="buyNFT('${doc.id}', ${d.price}, '${d.owner}')" class="nft-action-btn nft-btn-primary">Купить</button>
+                        <div class="flex items-center gap-1 mb-2">
+                            <p class="text-[9px] text-neutral-500 truncate">By: ${d.owner}</p>
+                            ${verifiedHtml}
+                        </div>
+                        <button onclick="buyNFT('${d.id}', ${d.price}, '${d.owner}')" class="nft-action-btn nft-btn-primary">Купить</button>
                     </div>
                 `;
                 container.appendChild(el);
-            });
+            }
         }
 
         async function loadInventory() {
@@ -839,7 +882,6 @@
                 const d = doc.data();
                 const el = document.createElement('div'); el.className = 'nft-card';
                 const btnAction = d.isListed ? `onclick="unlistNFT('${doc.id}')" class="nft-action-btn nft-btn-secondary">Снять (${d.price} Đ)` : `onclick="listNFT('${doc.id}')" class="nft-action-btn nft-btn-primary">Продать`;
-                const btnText = d.isListed ? 'Снять' : 'Продать';
                 
                 el.innerHTML = `
                     <img src="${d.image}" class="nft-image">
@@ -852,60 +894,69 @@
             });
         }
 
-        window.listNFT = async (id) => {
-            const price = prompt("Цена продажи (Đ):");
-            if(!price || isNaN(price) || price <= 0) return;
-            await updateDoc(doc(db, "nfts", id), { isListed: true, price: parseFloat(price) });
-            loadInventory();
+        window.listNFT = (id) => {
+            showConfirm("Продать NFT", "Укажите цену для продажи", "input", async (val) => {
+                const price = parseFloat(val);
+                if (!price || price <= 0) return showT('Ошибка', 'Некорректная цена', '', null, true);
+                
+                try {
+                    await updateDoc(doc(db, "nfts", id), { isListed: true, price: price });
+                    showT('Успешно', 'NFT выставлен на продажу');
+                    loadInventory();
+                } catch(e) {
+                    showT('Ошибка', 'Сбой', '', null, true);
+                }
+            });
         };
 
-        window.unlistNFT = async (id) => {
-            if(!confirm("Снять с продажи?")) return;
-            await updateDoc(doc(db, "nfts", id), { isListed: false });
-            loadInventory();
+        window.unlistNFT = (id) => {
+            showConfirm("Снять с продажи?", "NFT вернется в инвентарь", "confirm", async () => {
+                try {
+                    await updateDoc(doc(db, "nfts", id), { isListed: false });
+                    showT('Успешно', 'NFT снят с продажи');
+                    loadInventory();
+                } catch(e) {
+                    showT('Ошибка', 'Сбой', '', null, true);
+                }
+            });
         };
 
-        window.buyNFT = async (nftId, price, ownerEmail) => {
-            if(myData.balance < price) return showT('Ошибка', 'Недостаточно средств', '', null, true);
-            if(!confirm(`Купить за ${price} Đ?`)) return;
+        window.buyNFT = (nftId, price, ownerEmail) => {
+             if(myData.balance < price) return showT('Ошибка', 'Недостаточно средств', '', null, true);
+             
+             showConfirm("Купить NFT?", `Цена: ${price} Đ`, "confirm", async () => {
+                try {
+                    await runTransaction(db, async (t) => {
+                        const buyerRef = doc(db, "users", auth.currentUser.uid);
+                        const q = query(collection(db, "users"), where("email", "==", ownerEmail));
+                        const ownerSnap = await getDocs(q);
+                        if(ownerSnap.empty) throw "Owner not found";
+                        const ownerRef = ownerSnap.docs[0].ref;
 
-            try {
-                await runTransaction(db, async (t) => {
-                    const buyerRef = doc(db, "users", auth.currentUser.uid);
-                    // Need to find owner UID logic usually, but here we might trust email lookup or better, store ownerUID in NFT. 
-                    // For prototype simplification, we query owner by email.
-                    const q = query(collection(db, "users"), where("email", "==", ownerEmail));
-                    const ownerSnap = await getDocs(q);
-                    if(ownerSnap.empty) throw "Owner not found";
-                    const ownerRef = ownerSnap.docs[0].ref;
+                        const nftRef = doc(db, "nfts", nftId);
+                        const nftDoc = await t.get(nftRef);
+                        if(!nftDoc.exists() || !nftDoc.data().isListed) throw "Item no longer available";
 
-                    const nftRef = doc(db, "nfts", nftId);
-                    const nftDoc = await t.get(nftRef);
-                    if(!nftDoc.exists() || !nftDoc.data().isListed) throw "Item no longer available";
+                        const buyerData = (await t.get(buyerRef)).data();
+                        if(buyerData.balance < price) throw "Funds";
 
-                    const buyerData = (await t.get(buyerRef)).data();
-                    if(buyerData.balance < price) throw "Funds";
-
-                    t.update(buyerRef, { balance: increment(-price) });
-                    t.update(ownerRef, { balance: increment(price) });
-                    t.update(nftRef, { owner: auth.currentUser.email, isListed: false });
-                    
-                    // Add transaction record
-                    const txRef = doc(collection(db, "transactions"));
-                    t.set(txRef, { from: auth.currentUser.email, to: ownerEmail, amount: price, date: Timestamp.now(), parties: [auth.currentUser.email, ownerEmail], type: 'nft_buy' });
-                });
-                showT('Успешно', 'NFT куплен!');
-                loadMarket();
-            } catch(e) {
-                showT('Ошибка', e.message || "Сбой транзакции", '', null, true);
-            }
+                        t.update(buyerRef, { balance: increment(-price) });
+                        t.update(ownerRef, { balance: increment(price) });
+                        t.update(nftRef, { owner: auth.currentUser.email, isListed: false });
+                        
+                        const txRef = doc(collection(db, "transactions"));
+                        t.set(txRef, { from: auth.currentUser.email, to: ownerEmail, amount: price, date: Timestamp.now(), parties: [auth.currentUser.email, ownerEmail], type: 'nft_buy' });
+                    });
+                    showT('Успешно', 'NFT куплен!');
+                    loadMarket();
+                } catch(e) {
+                    showT('Ошибка', e.message || "Сбой транзакции", '', null, true);
+                }
+             });
         };
 
-        // 5. Public Profile Logic
         window.openPublicProfile = async (email) => {
             if(email === auth.currentUser.email) return openModal('profile');
-            
-            // UI Reset
             document.getElementById('pub-profile-avatar').src = '';
             document.getElementById('pub-profile-email').textContent = 'Loading...';
             document.getElementById('pub-profile-nfts').innerHTML = '';
@@ -918,7 +969,6 @@
             if(info.isVerified) document.getElementById('pub-profile-verified').classList.remove('hidden');
             else document.getElementById('pub-profile-verified').classList.add('hidden');
 
-            // Check Privacy & Load NFTs
             const qUser = query(collection(db, "users"), where("email", "==", email));
             const uSnap = await getDocs(qUser);
             if(!uSnap.empty) {
@@ -930,7 +980,6 @@
                 }
             }
 
-            // Load Public NFTs
             const qNft = query(collection(db, "nfts"), where("owner", "==", email));
             const nftSnap = await getDocs(qNft);
             
@@ -948,7 +997,6 @@
             }
         };
 
-        // 6. Settings Toggle
         window.toggleNftPrivacy = async (checked) => {
              await updateDoc(doc(db, "users", auth.currentUser.uid), { "settings.showNfts": checked });
         };
