@@ -5,7 +5,7 @@
     <link rel="icon" href="https://raw.githubusercontent.com/ShalfeyArt/admin/refs/heads/main/icon2.png" type="image/png" media="(prefers-color-scheme: dark)">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Doolcoin Wallet</title>
+    <title>Doolcoin Wallet + NFT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -13,7 +13,7 @@
     <style>
         /* BASE & RESET */
         * { -webkit-user-select: none; -moz-user-select: none; user-select: none; -webkit-touch-callout: none; box-sizing: border-box; }
-        input { -webkit-user-select: text !important; -moz-user-select: text !important; user-select: text !important; }
+        input, textarea { -webkit-user-select: text !important; -moz-user-select: text !important; user-select: text !important; }
         img { -webkit-user-drag: none; user-drag: none; pointer-events: none; }
         body { background-color: #050505; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; height: 100dvh; display: flex; justify-content: center; align-items: center; overflow: hidden; transition: background-color 0.4s ease, color 0.4s ease; }
         
@@ -63,20 +63,33 @@
         .swipe-zone { width: 100%; height: 32px; display: flex; align-items: center; justify-content: center; cursor: grab; touch-action: none; }
         .swipe-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 10px; }
 
+        /* NFT STYLES */
+        .nft-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .nft-card { background: #0f0f0f; border-radius: 20px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); position: relative; }
+        .nft-image { width: 100%; aspect-ratio: 1/1; object-fit: cover; background: #1a1a1a; }
+        .nft-info { padding: 12px; }
+        .nft-title { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #fff; truncate; }
+        .nft-price { font-size: 13px; font-weight: 900; color: #FF4D00; }
+        .nft-action-btn { width: 100%; padding: 8px; border-radius: 10px; font-size: 10px; font-weight: 800; text-transform: uppercase; margin-top: 8px; cursor: pointer; transition: all 0.2s; }
+        .nft-btn-primary { background: #fff; color: #000; }
+        .nft-btn-primary:hover { background: #e5e5e5; }
+        .nft-btn-secondary { background: rgba(255,255,255,0.05); color: #fff; }
+        .nft-btn-secondary:hover { background: rgba(255,255,255,0.1); }
+        
+        .sub-tab-btn { opacity: 0.5; transition: all 0.3s; filter: grayscale(1); }
+        .sub-tab-btn.active { opacity: 1; transform: scale(1.05); filter: grayscale(0); }
+
         /* --- LIGHT THEME FIXES --- */
         body.light-theme { background-color: #f0f2f5; color: #1a1a1a; }
         body.light-theme #app { background-color: #ffffff; border-color: rgba(0,0,0,0.05); box-shadow: 0 20px 60px rgba(0,0,0,0.08); }
         
-        /* Override all white text in light mode */
         body.light-theme .text-white { color: #111827 !important; }
         body.light-theme .text-neutral-500 { color: #6b7280; }
         body.light-theme .text-neutral-400 { color: #4b5563; }
         
-        /* Cards & Panels */
-        body.light-theme .dool-card { background: #f9fafb; border-color: rgba(0,0,0,0.06); }
+        body.light-theme .dool-card, body.light-theme .nft-card { background: #f9fafb; border-color: rgba(0,0,0,0.06); }
         body.light-theme .glass-panel { background: #f3f4f6; border-color: rgba(0,0,0,0.08); color: #000; }
         
-        /* Inputs & Form Elements */
         body.light-theme input { color: #111 !important; }
         body.light-theme input::placeholder { color: #9ca3af !important; }
         body.light-theme .bg-white\/5 { background-color: rgba(0,0,0,0.04); }
@@ -84,43 +97,29 @@
         body.light-theme .border-white\/10 { border-color: rgba(0,0,0,0.1); }
         body.light-theme .border-white\/5 { border-color: rgba(0,0,0,0.06); }
         
-        /* Modal Content Backgrounds */
         body.light-theme #modal-send-content, 
         body.light-theme #modal-receive-content,
         body.light-theme #modal-deposit-content,
         body.light-theme #modal-withdraw-content,
-        body.light-theme #modal-settings-content { background-color: #ffffff; color: #000; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); }
+        body.light-theme #modal-settings-content,
+        body.light-theme #modal-nft-create-content,
+        body.light-theme #modal-public-profile-content,
+        body.light-theme #modal-nft-view-content { background-color: #ffffff; color: #000; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); }
         
-        /* Toast Light */
         body.light-theme #toast { background: rgba(255,255,255,0.98); border-color: rgba(0,0,0,0.08); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1); }
         body.light-theme #toast-msg { color: #111; }
         
-        /* Icons Inversion for Visibility */
         body.light-theme .settings-icon, 
         body.light-theme .logout-icon,
         body.light-theme .nav-icon { filter: invert(1) brightness(0.2); }
-        /* Keep Active Nav Icon Orange */
         body.light-theme .nav-icon-active { filter: brightness(0) saturate(100%) invert(32%) sepia(98%) saturate(2329%) hue-rotate(358deg) brightness(101%) contrast(106%) !important; opacity: 1 !important; }
         
         body.light-theme .swipe-handle { background: #e5e7eb; }
         body.light-theme nav { background: rgba(255,255,255,0.9); border-color: rgba(0,0,0,0.05); }
-
-        /* QR Card in Light Mode */
         body.light-theme .qr-card-premium { background: linear-gradient(180deg, #f3f4f6 0%, #ffffff 100%); border-color: rgba(0,0,0,0.1); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1); }
-        
-        /* ABOUT CARD (PREMIUM) */
-        .about-card {
-            position: relative;
-            background: linear-gradient(160deg, #111, #000);
-            border-radius: 24px;
-            padding: 2px; /* For border gradient */
-            overflow: hidden;
-        }
-        .about-card::before {
-            content: ""; position: absolute; inset: 0;
-            background: linear-gradient(45deg, rgba(255, 77, 0, 0.5), transparent, rgba(255, 77, 0, 0.2));
-            border-radius: 24px; -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
-        }
+
+        .about-card { position: relative; background: linear-gradient(160deg, #111, #000); border-radius: 24px; padding: 2px; overflow: hidden; }
+        .about-card::before { content: ""; position: absolute; inset: 0; background: linear-gradient(45deg, rgba(255, 77, 0, 0.5), transparent, rgba(255, 77, 0, 0.2)); border-radius: 24px; -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
         .about-inner { background: #0a0a0a; border-radius: 22px; padding: 20px; position: relative; height: 100%; }
         body.light-theme .about-inner { background: #fff; }
         
@@ -128,6 +127,13 @@
         .theme-btn.active { border: 1px solid #FF4D00; opacity: 1; transform: scale(1); }
         .theme-btn { opacity: 0.6; transform: scale(0.96); transition: all 0.2s; }
 
+        /* TOGGLE SWITCH */
+        .toggle-checkbox { position: absolute; opacity: 0; cursor: pointer; height: 0; width: 0; }
+        .toggle-slot { position: relative; height: 24px; width: 44px; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; background-color: rgba(255,255,255,0.05); transition: background-color .3s; }
+        .toggle-checkbox:checked ~ .toggle-slot { background-color: #FF4D00; border-color: #FF4D00; }
+        .toggle-button { transform: translate(2px, 2px); height: 18px; width: 18px; border-radius: 50%; background-color: #fff; transition: transform .3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .toggle-checkbox:checked ~ .toggle-slot .toggle-button { transform: translate(22px, 2px); }
+        body.light-theme .toggle-slot { background-color: rgba(0,0,0,0.1); border-color: rgba(0,0,0,0.1); }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -175,33 +181,22 @@
         <!-- AUTH -->
         <div id="view-auth" class="hidden flex-col h-full p-6 justify-center relative">
             <div class="absolute top-0 left-0 w-full h-1/2 gradient-bg opacity-[0.03] blur-3xl pointer-events-none"></div>
-            
-            <button id="auth-ref-btn" onclick="openModal('invited-info')" class="hidden absolute top-6 left-6 z-30 group cursor-pointer">
-                <div class="w-12 h-12 glass-panel rounded-full flex items-center justify-center text-2xl relative border border-white/10 group-hover:bg-white/10 transition-colors">
-                    🎁
-                    <div class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
-                </div>
-            </button>
-
             <div class="text-center mb-10 relative z-10">
                 <span class="text-8xl font-black gradient-text inline-block mb-4 transform hover:scale-105 transition-transform duration-500">Đ</span>
                 <h1 class="text-4xl font-extrabold tracking-tight text-white">Doolcoin</h1>
                 <p class="text-neutral-500 mt-2 text-sm font-medium" data-lang="wallet_future">Кошелек будущего</p>
             </div>
-            
             <div class="space-y-3 relative z-10">
                 <button id="btn-google" class="w-full h-14 bg-white text-black rounded-2xl font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-3 transition-all active:scale-95 cursor-pointer relative overflow-hidden group">
                     <div class="absolute inset-0 bg-neutral-200 opacity-0 group-hover:opacity-10 transition-opacity"></div>
                     <svg width="24" height="24" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.84.81-.81z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
                     <span>Google</span>
                 </button>
-
                 <div class="flex items-center gap-4 py-2">
                     <div class="h-[1px] bg-white/10 flex-1"></div>
                     <span class="text-[10px] text-neutral-600 font-bold uppercase tracking-widest" data-lang="or">Или</span>
                     <div class="h-[1px] bg-white/10 flex-1"></div>
                 </div>
-
                 <div class="glass-panel rounded-3xl p-1.5 space-y-1.5">
                     <input type="email" id="auth-email" placeholder="Email" class="w-full bg-transparent text-white px-5 py-3.5 outline-none placeholder:text-neutral-600 font-bold">
                     <div class="h-[1px] bg-white/5 mx-5"></div>
@@ -231,11 +226,9 @@
                 </div>
                 
                 <div class="flex items-center gap-2">
-                    <!-- SETTINGS -->
                     <button onclick="openModal('settings')" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer">
                         <img src="https://img.icons8.com/?size=100&id=xyFoc6U1Hu3c&format=png&color=ffffff" class="w-5 h-5 opacity-80 settings-icon" alt="Settings">
                     </button>
-                    <!-- LOGOUT -->
                     <button id="btn-logout" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer">
                         <img src="https://img.icons8.com/?size=100&id=5HW1YsFkzHio&format=png&color=ffffff" class="w-5 h-5 opacity-80 logout-icon" alt="Logout">
                     </button>
@@ -248,7 +241,6 @@
                     <div class="dool-card rounded-[2.5rem] p-6 sm:p-8 relative overflow-hidden group">
                         <div class="absolute inset-0 gradient-bg opacity-[0.03] group-hover:opacity-[0.05] transition-opacity duration-500"></div>
                         <div class="absolute -right-12 -top-12 w-48 h-48 bg-[#FF4D00] rounded-full blur-[80px] opacity-20"></div>
-                        
                         <div class="relative z-10 flex flex-col items-center justify-center py-6">
                             <span class="text-[10px] font-bold text-neutral-500 uppercase tracking-[0.2em] mb-2" data-lang="total_balance">Общий баланс</span>
                             <div class="w-full flex items-baseline justify-center gap-1 mb-2 px-2">
@@ -256,20 +248,12 @@
                                 <span class="text-2xl font-black gradient-text leading-none mb-1 self-end pb-1">Đ</span>
                             </div>
                         </div>
-
                         <div class="flex gap-3 mt-4 relative z-10">
-                            <button onclick="openModal('send')" class="flex-1 h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 active:scale-95 transition-all shadow-lg shadow-white/5 cursor-pointer flex flex-col items-center justify-center">
-                                <span data-lang="send">Отправить</span>
-                            </button>
-                            <button onclick="openModal('scan')" class="w-14 h-14 glass-panel text-white rounded-2xl flex items-center justify-center hover:bg-white/10 active:scale-95 transition-all cursor-pointer border border-white/10 hover:border-orange-500/50">
-                                <img src="https://img.icons8.com/?size=100&id=XdgEzmYg0J8k&format=png&color=ffffff" class="w-6 h-6 settings-icon" alt="Scan">
-                            </button>
-                            <button onclick="openModal('receive')" class="flex-1 h-14 glass-panel text-white border border-white/10 rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-white/10 active:scale-95 transition-all cursor-pointer flex flex-col items-center justify-center">
-                                <span data-lang="receive">Получить</span>
-                            </button>
+                            <button onclick="openModal('send')" class="flex-1 h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 active:scale-95 transition-all shadow-lg shadow-white/5 cursor-pointer flex flex-col items-center justify-center"><span data-lang="send">Отправить</span></button>
+                            <button onclick="openModal('scan')" class="w-14 h-14 glass-panel text-white rounded-2xl flex items-center justify-center hover:bg-white/10 active:scale-95 transition-all cursor-pointer border border-white/10 hover:border-orange-500/50"><img src="https://img.icons8.com/?size=100&id=XdgEzmYg0J8k&format=png&color=ffffff" class="w-6 h-6 settings-icon" alt="Scan"></button>
+                            <button onclick="openModal('receive')" class="flex-1 h-14 glass-panel text-white border border-white/10 rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-white/10 active:scale-95 transition-all cursor-pointer flex flex-col items-center justify-center"><span data-lang="receive">Получить</span></button>
                         </div>
                     </div>
-
                     <div class="space-y-4">
                         <div class="flex items-center justify-between px-2">
                             <h3 class="text-[11px] font-black text-neutral-500 uppercase tracking-widest" data-lang="history">История операций</h3>
@@ -283,64 +267,17 @@
                     </div>
                 </div>
 
-                <!-- REFERRALS -->
-                <div id="tab-referrals" class="tab-content space-y-6">
-                    <div class="dool-card rounded-[2.5rem] p-6 sm:p-8 relative overflow-hidden">
-                        <div class="absolute top-0 right-0 w-32 h-32 gradient-bg blur-[60px] opacity-20"></div>
-                        <h3 class="text-2xl font-black mb-2 relative z-10 text-white" data-lang="invite_friend">Пригласи друга</h3>
-                        <p class="text-neutral-500 text-xs mb-8 leading-relaxed max-w-[80%] relative z-10">
-                            <span data-lang="ref_desc">Получи</span> <span class="text-white font-bold">10.00 Đ</span>
-                        </p>
-                        
-                        <div class="bg-black/40 border border-white/5 p-4 rounded-2xl space-y-3 relative z-10 backdrop-blur-sm">
-                            <div class="flex items-center justify-between gap-4">
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-[9px] font-black text-neutral-600 uppercase tracking-widest mb-1" data-lang="your_link">Ваша ссылка</p>
-                                    <input readonly id="ref-link" class="w-full text-[10px] font-mono text-neutral-400 bg-transparent outline-none truncate" value="...">
-                                </div>
-                                <div class="flex gap-2">
-                                    <button onclick="shareRef()" class="w-10 h-10 flex items-center justify-center bg-white/10 text-white rounded-xl hover:bg-white/20 transition-transform cursor-pointer">
-                                        <img src="https://img.icons8.com/?size=100&id=PuZtTk7UXaiT&format=png&color=ffffff" class="w-4 h-4 settings-icon" alt="Share">
-                                    </button>
-                                    <button onclick="copyRef()" class="w-10 h-10 flex items-center justify-center bg-orange-500 rounded-xl hover:bg-orange-600 transition-all cursor-pointer">
-                                        <img src="https://img.icons8.com/?size=100&id=v6i0IST6rKnE&format=png&color=000000" class="w-4 h-4" alt="Copy">
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="dool-card p-5 rounded-[2rem] flex flex-col items-center justify-center gap-1 aspect-square">
-                            <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center mb-2 text-neutral-400">
-                                <img src="https://img.icons8.com/?size=100&id=p8UFrp2VUgHR&format=png&color=000000" class="w-5 h-5 opacity-70 settings-icon" alt="Friends">
-                            </div>
-                            <p id="ref-count" class="text-2xl font-black text-white">0</p>
-                            <p class="text-[9px] font-bold text-neutral-600 uppercase tracking-wider" data-lang="friends">Друзей</p>
-                        </div>
-                        <div class="dool-card p-5 rounded-[2rem] flex flex-col items-center justify-center gap-1 aspect-square">
-                            <div class="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center mb-2 text-orange-500">
-                                <img src="https://img.icons8.com/?size=100&id=djfFWeKjwcd3&format=png&color=ffffff" class="w-5 h-5" style="filter: brightness(0) saturate(100%) invert(32%) sepia(98%) saturate(2329%) hue-rotate(358deg) brightness(101%) contrast(106%);" alt="Earned">
-                            </div>
-                            <p id="ref-earned" class="text-2xl font-black text-white">0</p>
-                            <p class="text-[9px] font-bold text-neutral-600 uppercase tracking-wider" data-lang="earned">Заработано</p>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- BANK -->
                 <div id="tab-bank" class="tab-content space-y-6">
                     <div class="text-center pt-4 pb-2">
                         <h2 class="text-xl font-black uppercase tracking-widest text-neutral-400" data-lang="staking">Стейкинг</h2>
                         <p class="text-[10px] text-orange-500 font-bold uppercase tracking-widest">+5% в неделю ⌛</p>
                     </div>
-
                    <div class="bank-stack-container">
                         <img src="https://emojigraph.org/media/facebook/jar_1fad9.png" class="bank-layer-bottom">
                         <img src="https://emojigraph.org/media/google/fire_1f525.png" class="bank-layer-fire">
                         <img src="https://emojigraph.org/media/facebook/jar_1fad9.png" class="bank-layer-top">
                     </div>
-
                     <div class="dool-card rounded-[2.5rem] p-6 sm:p-8 text-center relative overflow-hidden">
                         <div class="absolute inset-0 bg-orange-500/5"></div>
                         <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-2 relative z-10" data-lang="in_jar">В банке</p>
@@ -349,279 +286,290 @@
                             <span class="text-xl font-black text-orange-500">Đ</span>
                         </div>
                     </div>
-
                     <div class="grid grid-cols-2 gap-3">
-                        <button onclick="openModal('deposit')" class="h-20 glass-panel rounded-[2rem] flex flex-col items-center justify-center gap-1 hover:bg-white/10 transition-colors border border-white/10">
-                            <img src="https://img.icons8.com/?size=100&id=8P1z54VQlHYr&format=png&color=000000" class="w-12 h-12 settings-icon" alt="Deposit">
+                        <button onclick="openModal('deposit')" class="h-20 glass-panel rounded-[2rem] flex flex-col items-center justify-center gap-1 hover:bg-white/10 transition-colors border border-white/10"><img src="https://img.icons8.com/?size=100&id=8P1z54VQlHYr&format=png&color=000000" class="w-12 h-12 settings-icon" alt="Deposit"></button>
+                        <button onclick="openModal('withdraw')" class="h-20 glass-panel rounded-[2rem] flex flex-col items-center justify-center gap-1 hover:bg-white/10 transition-colors border border-white/10"><img src="https://img.icons8.com/?size=100&id=qRJUAI2xNkqe&format=png&color=000000" class="w-12 h-12 settings-icon" alt="Withdraw"></button>
+                    </div>
+                </div>
+
+                <!-- NFT TAB (NEW) -->
+                <div id="tab-nft" class="tab-content space-y-6">
+                    <div class="pt-4 pb-2 px-2 flex justify-between items-end">
+                        <h2 class="text-3xl font-black text-white italic tracking-tighter">NFT <span class="text-orange-500">World</span></h2>
+                    </div>
+                    
+                    <!-- Sub-nav -->
+                    <div class="flex gap-4 justify-between px-4 pb-4 border-b border-white/5">
+                        <button onclick="switchNftSubTab('market')" id="nft-sub-market" class="sub-tab-btn flex flex-col items-center gap-1 active">
+                            <div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10">
+                                <img src="https://img.icons8.com/?size=100&id=LwNLQyWraKTr&format=png&color=ffffff" class="w-6 h-6">
+                            </div>
+                            <span class="text-[9px] font-bold uppercase tracking-wider text-neutral-400">Shop</span>
                         </button>
-                        <button onclick="openModal('withdraw')" class="h-20 glass-panel rounded-[2rem] flex flex-col items-center justify-center gap-1 hover:bg-white/10 transition-colors border border-white/10">
-                             <img src="https://img.icons8.com/?size=100&id=qRJUAI2xNkqe&format=png&color=000000" class="w-12 h-12 settings-icon" alt="Withdraw">
+                        <button onclick="switchNftSubTab('inventory')" id="nft-sub-inventory" class="sub-tab-btn flex flex-col items-center gap-1">
+                            <div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10">
+                                <img src="https://img.icons8.com/?size=100&id=Q4Mp5MaDRZyl&format=png&color=ffffff" class="w-6 h-6">
+                            </div>
+                            <span class="text-[9px] font-bold uppercase tracking-wider text-neutral-400">Inventory</span>
                         </button>
+                        <button onclick="openModal('nft-create')" class="sub-tab-btn flex flex-col items-center gap-1" style="opacity:1; filter:none">
+                            <div class="w-12 h-12 rounded-2xl bg-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/20">
+                                <img src="https://img.icons8.com/?size=100&id=owhiHVzjr30B&format=png&color=ffffff" class="w-6 h-6">
+                            </div>
+                            <span class="text-[9px] font-bold uppercase tracking-wider text-white">Create</span>
+                        </button>
+                    </div>
+
+                    <!-- NFT Grid Container -->
+                    <div id="nft-view-market" class="nft-grid pb-20">
+                        <!-- Items injected by JS -->
+                    </div>
+                    <div id="nft-view-inventory" class="nft-grid pb-20 hidden">
+                        <!-- Items injected by JS -->
+                    </div>
+                </div>
+
+                <!-- REFERRALS -->
+                <div id="tab-referrals" class="tab-content space-y-6">
+                    <div class="dool-card rounded-[2.5rem] p-6 sm:p-8 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-32 h-32 gradient-bg blur-[60px] opacity-20"></div>
+                        <h3 class="text-2xl font-black mb-2 relative z-10 text-white" data-lang="invite_friend">Пригласи друга</h3>
+                        <p class="text-neutral-500 text-xs mb-8 leading-relaxed max-w-[80%] relative z-10">
+                            <span data-lang="ref_desc">Получи</span> <span class="text-white font-bold">10.00 Đ</span>
+                        </p>
+                        <div class="bg-black/40 border border-white/5 p-4 rounded-2xl space-y-3 relative z-10 backdrop-blur-sm">
+                            <div class="flex items-center justify-between gap-4">
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-[9px] font-black text-neutral-600 uppercase tracking-widest mb-1" data-lang="your_link">Ваша ссылка</p>
+                                    <input readonly id="ref-link" class="w-full text-[10px] font-mono text-neutral-400 bg-transparent outline-none truncate" value="...">
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="shareRef()" class="w-10 h-10 flex items-center justify-center bg-white/10 text-white rounded-xl hover:bg-white/20 transition-transform cursor-pointer"><img src="https://img.icons8.com/?size=100&id=PuZtTk7UXaiT&format=png&color=ffffff" class="w-4 h-4 settings-icon" alt="Share"></button>
+                                    <button onclick="copyRef()" class="w-10 h-10 flex items-center justify-center bg-orange-500 rounded-xl hover:bg-orange-600 transition-all cursor-pointer"><img src="https://img.icons8.com/?size=100&id=v6i0IST6rKnE&format=png&color=000000" class="w-4 h-4" alt="Copy"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="dool-card p-5 rounded-[2rem] flex flex-col items-center justify-center gap-1 aspect-square">
+                            <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center mb-2 text-neutral-400"><img src="https://img.icons8.com/?size=100&id=p8UFrp2VUgHR&format=png&color=000000" class="w-5 h-5 opacity-70 settings-icon" alt="Friends"></div>
+                            <p id="ref-count" class="text-2xl font-black text-white">0</p>
+                            <p class="text-[9px] font-bold text-neutral-600 uppercase tracking-wider" data-lang="friends">Друзей</p>
+                        </div>
+                        <div class="dool-card p-5 rounded-[2rem] flex flex-col items-center justify-center gap-1 aspect-square">
+                            <div class="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center mb-2 text-orange-500"><img src="https://img.icons8.com/?size=100&id=djfFWeKjwcd3&format=png&color=ffffff" class="w-5 h-5" style="filter: brightness(0) saturate(100%) invert(32%) sepia(98%) saturate(2329%) hue-rotate(358deg) brightness(101%) contrast(106%);" alt="Earned"></div>
+                            <p id="ref-earned" class="text-2xl font-black text-white">0</p>
+                            <p class="text-[9px] font-bold text-neutral-600 uppercase tracking-wider" data-lang="earned">Заработано</p>
+                        </div>
                     </div>
                 </div>
             </main>
 
-            <!-- NAV -->
-            <nav class="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[360px] h-16 bg-[#111]/90 backdrop-blur-xl border border-white/10 rounded-[2rem] flex items-center justify-around px-2 z-50 shadow-2xl transition-colors duration-300">
+            <!-- NAV (UPDATED WITH NFT) -->
+            <nav class="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[380px] h-16 bg-[#111]/90 backdrop-blur-xl border border-white/10 rounded-[2rem] flex items-center justify-around px-2 z-50 shadow-2xl transition-colors duration-300">
                 <button onclick="switchTab('wallet')" id="nav-wallet" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-orange-500 cursor-pointer">
-                    <img src="https://img.icons8.com/?size=100&id=Pv8alVtwvuFB&format=png&color=ffffff" class="w-9 h-9 nav-icon nav-icon-active" alt="Wallet">
+                    <img src="https://img.icons8.com/?size=100&id=Pv8alVtwvuFB&format=png&color=ffffff" class="w-8 h-8 nav-icon nav-icon-active" alt="Wallet">
                 </button>
                 <button onclick="switchTab('bank')" id="nav-bank" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
-                     <img src="https://img.icons8.com/?size=100&id=MRDxs37r5Fp9&format=png&color=ffffff" class="w-9 h-9 nav-icon" alt="Bank">
+                     <img src="https://img.icons8.com/?size=100&id=MRDxs37r5Fp9&format=png&color=ffffff" class="w-8 h-8 nav-icon" alt="Bank">
                 </button>
+                <button onclick="switchTab('nft')" id="nav-nft" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
+                    <img src="https://img.icons8.com/?size=100&id=2xm6PmHSTPzF&format=png&color=ffffff" class="w-9 h-9 nav-icon" alt="NFT">
+               </button>
                 <button onclick="switchTab('referrals')" id="nav-referrals" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
-                    <img src="https://img.icons8.com/?size=100&id=N9EwPosvU1Rm&format=png&color=ffffff" class="w-9 h-9 nav-icon" alt="Referrals">
+                    <img src="https://img.icons8.com/?size=100&id=N9EwPosvU1Rm&format=png&color=ffffff" class="w-8 h-8 nav-icon" alt="Referrals">
                 </button>
             </nav>
         </div>
 
-        <!-- SETTINGS MODAL (REDESIGNED) -->
+        <!-- SETTINGS MODAL -->
         <div id="modal-settings" onclick="if(event.target===this) closeModal('settings')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
             <div class="bg-[#0f0f0f] border-t border-white/10 rounded-t-[2.5rem] p-0 transform translate-y-full transition-transform duration-300" id="modal-settings-content">
                 <div class="swipe-zone"><div class="swipe-handle"></div></div>
-                
                 <div class="p-8 pb-10 space-y-8 overflow-y-auto max-h-[80vh]">
                     <div class="flex items-center gap-3 mb-2">
                         <img src="https://img.icons8.com/?size=100&id=xyFoc6U1Hu3c&format=png&color=ffffff" class="w-8 h-8 settings-icon">
                         <h2 class="text-2xl font-black text-white" data-lang="settings">Настройки</h2>
                     </div>
-
+                    <!-- Privacy Toggle -->
+                    <div class="bg-white/5 rounded-2xl p-4 flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-bold text-white mb-0.5">Показывать мои NFT</p>
+                            <p class="text-[10px] text-neutral-500 font-medium">Видны в публичном профиле</p>
+                        </div>
+                        <label class="relative inline-block w-11 h-6 cursor-pointer">
+                            <input type="checkbox" id="setting-show-nft" class="toggle-checkbox" onchange="toggleNftPrivacy(this.checked)">
+                            <div class="toggle-slot"><div class="toggle-button"></div></div>
+                        </label>
+                    </div>
                     <!-- Theme -->
                     <div>
                         <p class="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-3" data-lang="theme">Тема оформления</p>
                         <div class="grid grid-cols-2 gap-3">
-                            <button onclick="setTheme('light')" id="theme-btn-light" class="theme-btn h-14 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center gap-2 text-white">
-                                <img src="https://img.icons8.com/?size=100&id=nGdbxRylhrdU&format=png&color=ffffff" class="w-6 h-6 settings-icon">
-                                <span class="font-bold text-xs uppercase" data-lang="theme_light">Светлая</span>
-                            </button>
-                            <button onclick="setTheme('dark')" id="theme-btn-dark" class="theme-btn h-14 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center gap-2 text-white">
-                                <img src="https://img.icons8.com/?size=100&id=I0BKFITuoSCV&format=png&color=ffffff" class="w-6 h-6 settings-icon">
-                                <span class="font-bold text-xs uppercase" data-lang="theme_dark">Тёмная</span>
-                            </button>
+                            <button onclick="setTheme('light')" id="theme-btn-light" class="theme-btn h-14 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center gap-2 text-white"><img src="https://img.icons8.com/?size=100&id=nGdbxRylhrdU&format=png&color=ffffff" class="w-6 h-6 settings-icon"><span class="font-bold text-xs uppercase" data-lang="theme_light">Светлая</span></button>
+                            <button onclick="setTheme('dark')" id="theme-btn-dark" class="theme-btn h-14 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center gap-2 text-white"><img src="https://img.icons8.com/?size=100&id=I0BKFITuoSCV&format=png&color=ffffff" class="w-6 h-6 settings-icon"><span class="font-bold text-xs uppercase" data-lang="theme_dark">Тёмная</span></button>
                         </div>
                     </div>
-
-                    <!-- Language -->
-                    <div>
-                        <div class="flex items-center gap-2 mb-3">
-                            <img src="https://img.icons8.com/?size=100&id=ya6K4D74SdP6&format=png&color=ffffff" class="w-4 h-4 settings-icon">
-                            <p class="text-[10px] font-bold text-neutral-500 uppercase tracking-widest" data-lang="language">Язык</p>
-                        </div>
-                        <div class="grid grid-cols-3 gap-2">
-                            <button onclick="setLanguage('ru')" class="lang-btn h-10 bg-white/5 rounded-xl font-bold text-xs text-white" data-lang-code="ru">Русский</button>
-                            <button onclick="setLanguage('en')" class="lang-btn h-10 bg-white/5 rounded-xl font-bold text-xs text-white" data-lang-code="en">English</button>
-                            <button onclick="setLanguage('es')" class="lang-btn h-10 bg-white/5 rounded-xl font-bold text-xs text-white" data-lang-code="es">Español</button>
-                            <button onclick="setLanguage('uk')" class="lang-btn h-10 bg-white/5 rounded-xl font-bold text-xs text-white" data-lang-code="uk">Українська</button>
-                            <button onclick="setLanguage('fr')" class="lang-btn h-10 bg-white/5 rounded-xl font-bold text-xs text-white" data-lang-code="fr">Français</button>
-                        </div>
-                    </div>
-
-                    <!-- About Card Redesigned -->
+                    <!-- About -->
                     <div class="about-card">
                         <div class="about-inner">
                             <div class="flex items-center justify-between mb-4">
-                                <div class="flex items-center gap-2">
-                                    <div class="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center">
-                                        <span class="font-black text-black">Đ</span>
-                                    </div>
-                                    <span class="font-black text-sm tracking-widest text-white">DOOLCOIN</span>
-                                </div>
-                                <span class="text-[9px] font-mono text-neutral-500">v1.0.3</span>
+                                <div class="flex items-center gap-2"><div class="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center"><span class="font-black text-black">Đ</span></div><span class="font-black text-sm tracking-widest text-white">DOOLCOIN</span></div>
+                                <span class="text-[9px] font-mono text-neutral-500">v1.1.0 (NFT)</span>
                             </div>
-                            
                             <h3 class="text-xs font-bold text-white mb-2" data-lang="legal_title">Юридическая информация</h3>
-                            <p class="text-[10px] text-neutral-400 font-medium leading-relaxed mb-4 text-justify" data-lang="legal_text">
-                                Doolcoin (Đ) — это внутриигровая условная единица. Она не является платёжным средством, электронной валютой или ценной бумагой. Đ не имеет реальной денежной стоимости и не гарантирует возможности обмена на фиатные деньги. Все операции носят исключительно развлекательный характер.
-                            </p>
-                            
+                            <p class="text-[10px] text-neutral-400 font-medium leading-relaxed mb-4 text-justify" data-lang="legal_text">Doolcoin (Đ) — это внутриигровая условная единица. Не является платёжным средством.</p>
                             <div class="h-[1px] bg-white/10 w-full mb-3"></div>
-                            
-                            <div class="flex justify-between items-center">
-                                <span class="text-[9px] text-neutral-600">© 2026 Doolcoin Inc.</span>
-                                <a href="https://icons8.com" target="_blank" class="text-[9px] font-bold text-orange-500 hover:text-white transition-colors flex items-center gap-1">
-                                    <span>Icons by Icons8</span>
-                                </a>
-                            </div>
+                            <div class="flex justify-between items-center"><span class="text-[9px] text-neutral-600">© 2026 Doolcoin Inc.</span><a href="https://icons8.com" target="_blank" class="text-[9px] font-bold text-orange-500 hover:text-white transition-colors flex items-center gap-1"><span>Icons by Icons8</span></a></div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- PROFILE -->
+        <!-- PUBLIC PROFILE MODAL (NEW) -->
+        <div id="modal-public-profile" onclick="if(event.target===this) closeModal('public-profile')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
+             <div class="bg-[#0f0f0f] border-t border-white/10 rounded-t-[2.5rem] p-0 transform translate-y-full transition-transform duration-300 h-[85vh] flex flex-col" id="modal-public-profile-content">
+                <div class="swipe-zone shrink-0"><div class="swipe-handle"></div></div>
+                <div class="p-6 flex flex-col items-center shrink-0">
+                    <img id="pub-profile-avatar" src="" class="w-20 h-20 rounded-full border-4 border-[#1a1a1a] shadow-xl mb-3 object-cover">
+                    <div class="flex items-center gap-1 mb-1">
+                        <h2 id="pub-profile-email" class="text-lg font-black text-white"></h2>
+                        <img id="pub-profile-verified" src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" class="w-4 h-4 hidden">
+                    </div>
+                    <p class="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-6">Коллекционер</p>
+                </div>
+                <div class="flex-1 overflow-y-auto px-6 pb-10 hide-scroll">
+                    <p class="text-[10px] font-black text-neutral-600 uppercase tracking-widest mb-4">Коллекция NFT</p>
+                    <div id="pub-profile-nfts" class="nft-grid">
+                        <!-- Public NFTs loaded here -->
+                    </div>
+                    <div id="pub-profile-empty" class="hidden text-center py-10">
+                        <p class="text-neutral-600 text-xs font-bold">Коллекция скрыта или пуста</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CREATE NFT MODAL -->
+        <div id="modal-nft-create" onclick="if(event.target===this) closeModal('nft-create')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
+             <div class="bg-[#0f0f0f] border-t border-white/10 rounded-t-[2.5rem] p-0 transform translate-y-full transition-transform duration-300" id="modal-nft-create-content">
+                <div class="swipe-zone"><div class="swipe-handle"></div></div>
+                <div class="p-8 pb-10">
+                    <h2 class="text-xl font-black mb-4 text-white">Создать NFT</h2>
+                    <div class="space-y-4">
+                        <div class="flex justify-center mb-4">
+                            <label class="w-32 h-32 rounded-2xl border-2 border-dashed border-white/20 flex flex-col items-center justify-center cursor-pointer hover:border-orange-500 hover:bg-white/5 transition-all relative overflow-hidden group">
+                                <img id="nft-preview-img" class="absolute inset-0 w-full h-full object-cover hidden">
+                                <div class="text-center p-2 z-10" id="nft-upload-placeholder">
+                                    <span class="text-2xl">📷</span>
+                                    <p class="text-[9px] font-bold text-neutral-500 mt-2 uppercase">Загрузить</p>
+                                </div>
+                                <input type="file" id="nft-file-input" class="hidden" accept="image/*" onchange="previewNftImage(this)">
+                            </label>
+                        </div>
+                        <div class="bg-white/5 rounded-2xl p-4 border border-white/5">
+                            <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Название</p>
+                            <input type="text" id="nft-create-name" placeholder="Мой шедевр" class="w-full bg-transparent outline-none font-bold text-white text-sm" maxlength="20">
+                        </div>
+                        <button id="btn-create-nft" onclick="mintNFT()" class="w-full h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer">Создать</button>
+                        <p class="text-[9px] text-center text-neutral-600 font-medium">Система Антиплагиат активна (70%)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- OTHER MODALS (Send, Receive, etc.) -->
         <div id="modal-profile" onclick="if(event.target===this) closeModal('profile')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col items-center justify-center p-8 opacity-0 transition-opacity duration-300">
             <div class="w-full max-w-xs transform scale-90 transition-transform duration-300" id="modal-profile-content">
                 <div class="bg-[#111] border border-white/10 p-8 rounded-[2.5rem] text-center shadow-2xl dool-card">
                     <h2 class="text-xl font-black mb-6 text-white" data-lang="your_profile">Ваш Профиль</h2>
                     <div class="relative inline-block mb-6 group">
-                        <div class="p-1 gradient-bg rounded-full">
-                            <img id="edit-avatar-img" src="" class="w-24 h-24 rounded-full object-cover border-4 border-[#111] bg-neutral-900">
-                        </div>
-                        <label class="absolute bottom-0 right-0 bg-white text-black w-8 h-8 flex items-center justify-center rounded-full cursor-pointer hover:scale-110 transition-transform shadow-lg">
-                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
-                            <input type="file" id="avatar-input" class="hidden" accept="image/*">
-                        </label>
+                        <div class="p-1 gradient-bg rounded-full"><img id="edit-avatar-img" src="" class="w-24 h-24 rounded-full object-cover border-4 border-[#111] bg-neutral-900"></div>
+                        <label class="absolute bottom-0 right-0 bg-white text-black w-8 h-8 flex items-center justify-center rounded-full cursor-pointer hover:scale-110 transition-transform shadow-lg"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg><input type="file" id="avatar-input" class="hidden" accept="image/*"></label>
                     </div>
-                    
-                    <!-- Verification Section -->
-                    <div id="profile-verification-status" class="mb-6 flex flex-col items-center min-h-[40px]">
-                        <!-- Injected via JS -->
-                    </div>
-
+                    <div id="profile-verification-status" class="mb-6 flex flex-col items-center min-h-[40px]"></div>
                     <p id="profile-email" class="text-xs text-neutral-500 font-bold mb-6 truncate px-2">...</p>
                     <button onclick="closeModal('profile')" class="w-full h-12 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer" data-lang="close">Закрыть</button>
                 </div>
             </div>
         </div>
 
-        <!-- INVITE -->
-        <div id="modal-invited-info" onclick="if(event.target===this) closeModal('invited-info')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col items-center justify-center p-8 opacity-0 transition-opacity duration-300">
-            <div class="w-full max-w-xs transform scale-90 transition-transform duration-300" id="modal-invited-info-content">
-                <div class="bg-[#111] border border-orange-500/30 p-8 rounded-[2.5rem] text-center shadow-[0_0_50px_rgba(255,77,0,0.2)]">
-                    <div class="w-16 h-16 bg-orange-500/10 rounded-full flex items-center justify-center text-4xl mx-auto mb-4 border border-orange-500/20">🎁</div>
-                    <h2 class="text-xl font-black mb-2 text-white">Вы приглашены!</h2>
-                    <p class="text-xs text-neutral-400 font-medium mb-6">Пользователь <span id="invited-by-email" class="text-orange-500 font-bold">...</span> пригласил вас.</p>
-                    <div class="bg-white/5 rounded-2xl p-4 mb-6">
-                        <p class="text-[10px] font-black uppercase text-neutral-500 mb-2">Ваш бонус</p>
-                        <p class="text-2xl font-black text-white">+10.00 Đ</p>
-                    </div>
-                    <button onclick="closeModal('invited-info')" class="w-full h-12 bg-white text-black rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-neutral-200 transition-colors cursor-pointer">Отлично</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- SEND -->
         <div id="modal-send" onclick="if(event.target===this) closeModal('send')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
             <div class="bg-[#0f0f0f] border-t border-white/10 rounded-t-[2.5rem] p-0 transform translate-y-full transition-transform duration-300" id="modal-send-content">
                 <div class="swipe-zone"><div class="swipe-handle"></div></div>
                 <div class="p-8 pb-10">
                     <h2 class="text-2xl font-black mb-6 px-2 text-white" data-lang="send_title">Перевод</h2>
                     <div id="proposal-notice" class="hidden mb-4 bg-orange-500/10 border border-orange-500/20 p-3 rounded-2xl flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-black">
-                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
-                        </div>
-                        <div>
-                            <p class="text-[10px] font-black uppercase text-orange-500 tracking-wider">Предложение</p>
-                            <p class="text-xs text-neutral-400 font-bold">Данные заполнены автоматически</p>
-                        </div>
+                        <div class="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-black"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>
+                        <div><p class="text-[10px] font-black uppercase text-orange-500 tracking-wider">Предложение</p><p class="text-xs text-neutral-400 font-bold">Данные заполнены автоматически</p></div>
                     </div>
                     <div class="space-y-3">
-                        <div class="bg-white/5 rounded-2xl p-4 border border-white/5 focus-within:border-orange-500/50 transition-colors">
-                            <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1" data-lang="recipient">Получатель</p>
-                            <input type="email" id="send-email" placeholder="email@example.com" class="w-full bg-transparent outline-none font-bold text-sm placeholder:text-neutral-700 text-white">
-                        </div>
-                        <div class="bg-white/5 rounded-2xl p-4 border border-white/5 focus-within:border-orange-500/50 transition-colors">
-                            <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1" data-lang="amount">Сумма (Мин 0.1)</p>
-                            <div class="flex items-center gap-2">
-                                <input type="number" id="send-amt" placeholder="0.0" class="w-full bg-transparent outline-none font-black text-3xl placeholder:text-neutral-700 text-white">
-                                <span class="text-xl font-black text-orange-500">Đ</span>
-                            </div>
-                        </div>
-                        <div class="flex gap-3 pt-4">
-                            <button onclick="closeModal('send')" class="flex-1 h-14 bg-white/5 text-neutral-400 rounded-2xl font-bold text-xs uppercase tracking-wider cursor-pointer" data-lang="cancel">Отмена</button>
-                            <button id="btn-do-send" class="flex-[2] h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer" data-lang="send_action">Отправить</button>
-                        </div>
+                        <div class="bg-white/5 rounded-2xl p-4 border border-white/5 focus-within:border-orange-500/50 transition-colors"><p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1" data-lang="recipient">Получатель</p><input type="email" id="send-email" placeholder="email@example.com" class="w-full bg-transparent outline-none font-bold text-sm placeholder:text-neutral-700 text-white"></div>
+                        <div class="bg-white/5 rounded-2xl p-4 border border-white/5 focus-within:border-orange-500/50 transition-colors"><p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1" data-lang="amount">Сумма (Мин 0.1)</p><div class="flex items-center gap-2"><input type="number" id="send-amt" placeholder="0.0" class="w-full bg-transparent outline-none font-black text-3xl placeholder:text-neutral-700 text-white"><span class="text-xl font-black text-orange-500">Đ</span></div></div>
+                        <div class="flex gap-3 pt-4"><button onclick="closeModal('send')" class="flex-1 h-14 bg-white/5 text-neutral-400 rounded-2xl font-bold text-xs uppercase tracking-wider cursor-pointer" data-lang="cancel">Отмена</button><button id="btn-do-send" class="flex-[2] h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer" data-lang="send_action">Отправить</button></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- RECEIVE -->
         <div id="modal-receive" onclick="if(event.target===this) closeModal('receive')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
             <div class="bg-[#0f0f0f] border border-white/10 rounded-t-[2.5rem] p-0 w-full transform translate-y-full transition-transform duration-300 shadow-2xl" id="modal-receive-content">
                 <div class="swipe-zone"><div class="swipe-handle"></div></div>
                 <div class="p-8 pb-10">
-                    <div class="text-center mb-6">
-                        <h2 class="text-2xl font-black mb-1 text-white" data-lang="receive">Получить</h2>
-                        <p class="text-neutral-500 text-xs font-medium" data-lang="show_qr">Покажите этот код отправителю</p>
-                    </div>
-                    <div class="flex justify-center mb-8">
-                        <div class="qr-card-premium">
-                            <div class="flex items-center gap-2 mb-4 opacity-70">
-                                <span class="text-xl font-black text-white">Đ</span>
-                                <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-white">Doolcoin</span>
-                            </div>
-                            <div id="qrcode-container"></div>
-                        </div>
-                    </div>
+                    <div class="text-center mb-6"><h2 class="text-2xl font-black mb-1 text-white" data-lang="receive">Получить</h2><p class="text-neutral-500 text-xs font-medium" data-lang="show_qr">Покажите этот код отправителю</p></div>
+                    <div class="flex justify-center mb-8"><div class="qr-card-premium"><div class="flex items-center gap-2 mb-4 opacity-70"><span class="text-xl font-black text-white">Đ</span><span class="text-[10px] font-bold uppercase tracking-[0.2em] text-white">Doolcoin</span></div><div id="qrcode-container"></div></div></div>
                     <div class="space-y-4">
-                        <div class="bg-white/5 p-4 rounded-2xl border border-white/5 flex items-center justify-between">
-                            <div class="flex-1">
-                                <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1" data-lang="req_amount">Предложить сумму</p>
-                                <input type="number" id="receive-amt-req" data-lang-placeholder="any" placeholder="Любая" class="w-full bg-transparent outline-none font-bold text-lg placeholder:text-neutral-700 text-white">
-                            </div>
-                            <span class="text-lg font-black text-orange-500 ml-3">Đ</span>
-                        </div>
-                        <div onclick="copyMyEmail()" class="bg-white/5 p-4 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-white/10 active:scale-95 transition-all border border-white/5">
-                            <div class="flex-1 min-w-0 pr-2">
-                                <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1" data-lang="your_addr">Ваш адрес</p>
-                                <p id="my-email-addr" class="font-mono text-orange-500 truncate text-sm">...</p>
-                            </div>
-                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" class="text-neutral-500"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                        </div>
+                        <div class="bg-white/5 p-4 rounded-2xl border border-white/5 flex items-center justify-between"><div class="flex-1"><p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1" data-lang="req_amount">Предложить сумму</p><input type="number" id="receive-amt-req" data-lang-placeholder="any" placeholder="Любая" class="w-full bg-transparent outline-none font-bold text-lg placeholder:text-neutral-700 text-white"></div><span class="text-lg font-black text-orange-500 ml-3">Đ</span></div>
+                        <div onclick="copyMyEmail()" class="bg-white/5 p-4 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-white/10 active:scale-95 transition-all border border-white/5"><div class="flex-1 min-w-0 pr-2"><p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1" data-lang="your_addr">Ваш адрес</p><p id="my-email-addr" class="font-mono text-orange-500 truncate text-sm">...</p></div><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" class="text-neutral-500"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <!-- DEPOSIT -->
         <div id="modal-deposit" onclick="if(event.target===this) closeModal('deposit')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
             <div class="bg-[#111] border-t border-white/10 rounded-t-[2.5rem] p-0 transform translate-y-full transition-transform duration-300" id="modal-deposit-content">
                 <div class="swipe-zone"><div class="swipe-handle"></div></div>
                 <div class="p-8 pb-10">
                     <h2 class="text-xl font-black mb-4 text-white" data-lang="deposit_title">Положить в банку</h2>
-                    <div class="bg-white/5 rounded-2xl p-4 border border-white/5 mb-4">
-                        <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1" data-lang="amount">Сумма</p>
-                        <div class="flex items-center gap-2">
-                            <input type="number" id="deposit-amt" placeholder="0.0" class="w-full bg-transparent outline-none font-black text-3xl placeholder:text-neutral-700 text-white">
-                            <span class="text-xl font-black text-orange-500">Đ</span>
-                        </div>
-                    </div>
+                    <div class="bg-white/5 rounded-2xl p-4 border border-white/5 mb-4"><p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1" data-lang="amount">Сумма</p><div class="flex items-center gap-2"><input type="number" id="deposit-amt" placeholder="0.0" class="w-full bg-transparent outline-none font-black text-3xl placeholder:text-neutral-700 text-white"><span class="text-xl font-black text-orange-500">Đ</span></div></div>
                     <button id="btn-do-deposit" class="w-full h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer" data-lang="deposit_action">Положить</button>
                     <button onclick="closeModal('deposit')" class="w-full mt-2 h-10 text-neutral-500 font-bold text-[10px] uppercase cursor-pointer" data-lang="cancel">Отмена</button>
                 </div>
             </div>
         </div>
 
-        <!-- WITHDRAW -->
         <div id="modal-withdraw" onclick="if(event.target===this) closeModal('withdraw')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
              <div class="bg-[#111] border-t border-white/10 rounded-t-[2.5rem] p-0 transform translate-y-full transition-transform duration-300" id="modal-withdraw-content">
                 <div class="swipe-zone"><div class="swipe-handle"></div></div>
                 <div class="p-8 pb-10">
                     <h2 class="text-xl font-black mb-4 text-white" data-lang="withdraw_title">Достать из банки</h2>
-                    <div class="bg-white/5 rounded-2xl p-4 border border-white/5 mb-4">
-                        <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1" data-lang="amount">Сумма</p>
-                        <div class="flex items-center gap-2">
-                            <input type="number" id="withdraw-amt" placeholder="0.0" class="w-full bg-transparent outline-none font-black text-3xl placeholder:text-neutral-700 text-white">
-                            <span class="text-xl font-black text-orange-500">Đ</span>
-                        </div>
-                    </div>
+                    <div class="bg-white/5 rounded-2xl p-4 border border-white/5 mb-4"><p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1" data-lang="amount">Сумма</p><div class="flex items-center gap-2"><input type="number" id="withdraw-amt" placeholder="0.0" class="w-full bg-transparent outline-none font-black text-3xl placeholder:text-neutral-700 text-white"><span class="text-xl font-black text-orange-500">Đ</span></div></div>
                     <button id="btn-do-withdraw" class="w-full h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer" data-lang="withdraw_action">Достать</button>
                     <button onclick="closeModal('withdraw')" class="w-full mt-2 h-10 text-neutral-500 font-bold text-[10px] uppercase cursor-pointer" data-lang="cancel">Отмена</button>
                 </div>
             </div>
         </div>
 
-        <!-- SCANNER -->
         <div id="modal-scan" class="hidden absolute inset-0 z-[120] bg-black flex flex-col opacity-0 transition-opacity duration-300">
             <div class="absolute top-0 left-0 w-full p-6 z-20 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent">
                  <h2 class="text-xl font-black text-white drop-shadow-md" data-lang="scanning">Сканирование</h2>
-                 <button onclick="closeModal('scan')" class="w-10 h-10 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center text-white cursor-pointer hover:bg-white/20 transition-all border border-white/10">
-                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                </button>
+                 <button onclick="closeModal('scan')" class="w-10 h-10 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center text-white cursor-pointer hover:bg-white/20 transition-all border border-white/10"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
             </div>
             <div class="w-full h-full relative" id="modal-scan-content">
                 <div id="reader"></div>
                 <div class="scan-focus-area"><div class="scan-border-glow"></div><div class="scan-laser"></div></div>
             </div>
         </div>
-
     </div>
+
+    <!-- Hidden Canvas for Hash Generation -->
+    <canvas id="hash-canvas" width="16" height="16" class="hidden"></canvas>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, query, where, runTransaction, Timestamp, increment, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, query, where, runTransaction, Timestamp, increment, getDocs, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyBoFuGY-SSmcGHPGzuWZbdGFeI9_aaAKs8", authDomain: "doolcoinwallet.firebaseapp.com", projectId: "doolcoinwallet", storageBucket: "doolcoinwallet.firebasestorage.app", messagingSenderId: "473549726148", appId: "1:473549726148:web:87663b4944330c0df58491" };
         const app = initializeApp(firebaseConfig);
@@ -633,54 +581,14 @@
             ru: {
                 total_balance: "Общий баланс", send: "Отправить", receive: "Получить", history: "История операций", loading: "Загрузка...", invite_friend: "Пригласи друга", ref_desc: "Получи", your_link: "Ваша ссылка", friends: "Друзей", earned: "Заработано", staking: "Стейкинг", in_jar: "В банке", profile: "Профиль", wallet_future: "Кошелек будущего", or: "Или", login: "Войти", create: "Создать", settings: "Настройки", theme: "Тема оформления", theme_light: "Светлая", theme_dark: "Тёмная", language: "Язык", your_profile: "Ваш Профиль", close: "Закрыть", send_title: "Перевод", recipient: "Получатель", amount: "Сумма (Мин 0.1)", cancel: "Отмена", send_action: "Отправить", show_qr: "Покажите этот код отправителю", req_amount: "Предложить сумму", your_addr: "Ваш адрес", deposit_title: "Положить в банку", deposit_action: "Положить", withdraw_title: "Достать из банки", withdraw_action: "Достать", scanning: "Сканирование", access_denied: "Доступ ограничен", password_ph: "Пароль", deposit_success: "Депозит успешен", withdraw_success: "Вывод успешен", addr_copied: "Адрес скопирован", link_copied: "Ссылка скопирована", sent_to: "Отправлено", error_fill: "Заполните поля", error_pass_len: "Пароль < 6 символов", error_self: "Нельзя отправить себе", error_min: "Минимум 0.1 Đ", error_fund: "Недостаточно средств",
                 legal_title: "Юридическая информация",
-                legal_text: "Doolcoin (Đ) — это внутриигровая условная единица. Она не является платёжным средством, электронной валютой или ценной бумагой. Đ не имеет реальной денежной стоимости и не гарантирует возможности обмена на фиатные деньги. Все операции носят исключительно развлекательный характер.",
+                legal_text: "Doolcoin (Đ) — это внутриигровая условная единица. Она не является платёжным средством, электронной валютой или ценной бумагой. Đ не имеет реальной денежной стоимости и не гарантирует возможности обмена на фиатные деньги.",
                 any: "Любая"
-            },
-            en: {
-                total_balance: "Total Balance", send: "Send", receive: "Receive", history: "Transaction History", loading: "Loading...", invite_friend: "Invite a Friend", ref_desc: "Get", your_link: "Your Link", friends: "Friends", earned: "Earned", staking: "Staking", in_jar: "In Bank", profile: "Profile", wallet_future: "Wallet of the Future", or: "Or", login: "Log In", create: "Create", settings: "Settings", theme: "Theme", theme_light: "Light", theme_dark: "Dark", language: "Language", your_profile: "Your Profile", close: "Close", send_title: "Transfer", recipient: "Recipient", amount: "Amount (Min 0.1)", cancel: "Cancel", send_action: "Send", show_qr: "Show this code to sender", req_amount: "Request Amount", your_addr: "Your Address", deposit_title: "Deposit to Bank", deposit_action: "Deposit", withdraw_title: "Withdraw from Bank", withdraw_action: "Withdraw", scanning: "Scanning", access_denied: "Access Denied", password_ph: "Password", deposit_success: "Deposit successful", withdraw_success: "Withdrawal successful", addr_copied: "Address copied", link_copied: "Link copied", sent_to: "Sent to", error_fill: "Fill all fields", error_pass_len: "Password < 6 chars", error_self: "Cannot send to self", error_min: "Minimum 0.1 Đ", error_fund: "Insufficient funds",
-                legal_title: "Legal Information",
-                legal_text: "Doolcoin (Đ) is an in-game virtual unit. It is not a means of payment, electronic currency, or security. Đ has no real monetary value and does not guarantee exchangeability for fiat money. All operations are exclusively for entertainment purposes.",
-                any: "Any"
-            },
-            es: {
-                total_balance: "Saldo Total", send: "Enviar", receive: "Recibir", history: "Historial", loading: "Cargando...", invite_friend: "Invitar Amigo", ref_desc: "Obtén", your_link: "Tu Enlace", friends: "Amigos", earned: "Ganado", staking: "Staking", in_jar: "En Banco", profile: "Perfil", wallet_future: "Billetera del Futuro", or: "O", login: "Entrar", create: "Crear", settings: "Ajustes", theme: "Tema", theme_light: "Claro", theme_dark: "Oscuro", language: "Idioma", your_profile: "Tu Perfil", close: "Cerrar", send_title: "Transferir", recipient: "Destinatario", amount: "Cantidad (Mín 0.1)", cancel: "Cancelar", send_action: "Enviar", show_qr: "Muestra este código", req_amount: "Solicitar Cantidad", your_addr: "Tu Dirección", deposit_title: "Depositar", deposit_action: "Depositar", withdraw_title: "Retirar", withdraw_action: "Retirar", scanning: "Escaneando", access_denied: "Acceso Denegado", password_ph: "Contraseña", deposit_success: "Depósito exitoso", withdraw_success: "Retiro exitoso", addr_copied: "Dirección copiada", link_copied: "Enlace copiado", sent_to: "Enviado a", error_fill: "Rellena los campos", error_pass_len: "Contraseña < 6 carac.", error_self: "No puedes enviarte a ti", error_min: "Mínimo 0.1 Đ", error_fund: "Fondos insuficientes",
-                legal_title: "Información Legal",
-                legal_text: "Doolcoin (Đ) es una unidad virtual del juego. No es un medio de pago, moneda electrónica o valor. Đ no tiene valor monetario real y no garantiza el intercambio por dinero fiduciario. Todas las operaciones son exclusivamente para entretenimiento.",
-                any: "Cualquier"
-            },
-            uk: {
-                total_balance: "Загальний баланс", send: "Надіслати", receive: "Отримати", history: "Історія операцій", loading: "Завантаження...", invite_friend: "Запроси друга", ref_desc: "Отримай", your_link: "Ваше посилання", friends: "Друзів", earned: "Зароблено", staking: "Стейкінг", in_jar: "У банку", profile: "Профіль", wallet_future: "Гаманець майбутнього", or: "Або", login: "Увійти", create: "Створити", settings: "Налаштування", theme: "Тема оформлення", theme_light: "Світла", theme_dark: "Темна", language: "Мова", your_profile: "Ваш Профіль", close: "Закрити", send_title: "Переказ", recipient: "Отримувач", amount: "Сума (Мін 0.1)", cancel: "Скасувати", send_action: "Надіслати", show_qr: "Покажіть цей код", req_amount: "Запитати суму", your_addr: "Ваша адреса", deposit_title: "Покласти в банку", deposit_action: "Покласти", withdraw_title: "Дістати з банки", withdraw_action: "Дістати", scanning: "Сканування", access_denied: "Доступ обмежено", password_ph: "Пароль", deposit_success: "Депозит успішний", withdraw_success: "Виведення успішне", addr_copied: "Адресу скопійовано", link_copied: "Посилання скопійовано", sent_to: "Надіслано", error_fill: "Заповніть поля", error_pass_len: "Пароль < 6 символів", error_self: "Не можна собі", error_min: "Мін 0.1 Đ", error_fund: "Недостатньо коштів",
-                legal_title: "Юридична інформація",
-                legal_text: "Doolcoin (Đ) — це внутрішньоігрова умовна одиниця. Вона не є платіжним засобом, електронною валютою або цінним папером. Đ не має реальної грошової вартості і не гарантує обміну на фіатні гроші. Всі операції носять виключно розважальний характер.",
-                any: "Будь-яка"
-            },
-            fr: {
-                total_balance: "Solde Total", send: "Envoyer", receive: "Recevoir", history: "Historique", loading: "Chargement...", invite_friend: "Inviter un ami", ref_desc: "Obtenez", your_link: "Votre lien", friends: "Amis", earned: "Gagné", staking: "Staking", in_jar: "En Banque", profile: "Profil", wallet_future: "Portefeuille du futur", or: "Ou", login: "Connexion", create: "Créer", settings: "Paramètres", theme: "Thème", theme_light: "Clair", theme_dark: "Sombre", language: "Langue", your_profile: "Votre Profil", close: "Fermer", send_title: "Transfert", recipient: "Destinataire", amount: "Montant (Min 0.1)", cancel: "Annuler", send_action: "Envoyer", show_qr: "Montrez ce code", req_amount: "Demander montant", your_addr: "Votre adresse", deposit_title: "Dépôt", deposit_action: "Déposer", withdraw_title: "Retrait", withdraw_action: "Retirer", scanning: "Scanner", access_denied: "Accès refusé", password_ph: "Mot de passe", deposit_success: "Dépôt réussi", withdraw_success: "Retrait réussi", addr_copied: "Adresse copiée", link_copied: "Lien copié", sent_to: "Envoyé à", error_fill: "Remplir les champs", error_pass_len: "Mot de passe < 6 car.", error_self: "Impossible d'envoyer à soi-même", error_min: "Min 0.1 Đ", error_fund: "Fonds insuffisants",
-                legal_title: "Information Légale",
-                legal_text: "Doolcoin (Đ) est une unité virtuelle de jeu. Ce n'est pas un moyen de paiement, une monnaie électronique ou un titre. Đ n'a aucune valeur monétaire réelle et ne garantit pas l'échange contre de la monnaie fiduciaire. Toutes les opérations sont exclusivement à des fins de divertissement.",
-                any: "Toute"
             }
         };
 
-        let currentLang = localStorage.getItem('dool_lang') || 'ru';
+        // --- CORE FUNCTIONS & STATE ---
+        let currentLang = 'ru';
         let currentTheme = localStorage.getItem('dool_theme') || 'dark';
-
-        window.setLanguage = (lang) => {
-            if (!langData[lang]) return;
-            currentLang = lang;
-            localStorage.setItem('dool_lang', lang);
-            document.querySelectorAll('[data-lang]').forEach(el => { const key = el.getAttribute('data-lang'); if (langData[lang][key]) el.textContent = langData[lang][key]; });
-            document.querySelectorAll('[data-lang-placeholder]').forEach(el => { 
-                const key = el.getAttribute('data-lang-placeholder');
-                if(langData[lang][key]) el.placeholder = langData[lang][key];
-                if(key === 'password') el.placeholder = langData[lang]['password_ph'];
-                if(key === 'any') el.placeholder = langData[lang]['any'];
-            });
-            document.querySelectorAll('.lang-btn').forEach(btn => {
-                if (btn.getAttribute('data-lang-code') === lang) btn.classList.add('active');
-                else btn.classList.remove('active');
-            });
-        };
 
         window.setTheme = (theme) => {
             currentTheme = theme;
@@ -695,18 +603,15 @@
                 document.getElementById('theme-btn-dark').classList.add('active');
             }
         };
-
-        window.setLanguage(currentLang);
         window.setTheme(currentTheme);
 
-        async function getClientIP() {
-            try { const res = await fetch('https://api.ipify.org?format=json'); const data = await res.json(); return data.ip; } catch (e) { return '0.0.0.0'; }
-        }
+        async function getClientIP() { try { const res = await fetch('https://api.ipify.org?format=json'); const data = await res.json(); return data.ip; } catch (e) { return '0.0.0.0'; } }
 
-        window.appLogout = () => { signOut(auth).then(() => { document.getElementById('view-banned').classList.add('hidden'); document.getElementById('view-banned').classList.remove('flex'); }).catch(() => window.location.reload()); };
+        window.appLogout = () => { signOut(auth).then(() => { location.reload(); }); };
 
         let myData = null, lastBal = null, userCache = {}, html5QrCode = null; 
         
+        // --- SWIPE TO CLOSE ---
         function initSwipeClose(modalName) {
             const modalId = 'modal-' + modalName, contentId = modalId + '-content', content = document.getElementById(contentId), handle = content.querySelector('.swipe-zone');
             if(!handle) return;
@@ -715,53 +620,42 @@
             handle.addEventListener('touchmove', (e) => { if(!isDragging) return; currentY = e.touches[0].clientY; const diff = currentY - startY; if(diff > 0) content.style.transform = `translateY(${diff}px)`; }, {passive: true});
             handle.addEventListener('touchend', (e) => { isDragging = false; const diff = currentY - startY; content.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'; if(diff > 120) closeModal(modalName); else content.style.transform = ''; });
         }
-        ['send', 'receive', 'deposit', 'withdraw', 'settings'].forEach(initSwipeClose);
+        ['send', 'receive', 'deposit', 'withdraw', 'settings', 'nft-create', 'public-profile'].forEach(initSwipeClose);
 
-        function showRefButton(email) { const btn = document.getElementById('auth-ref-btn'); if(btn) btn.classList.remove('hidden'); }
-        try {
-            const urlParams = new URLSearchParams(window.location.search), refParam = urlParams.get('ref');
-            if (refParam) { window.history.replaceState({}, document.title, window.location.pathname); localStorage.setItem('dool_ref', refParam.toLowerCase()); showRefButton(refParam); } 
-            else { const savedRef = localStorage.getItem('dool_ref'); if (savedRef) showRefButton(savedRef); }
-        } catch(e) {}
-
+        // --- USER INFO & CACHE ---
         async function getUserInfo(email) {
             if (userCache[email]) return userCache[email];
-            let info = { avatar: `https://ui-avatars.com/api/?background=random&color=fff&name=${email.charAt(0).toUpperCase()}&size=128`, email: email, isVerified: false };
+            let info = { avatar: `https://ui-avatars.com/api/?background=random&color=fff&name=${email.charAt(0).toUpperCase()}`, email: email, isVerified: false };
             try { 
                 const q = query(collection(db, "users"), where("email", "==", email)); 
                 const res = await getDocs(q); 
-                if (!res.empty) { 
-                    const d = res.docs[0].data(); 
-                    if (d.avatar) info.avatar = d.avatar; 
-                    if (d.isVerified) info.isVerified = true;
-                } 
+                if (!res.empty) { const d = res.docs[0].data(); if(d.avatar) info.avatar = d.avatar; if(d.isVerified) info.isVerified = true; } 
             } catch (e) {}
             userCache[email] = info; return info;
         }
 
+        // --- MODAL MANAGEMENT ---
         window.openModal = (n) => {
             const m = document.getElementById('modal-'+n), c = document.getElementById(`modal-${n}-content`);
             if(!m || !c) return; m.classList.remove('hidden'); void m.offsetWidth; m.classList.remove('opacity-0');
-            if(['send', 'receive', 'deposit', 'withdraw', 'settings'].includes(n)) { c.style.transform = ''; setTimeout(() => c.classList.remove('translate-y-full'), 10); } else if(n !== 'scan') c.classList.remove('scale-90');
+            if(['send', 'receive', 'deposit', 'withdraw', 'settings', 'nft-create', 'public-profile'].includes(n)) { c.style.transform = ''; setTimeout(() => c.classList.remove('translate-y-full'), 10); } else if(n !== 'scan') c.classList.remove('scale-90');
             if(n === 'receive') updateQR(); if(n === 'scan') startScannerV2();
         };
 
         window.closeModal = (n) => {
             const m = document.getElementById('modal-'+n), c = document.getElementById(`modal-${n}-content`);
             if(!m || !c) return; m.classList.add('opacity-0');
-            if(['send', 'receive', 'deposit', 'withdraw', 'settings'].includes(n)) c.classList.add('translate-y-full'); else if(n !== 'scan') c.classList.add('scale-90');
+            if(['send', 'receive', 'deposit', 'withdraw', 'settings', 'nft-create', 'public-profile'].includes(n)) c.classList.add('translate-y-full'); else if(n !== 'scan') c.classList.add('scale-90');
             if(n === 'scan') stopScannerV2(); if(n === 'send') clearSendForm(); setTimeout(() => m.classList.add('hidden'), 300);
         };
-
-        function clearSendForm() { setTimeout(() => { document.getElementById('send-amt').value = ''; document.getElementById('send-email').value = ''; document.getElementById('send-amt').readOnly = false; document.getElementById('send-email').readOnly = false; document.getElementById('proposal-notice').classList.add('hidden'); document.getElementById('btn-do-send').textContent = getTrans('send_action'); }, 300); }
-
-        function getTrans(key) { return langData[currentLang][key] || key; }
+        
+        function clearSendForm() { setTimeout(() => { document.getElementById('send-amt').value = ''; document.getElementById('send-email').value = ''; document.getElementById('send-amt').readOnly = false; document.getElementById('send-email').readOnly = false; document.getElementById('proposal-notice').classList.add('hidden'); document.getElementById('btn-do-send').textContent = "Отправить"; }, 300); }
         let toastTimeout;
         window.showT = async (title, msg, amountStr = '', senderEmail = null, isError = false) => {
             const t = document.getElementById('toast'), icon = document.getElementById('toast-icon-sys'), avImg = document.getElementById('toast-avatar'), amtEl = document.getElementById('toast-amount'), titleEl = document.getElementById('toast-title');
             clearTimeout(toastTimeout); t.classList.remove('active');
             setTimeout(async () => {
-                let displayTitle = title; if (displayTitle === 'Банк') displayTitle = getTrans('in_jar');
+                let displayTitle = title;
                 titleEl.textContent = displayTitle; document.getElementById('toast-msg').textContent = msg;
                 if (amountStr) { amtEl.textContent = amountStr; amtEl.classList.remove('hidden'); } else amtEl.classList.add('hidden');
                 avImg.className = "w-full h-full hidden"; avImg.style.filter = ''; 
@@ -769,8 +663,8 @@
                 else {
                     let sysImg = null;
                     if (isError) sysImg = "https://img.icons8.com/?size=100&id=5PexHbhSpPcd&format=png&color=ffffff";
-                    else if (displayTitle === getTrans('in_jar') || title.includes('Банка')) sysImg = "https://emojigraph.org/media/facebook/jar_1fad9.png";
-                    else if (title.includes('Успешно') || title === 'Success') sysImg = "https://img.icons8.com/?size=100&id=ThDU3IFKpFui&format=png&color=ffffff";
+                    else if (title.includes('Банка')) sysImg = "https://emojigraph.org/media/facebook/jar_1fad9.png";
+                    else if (title.includes('Success') || title.includes('Успешно')) sysImg = "https://img.icons8.com/?size=100&id=ThDU3IFKpFui&format=png&color=ffffff";
                     else sysImg = "https://img.icons8.com/?size=100&id=oStKNuPVzV7A&format=png&color=ffffff"; 
                     if (sysImg) { icon.classList.add('hidden'); avImg.classList.remove('hidden'); avImg.classList.add('object-contain', 'p-1.5'); avImg.src = sysImg; if(currentTheme === 'light' && !displayTitle.includes('Банка')) avImg.style.filter = 'invert(0.8)'; } 
                 }
@@ -782,14 +676,290 @@
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); document.getElementById('tab-'+tab).classList.add('active');
             document.querySelectorAll('.nav-icon').forEach(img => { img.style.filter = ''; if(currentTheme === 'light') img.style.filter = 'invert(0.8)'; img.style.opacity = '0.5'; img.classList.remove('nav-icon-active'); });
             const activeImg = document.getElementById('nav-'+tab).querySelector('img'); activeImg.style.opacity = '1'; activeImg.style.filter = 'brightness(0) saturate(100%) invert(32%) sepia(98%) saturate(2329%) hue-rotate(358deg) brightness(101%) contrast(106%)'; activeImg.classList.add('nav-icon-active');
+            if(tab === 'nft') loadMarket();
         };
 
+        // --- NFT SYSTEM LOGIC ---
+        
+        // 1. Image Hashing (Perceptual Hash Simplified)
+        async function computeImageHash(imgElement) {
+            const canvas = document.getElementById('hash-canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(imgElement, 0, 0, 16, 16);
+            const imageData = ctx.getImageData(0, 0, 16, 16).data;
+            let total = 0;
+            for(let i=0; i<imageData.length; i+=4) total += imageData[i]; // Grayscale simplified (using R channel)
+            const avg = total / (16*16);
+            let hash = '';
+            for(let i=0; i<imageData.length; i+=4) {
+                hash += (imageData[i] >= avg) ? '1' : '0';
+            }
+            return hash;
+        }
+
+        // 2. Similarity Check
+        function checkSimilarity(hash1, hash2) {
+            let matches = 0;
+            for(let i=0; i<hash1.length; i++) {
+                if(hash1[i] === hash2[i]) matches++;
+            }
+            return (matches / hash1.length);
+        }
+
+        // 3. Create NFT
+        window.previewNftImage = (input) => {
+            const file = input.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = document.getElementById('nft-preview-img');
+                    img.src = e.target.result;
+                    img.classList.remove('hidden');
+                    document.getElementById('nft-upload-placeholder').classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        window.mintNFT = async () => {
+            const img = document.getElementById('nft-preview-img');
+            const name = document.getElementById('nft-create-name').value;
+            const btn = document.getElementById('btn-create-nft');
+
+            if(img.classList.contains('hidden') || !name) return showT('Ошибка', 'Фото и название обязательны', '', null, true);
+
+            btn.disabled = true; btn.textContent = 'Проверка...';
+
+            try {
+                // Generate Hash
+                const myHash = await computeImageHash(img);
+                
+                // Anti-Plagiarism Check
+                // Note: In a real production app, this should be done server-side or with optimized querying.
+                // Here we fetch existing NFT hashes. Limiting to 100 for prototype performance.
+                const q = query(collection(db, "nfts")); 
+                const querySnapshot = await getDocs(q);
+                
+                let isPlagiarized = false;
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    if(data.hash) {
+                        const similarity = checkSimilarity(myHash, data.hash);
+                        if(similarity > 0.70) isPlagiarized = true;
+                    }
+                });
+
+                if(isPlagiarized) {
+                    showT('Отклонено', 'Сходство > 70% с существующим NFT', '', null, true);
+                    btn.disabled = false; btn.textContent = 'Создать';
+                    return;
+                }
+
+                // Upload
+                btn.textContent = 'Минтинг...';
+                await setDoc(doc(collection(db, "nfts")), {
+                    owner: auth.currentUser.email,
+                    name: name,
+                    image: img.src, // Base64
+                    hash: myHash,
+                    price: 0,
+                    isListed: false,
+                    createdAt: serverTimestamp()
+                });
+                
+                closeModal('nft-create');
+                document.getElementById('nft-create-name').value = '';
+                img.classList.add('hidden');
+                document.getElementById('nft-upload-placeholder').classList.remove('hidden');
+                showT('Успешно', 'NFT создан!');
+                if(document.getElementById('nft-sub-inventory').classList.contains('active')) loadInventory();
+
+            } catch(e) {
+                console.error(e);
+                showT('Ошибка', 'Не удалось создать NFT', '', null, true);
+            } finally {
+                btn.disabled = false; btn.textContent = 'Создать';
+            }
+        };
+
+        // 4. NFT Tabs Logic
+        window.switchNftSubTab = (tab) => {
+            document.getElementById('nft-sub-market').classList.remove('active');
+            document.getElementById('nft-sub-inventory').classList.remove('active');
+            document.getElementById('nft-sub-'+tab).classList.add('active');
+            
+            document.getElementById('nft-view-market').classList.add('hidden');
+            document.getElementById('nft-view-inventory').classList.add('hidden');
+            document.getElementById('nft-view-'+tab).classList.remove('hidden');
+            
+            if(tab === 'market') loadMarket();
+            if(tab === 'inventory') loadInventory();
+        };
+
+        async function loadMarket() {
+            const container = document.getElementById('nft-view-market');
+            container.innerHTML = '<div class="col-span-2 text-center py-10"><div class="w-8 h-8 border-2 border-white/10 border-t-orange-500 rounded-full animate-spin mx-auto"></div></div>';
+            
+            const q = query(collection(db, "nfts"), where("isListed", "==", true));
+            const snap = await getDocs(q);
+            container.innerHTML = '';
+            
+            if(snap.empty) { container.innerHTML = '<p class="col-span-2 text-center text-neutral-600 text-[10px] font-bold uppercase mt-10">Магазин пуст</p>'; return; }
+
+            snap.forEach(doc => {
+                const d = doc.data();
+                if(d.owner === auth.currentUser.email) return; // Don't show own items in market
+                const el = document.createElement('div'); el.className = 'nft-card';
+                el.innerHTML = `
+                    <img src="${d.image}" class="nft-image">
+                    <div class="nft-info">
+                        <div class="flex justify-between items-start mb-2">
+                            <p class="nft-title">${d.name}</p>
+                            <p class="nft-price">${d.price} Đ</p>
+                        </div>
+                        <p class="text-[9px] text-neutral-500 truncate mb-2">By: ${d.owner}</p>
+                        <button onclick="buyNFT('${doc.id}', ${d.price}, '${d.owner}')" class="nft-action-btn nft-btn-primary">Купить</button>
+                    </div>
+                `;
+                container.appendChild(el);
+            });
+        }
+
+        async function loadInventory() {
+            const container = document.getElementById('nft-view-inventory');
+            container.innerHTML = '<div class="col-span-2 text-center py-10"><div class="w-8 h-8 border-2 border-white/10 border-t-orange-500 rounded-full animate-spin mx-auto"></div></div>';
+            
+            const q = query(collection(db, "nfts"), where("owner", "==", auth.currentUser.email));
+            const snap = await getDocs(q);
+            container.innerHTML = '';
+            
+            if(snap.empty) { container.innerHTML = '<p class="col-span-2 text-center text-neutral-600 text-[10px] font-bold uppercase mt-10">Пусто. Создайте NFT!</p>'; return; }
+
+            snap.forEach(doc => {
+                const d = doc.data();
+                const el = document.createElement('div'); el.className = 'nft-card';
+                const btnAction = d.isListed ? `onclick="unlistNFT('${doc.id}')" class="nft-action-btn nft-btn-secondary">Снять (${d.price} Đ)` : `onclick="listNFT('${doc.id}')" class="nft-action-btn nft-btn-primary">Продать`;
+                const btnText = d.isListed ? 'Снять' : 'Продать';
+                
+                el.innerHTML = `
+                    <img src="${d.image}" class="nft-image">
+                    <div class="nft-info">
+                        <p class="nft-title mb-1">${d.name}</p>
+                        <button ${btnAction}</button>
+                    </div>
+                `;
+                container.appendChild(el);
+            });
+        }
+
+        window.listNFT = async (id) => {
+            const price = prompt("Цена продажи (Đ):");
+            if(!price || isNaN(price) || price <= 0) return;
+            await updateDoc(doc(db, "nfts", id), { isListed: true, price: parseFloat(price) });
+            loadInventory();
+        };
+
+        window.unlistNFT = async (id) => {
+            if(!confirm("Снять с продажи?")) return;
+            await updateDoc(doc(db, "nfts", id), { isListed: false });
+            loadInventory();
+        };
+
+        window.buyNFT = async (nftId, price, ownerEmail) => {
+            if(myData.balance < price) return showT('Ошибка', 'Недостаточно средств', '', null, true);
+            if(!confirm(`Купить за ${price} Đ?`)) return;
+
+            try {
+                await runTransaction(db, async (t) => {
+                    const buyerRef = doc(db, "users", auth.currentUser.uid);
+                    // Need to find owner UID logic usually, but here we might trust email lookup or better, store ownerUID in NFT. 
+                    // For prototype simplification, we query owner by email.
+                    const q = query(collection(db, "users"), where("email", "==", ownerEmail));
+                    const ownerSnap = await getDocs(q);
+                    if(ownerSnap.empty) throw "Owner not found";
+                    const ownerRef = ownerSnap.docs[0].ref;
+
+                    const nftRef = doc(db, "nfts", nftId);
+                    const nftDoc = await t.get(nftRef);
+                    if(!nftDoc.exists() || !nftDoc.data().isListed) throw "Item no longer available";
+
+                    const buyerData = (await t.get(buyerRef)).data();
+                    if(buyerData.balance < price) throw "Funds";
+
+                    t.update(buyerRef, { balance: increment(-price) });
+                    t.update(ownerRef, { balance: increment(price) });
+                    t.update(nftRef, { owner: auth.currentUser.email, isListed: false });
+                    
+                    // Add transaction record
+                    const txRef = doc(collection(db, "transactions"));
+                    t.set(txRef, { from: auth.currentUser.email, to: ownerEmail, amount: price, date: Timestamp.now(), parties: [auth.currentUser.email, ownerEmail], type: 'nft_buy' });
+                });
+                showT('Успешно', 'NFT куплен!');
+                loadMarket();
+            } catch(e) {
+                showT('Ошибка', e.message || "Сбой транзакции", '', null, true);
+            }
+        };
+
+        // 5. Public Profile Logic
+        window.openPublicProfile = async (email) => {
+            if(email === auth.currentUser.email) return openModal('profile');
+            
+            // UI Reset
+            document.getElementById('pub-profile-avatar').src = '';
+            document.getElementById('pub-profile-email').textContent = 'Loading...';
+            document.getElementById('pub-profile-nfts').innerHTML = '';
+            document.getElementById('pub-profile-empty').classList.add('hidden');
+            openModal('public-profile');
+
+            const info = await getUserInfo(email);
+            document.getElementById('pub-profile-avatar').src = info.avatar;
+            document.getElementById('pub-profile-email').textContent = email;
+            if(info.isVerified) document.getElementById('pub-profile-verified').classList.remove('hidden');
+            else document.getElementById('pub-profile-verified').classList.add('hidden');
+
+            // Check Privacy & Load NFTs
+            const qUser = query(collection(db, "users"), where("email", "==", email));
+            const uSnap = await getDocs(qUser);
+            if(!uSnap.empty) {
+                const uData = uSnap.docs[0].data();
+                if(uData.settings && uData.settings.showNfts === false) {
+                    document.getElementById('pub-profile-empty').textContent = "Коллекция скрыта пользователем";
+                    document.getElementById('pub-profile-empty').classList.remove('hidden');
+                    return;
+                }
+            }
+
+            // Load Public NFTs
+            const qNft = query(collection(db, "nfts"), where("owner", "==", email));
+            const nftSnap = await getDocs(qNft);
+            
+            if(nftSnap.empty) {
+                document.getElementById('pub-profile-empty').textContent = "Коллекция пуста";
+                document.getElementById('pub-profile-empty').classList.remove('hidden');
+            } else {
+                const container = document.getElementById('pub-profile-nfts');
+                nftSnap.forEach(doc => {
+                    const d = doc.data();
+                    const el = document.createElement('div'); el.className = 'nft-card';
+                    el.innerHTML = `<img src="${d.image}" class="nft-image"><div class="nft-info"><p class="nft-title">${d.name}</p></div>`;
+                    container.appendChild(el);
+                });
+            }
+        };
+
+        // 6. Settings Toggle
+        window.toggleNftPrivacy = async (checked) => {
+             await updateDoc(doc(db, "users", auth.currentUser.uid), { "settings.showNfts": checked });
+        };
+
+        // --- AUTH & INIT ---
         onAuthStateChanged(auth, async (u) => {
             if (u) {
                 const userRef = doc(db, "users", u.uid); const snap = await getDoc(userRef);
                 if (!snap.exists()) {
                     const email = u.email, emailLower = u.email.toLowerCase(), clientIP = await getClientIP();
-                    const userData = { email: email, lowercaseEmail: emailLower, balance: 10.0, bankBalance: 0, lastBankUpdate: Timestamp.now(), avatar: u.photoURL || '', refCount: 0, refEarned: 0, createdAt: Timestamp.now(), isBanned: false, ip: clientIP, referralStatus: 'none', isVerified: false };
+                    const userData = { email: email, lowercaseEmail: emailLower, balance: 10.0, bankBalance: 0, lastBankUpdate: Timestamp.now(), avatar: u.photoURL || '', refCount: 0, refEarned: 0, createdAt: Timestamp.now(), isBanned: false, ip: clientIP, referralStatus: 'none', isVerified: false, settings: { showNfts: true } };
                     const refEmail = localStorage.getItem('dool_ref');
                     if (refEmail && refEmail !== emailLower) {
                         try {
@@ -807,93 +977,89 @@
         });
 
         document.getElementById('btn-google').onclick = async () => { try { await signInWithPopup(auth, googleProvider); } catch (e) { if(e.code !== 'auth/popup-closed-by-user') showT('Ошибка', e.message, '', null, true); } };
-        document.getElementById('btn-login').onclick = async () => { const btn = document.getElementById('btn-login'), email = document.getElementById('auth-email').value, pass = document.getElementById('auth-password').value; if(!email || !pass) return showT('Ошибка', getTrans('error_fill'), '', null, true); btn.disabled = true; try { await signInWithEmailAndPassword(auth, email, pass); } catch(e) { btn.disabled = false; showT('Ошибка', 'Login Error', '', null, true); } };
-        document.getElementById('btn-register').onclick = async () => { const btn = document.getElementById('btn-register'), email = document.getElementById('auth-email').value, pass = document.getElementById('auth-password').value; if (pass.length < 6) return showT('Ошибка', getTrans('error_pass_len'), '', null, true); btn.disabled = true; try { await createUserWithEmailAndPassword(auth, email, pass); } catch(e) { btn.disabled = false; showT('Ошибка', 'Error', '', null, true); } };
+        document.getElementById('btn-login').onclick = async () => { const btn = document.getElementById('btn-login'), email = document.getElementById('auth-email').value, pass = document.getElementById('auth-password').value; if(!email || !pass) return showT('Ошибка', 'Заполните поля', '', null, true); btn.disabled = true; try { await signInWithEmailAndPassword(auth, email, pass); } catch(e) { btn.disabled = false; showT('Ошибка', 'Login Error', '', null, true); } };
+        document.getElementById('btn-register').onclick = async () => { const btn = document.getElementById('btn-register'), email = document.getElementById('auth-email').value, pass = document.getElementById('auth-password').value; if (pass.length < 6) return showT('Ошибка', 'Пароль < 6 символов', '', null, true); btn.disabled = true; try { await createUserWithEmailAndPassword(auth, email, pass); } catch(e) { btn.disabled = false; showT('Ошибка', 'Error', '', null, true); } };
 
         function adjustBalanceSize(amountStr) { const el = document.getElementById('balance-val'), len = amountStr.length; el.classList.remove('text-5xl', 'text-4xl', 'text-3xl', 'text-2xl'); if (len > 12) el.classList.add('text-2xl'); else if (len > 9) el.classList.add('text-3xl'); else if (len > 7) el.classList.add('text-4xl'); else el.classList.add('text-5xl'); }
+        
         function startApp(u) {
             document.getElementById('main-username').textContent = u.email; document.getElementById('profile-email').textContent = u.email; document.getElementById('my-email-addr').textContent = u.email;
             const refLink = `${window.location.href.split('?')[0]}?ref=${u.email}`; document.getElementById('ref-link').value = refLink;
             onSnapshot(doc(db, "users", u.uid), async (snap) => {
                 const d = snap.data(); if (!d) return;
                 if (d.isBanned) { document.getElementById('view-loading').classList.add('hidden'); document.getElementById('view-main').classList.add('hidden'); document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-banned').classList.remove('hidden'); document.getElementById('view-banned').classList.add('flex'); document.getElementById('ban-text').textContent = d.banReason || "Blocked"; return; } 
-                else { document.getElementById('view-banned').classList.add('hidden'); document.getElementById('view-banned').classList.remove('flex'); }
                 if (lastBal !== null && d.balance > lastBal) handleIncomingTransfer(u.email, d.balance - lastBal);
                 myData = d; lastBal = d.balance; const balStr = d.balance.toFixed(2); const balEl = document.getElementById('balance-val'); balEl.textContent = balStr; adjustBalanceSize(balStr);
                 updateBankVisuals(d);
                 document.getElementById('ref-count').textContent = d.refCount || 0; document.getElementById('ref-earned').textContent = (d.refEarned || 0).toFixed(1);
                 const av = d.avatar || `https://ui-avatars.com/api/?background=random&color=fff&name=${u.email.charAt(0)}`; document.getElementById('main-avatar').src = av; document.getElementById('edit-avatar-img').src = av;
                 
-                // VERIFICATION UI UPDATE
+                // Init settings toggle
+                const showNftSetting = (d.settings && d.settings.showNfts !== undefined) ? d.settings.showNfts : true;
+                document.getElementById('setting-show-nft').checked = showNftSetting;
+
+                // Verification
                 const vIcon = document.getElementById('header-verified-icon');
                 const vSection = document.getElementById('profile-verification-status');
-                if (d.isVerified) {
-                    vIcon.classList.remove('hidden');
-                    vSection.innerHTML = `
-                        <div class="flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 px-4 py-2 rounded-xl">
-                            <img src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" class="w-5 h-5">
-                            <span class="text-xs font-bold text-blue-400 uppercase tracking-wider">Верифицирован</span>
-                        </div>
-                    `;
-                } else {
-                    vIcon.classList.add('hidden');
-                    vSection.innerHTML = `
-                        <button onclick="requestVerification()" class="flex items-center gap-2 bg-white/5 border border-white/10 hover:bg-white/10 px-4 py-2 rounded-xl transition-colors group cursor-pointer">
-                            <span class="text-xs font-bold text-neutral-400 group-hover:text-white uppercase tracking-wider">Получить галочку</span>
-                            <img src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" class="w-4 h-4 opacity-50 grayscale group-hover:grayscale-0 group-hover:opacity-100 transition-all">
-                        </button>
-                    `;
-                }
+                if (d.isVerified) { vIcon.classList.remove('hidden'); vSection.innerHTML = `<div class="flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 px-4 py-2 rounded-xl"><img src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" class="w-5 h-5"><span class="text-xs font-bold text-blue-400 uppercase tracking-wider">Верифицирован</span></div>`; } 
+                else { vIcon.classList.add('hidden'); vSection.innerHTML = `<button onclick="requestVerification()" class="flex items-center gap-2 bg-white/5 border border-white/10 hover:bg-white/10 px-4 py-2 rounded-xl transition-colors group cursor-pointer"><span class="text-xs font-bold text-neutral-400 group-hover:text-white uppercase tracking-wider">Получить галочку</span><img src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" class="w-4 h-4 opacity-50 grayscale group-hover:grayscale-0 group-hover:opacity-100 transition-all"></button>`; }
 
                 document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-loading').classList.add('hidden'); document.getElementById('view-main').classList.replace('hidden', 'flex'); switchTab('wallet'); document.getElementById('btn-login').disabled = false; document.getElementById('btn-register').disabled = false;
             });
+
+            // History Listener with Profile Click
             const qTx = query(collection(db, "transactions"), where("parties", "array-contains", u.email));
             onSnapshot(qTx, async (snap) => {
                 const list = document.getElementById('tx-history'); if (snap.empty) { list.innerHTML = `<p class="text-center text-neutral-600 text-[10px] uppercase font-bold py-4">...</p>`; return; }
                 const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date); let html = '';
                 for (const tx of docs) {
                     const isSent = tx.from === u.email, partner = isSent ? tx.to : tx.from, dateStr = tx.date ? new Date(tx.date.toMillis()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
-                    html += `<div class="flex items-center justify-between p-4 rounded-[1.5rem] bg-white/[0.03] border border-white/5"><div class="flex items-center gap-3 overflow-hidden"><img id="av-${tx.date.toMillis()}" src="https://ui-avatars.com/api/?background=222&color=666&name=${partner.charAt(0)}" class="w-10 h-10 rounded-full bg-neutral-800 object-cover border border-white/5 shrink-0"><div class="min-w-0"><p class="text-[9px] font-black uppercase ${isSent ? 'text-neutral-500' : 'text-[#FF4D00]'} tracking-widest mb-0.5">${isSent ? 'To:' : 'From:'}</p><div class="flex items-center gap-1"><p class="text-[11px] font-bold text-white truncate max-w-[120px] leading-tight">${partner}</p><img id="ver-${tx.date.toMillis()}" src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" class="w-3 h-3 hidden"></div></div></div><div class="text-right"><p class="text-sm font-black ${isSent ? 'text-white' : 'text-[#FF4D00]'}">${isSent ? '-' : '+'}${tx.amount.toFixed(1)}</p><p class="text-[9px] text-neutral-600 font-bold uppercase">${dateStr}</p></div></div>`;
-                    if(partner.includes('@')) getUserInfo(partner).then(inf => { 
-                        const el = document.getElementById(`av-${tx.date.toMillis()}`); if(el) el.src = inf.avatar; 
-                        if (inf.isVerified) { const vel = document.getElementById(`ver-${tx.date.toMillis()}`); if(vel) vel.classList.remove('hidden'); }
-                    });
+                    // Added onclick to the container div of the partner info
+                    const clickAction = partner.includes('@') ? `onclick="openPublicProfile('${partner}')" style="cursor:pointer"` : '';
+                    
+                    html += `<div class="flex items-center justify-between p-4 rounded-[1.5rem] bg-white/[0.03] border border-white/5">
+                        <div class="flex items-center gap-3 overflow-hidden" ${clickAction}>
+                            <img id="av-${tx.date.toMillis()}" src="https://ui-avatars.com/api/?background=222&color=666&name=${partner.charAt(0)}" class="w-10 h-10 rounded-full bg-neutral-800 object-cover border border-white/5 shrink-0">
+                            <div class="min-w-0">
+                                <p class="text-[9px] font-black uppercase ${isSent ? 'text-neutral-500' : 'text-[#FF4D00]'} tracking-widest mb-0.5">${isSent ? 'To:' : 'From:'}</p>
+                                <div class="flex items-center gap-1"><p class="text-[11px] font-bold text-white truncate max-w-[120px] leading-tight hover:text-orange-500 transition-colors">${partner}</p></div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-black ${isSent ? 'text-white' : 'text-[#FF4D00]'}">${isSent ? '-' : '+'}${tx.amount.toFixed(1)}</p>
+                            <p class="text-[9px] text-neutral-600 font-bold uppercase">${dateStr}</p>
+                        </div>
+                    </div>`;
+                    if(partner.includes('@')) getUserInfo(partner).then(inf => { const el = document.getElementById(`av-${tx.date.toMillis()}`); if(el) el.src = inf.avatar; });
                 }
                 list.innerHTML = html;
             });
         }
         
-        window.requestVerification = async () => {
-             const btn = document.querySelector('#profile-verification-status button');
-             if(btn) btn.innerHTML = '<span class="text-xs font-bold animate-pulse text-white">Загрузка...</span>';
-             try {
-                await updateDoc(doc(db, "users", auth.currentUser.uid), { isVerified: true });
-                showT('Успешно', 'Вы верифицированы!');
-             } catch (e) {
-                showT('Ошибка', 'Не удалось верифицировать', '', null, true);
-                if(btn) btn.innerHTML = 'Ошибка';
-             }
-        };
-
-        async function handleIncomingTransfer(myEmail, amountDiff) {
-            try { const q = query(collection(db, "transactions"), where("to", "==", myEmail)); const snap = await getDocs(q); if (!snap.empty) { const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date); if (Math.abs(docs[0].amount - amountDiff) < 0.01) { if (docs[0].type === 'referral_bonus') showT('Bonus', getTrans('ref_desc'), `+${amountDiff.toFixed(1)} Đ`); else showT('Transfer', docs[0].from, `+${amountDiff.toFixed(1)} Đ`, docs[0].from); return; } } showT('Банк', getTrans('in_jar'), `+${amountDiff.toFixed(1)} Đ`); } catch(e) {}
-        }
+        window.requestVerification = async () => { try { await updateDoc(doc(db, "users", auth.currentUser.uid), { isVerified: true }); showT('Успешно', 'Вы верифицированы!'); } catch (e) { showT('Ошибка', 'Не удалось верифицировать', '', null, true); } };
+        async function handleIncomingTransfer(myEmail, amountDiff) { try { const q = query(collection(db, "transactions"), where("to", "==", myEmail)); const snap = await getDocs(q); if (!snap.empty) { const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date); if (Math.abs(docs[0].amount - amountDiff) < 0.01) { if (docs[0].type === 'referral_bonus') showT('Bonus', 'Ref Bonus', `+${amountDiff.toFixed(1)} Đ`); else showT('Transfer', docs[0].from, `+${amountDiff.toFixed(1)} Đ`, docs[0].from); return; } } showT('Банк', 'В банке', `+${amountDiff.toFixed(1)} Đ`); } catch(e) {} }
+        
         document.getElementById('avatar-input').onchange = (e) => { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = async (ev) => { try { await updateDoc(doc(db, "users", auth.currentUser.uid), { avatar: ev.target.result }); showT('Profile', 'Updated'); } catch { showT('Error', 'Failed', '', null, true); } }; reader.readAsDataURL(file); };
+        
         function calculateCompoundBalance(stored, lastUpdate) { if (!stored || stored <= 0 || !lastUpdate) return stored || 0; const diffWeeks = (new Date() - lastUpdate.toDate()) / (1000 * 60 * 60 * 24 * 7); return stored * Math.pow(1.05, diffWeeks); }
         function updateBankVisuals(d) { const bankBal = calculateCompoundBalance(d.bankBalance, d.lastBankUpdate); document.getElementById('bank-balance-val').textContent = bankBal.toFixed(1); const fire = document.querySelector('.bank-layer-fire'); if (fire) fire.style.opacity = bankBal >= 0.1 ? '1' : '0'; }
         setInterval(() => { if(myData) updateBankVisuals(myData); }, 1000);
-        document.getElementById('btn-do-deposit').onclick = async () => { const amt = parseFloat(document.getElementById('deposit-amt').value); if (!amt || amt < 0.1) return showT('Ошибка', getTrans('error_min'), '', null, true); if (amt > myData.balance) return showT('Ошибка', getTrans('error_fund'), '', null, true); try { const userRef = doc(db, "users", auth.currentUser.uid); await runTransaction(db, async (t) => { const d = (await t.get(userRef)).data(); const newWalletBal = d.balance - amt; if(newWalletBal < 0) throw "Funds"; t.update(userRef, { balance: newWalletBal, bankBalance: calculateCompoundBalance(d.bankBalance, d.lastBankUpdate) + amt, lastBankUpdate: serverTimestamp() }); }); closeModal('deposit'); document.getElementById('deposit-amt').value = ''; showT('Банк', getTrans('deposit_success')); } catch(e) { showT('Ошибка', e.message, '', null, true); } };
-        document.getElementById('btn-do-withdraw').onclick = async () => { const amt = parseFloat(document.getElementById('withdraw-amt').value); if (!amt || amt < 0.1) return showT('Ошибка', getTrans('error_min'), '', null, true); try { const userRef = doc(db, "users", auth.currentUser.uid); await runTransaction(db, async (t) => { const d = (await t.get(userRef)).data(); const currentBank = calculateCompoundBalance(d.bankBalance, d.lastBankUpdate); if (amt > currentBank) throw "Funds"; t.update(userRef, { balance: d.balance + amt, bankBalance: currentBank - amt, lastBankUpdate: serverTimestamp() }); }); closeModal('withdraw'); document.getElementById('withdraw-amt').value = ''; showT('Банк', getTrans('withdraw_success')); } catch(e) { showT('Ошибка', e.message, '', null, true); } };
+        
+        document.getElementById('btn-do-deposit').onclick = async () => { const amt = parseFloat(document.getElementById('deposit-amt').value); if (!amt || amt < 0.1) return showT('Ошибка', 'Мин 0.1', '', null, true); if (amt > myData.balance) return showT('Ошибка', 'Недостаточно средств', '', null, true); try { const userRef = doc(db, "users", auth.currentUser.uid); await runTransaction(db, async (t) => { const d = (await t.get(userRef)).data(); const newWalletBal = d.balance - amt; if(newWalletBal < 0) throw "Funds"; t.update(userRef, { balance: newWalletBal, bankBalance: calculateCompoundBalance(d.bankBalance, d.lastBankUpdate) + amt, lastBankUpdate: serverTimestamp() }); }); closeModal('deposit'); document.getElementById('deposit-amt').value = ''; showT('Банк', 'Успешно'); } catch(e) { showT('Ошибка', e.message, '', null, true); } };
+        document.getElementById('btn-do-withdraw').onclick = async () => { const amt = parseFloat(document.getElementById('withdraw-amt').value); if (!amt || amt < 0.1) return showT('Ошибка', 'Мин 0.1', '', null, true); try { const userRef = doc(db, "users", auth.currentUser.uid); await runTransaction(db, async (t) => { const d = (await t.get(userRef)).data(); const currentBank = calculateCompoundBalance(d.bankBalance, d.lastBankUpdate); if (amt > currentBank) throw "Funds"; t.update(userRef, { balance: d.balance + amt, bankBalance: currentBank - amt, lastBankUpdate: serverTimestamp() }); }); closeModal('withdraw'); document.getElementById('withdraw-amt').value = ''; showT('Банк', 'Успешно'); } catch(e) { showT('Ошибка', e.message, '', null, true); } };
+        
         window.updateQR = () => { const email = auth.currentUser.email; let amt = parseFloat(document.getElementById('receive-amt-req').value); const container = document.getElementById('qrcode-container'); if(isNaN(amt)) amt = 0; const data = JSON.stringify({ t: "req", e: email, a: amt }); container.innerHTML = ''; new QRCode(container, { text: data, width: 180, height: 180, colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.M }); };
         document.getElementById('receive-amt-req').oninput = updateQR;
+        
         window.startScannerV2 = () => { if (html5QrCode) return; html5QrCode = new Html5Qrcode("reader"); html5QrCode.start({ facingMode: "environment" }, { fps: 15, aspectRatio: window.innerHeight / window.innerWidth }, onScanSuccess, onScanError).catch(err => closeModal('scan')); };
         const onScanSuccess = (decodedText) => { closeModal('scan'); try { const data = JSON.parse(decodedText); if(data.t === 'req' && data.e) openProposalModal(data); else showT('Error', 'QR?', '', null, true); } catch (e) { if(decodedText.includes('@')) openProposalModal({e: decodedText, a: 0}); else showT('Error', 'QR?', '', null, true); } };
         const onScanError = () => {};
         window.stopScannerV2 = () => { if (html5QrCode) { html5QrCode.stop().then(() => { html5QrCode.clear(); html5QrCode = null; }).catch(err => console.log(err)); } };
         function openProposalModal(data) { openModal('send'); document.getElementById('send-email').value = data.e; if (data.a > 0) { document.getElementById('send-amt').value = data.a; document.getElementById('send-amt').readOnly = true; document.getElementById('send-email').readOnly = true; document.getElementById('proposal-notice').classList.remove('hidden'); } }
+        
         document.getElementById('btn-do-send').onclick = async () => {
             const to = document.getElementById('send-email').value.trim().toLowerCase(), amt = parseFloat(document.getElementById('send-amt').value), myEmail = auth.currentUser.email;
-            if (to === myEmail) return showT('Ошибка', getTrans('error_self'), '', null, true); if (!amt || amt < 0.1) return showT('Ошибка', getTrans('error_min'), '', null, true); if (amt > myData.balance) return showT('Ошибка', getTrans('error_fund'), '', null, true);
+            if (to === myEmail) return showT('Ошибка', 'Нельзя себе', '', null, true); if (!amt || amt < 0.1) return showT('Ошибка', 'Мин 0.1', '', null, true); if (amt > myData.balance) return showT('Ошибка', 'Недостаточно', '', null, true);
             const btn = document.getElementById('btn-do-send'); btn.disabled = true; btn.textContent = '...';
             try {
                 const q = query(collection(db, "users"), where("email", "==", to)); const res = await getDocs(q); if (res.empty) throw new Error("User not found");
@@ -906,13 +1072,14 @@
                         t.update(doc(db, "users", sData.referredByUid), { balance: increment(10), refCount: increment(1), refEarned: increment(10) }); t.update(senderRef, { referralStatus: 'paid' });
                         t.set(doc(collection(db, "transactions")), { from: 'System (Ref)', to: sData.referredBy, amount: 10.0, date: Timestamp.now(), parties: [sData.referredBy], type: 'referral_bonus' });
                     }
-                }); closeModal('send'); showT('Успешно', `${getTrans('sent_to')} ${to}`, `-${amt.toFixed(1)} Đ`);
-            } catch (e) { showT('Ошибка', e.message, '', null, true); } finally { btn.disabled = false; btn.textContent = getTrans('send_action'); }
+                }); closeModal('send'); showT('Успешно', `Отправлено`, `-${amt.toFixed(1)} Đ`);
+            } catch (e) { showT('Ошибка', e.message, '', null, true); } finally { btn.disabled = false; btn.textContent = "Отправить"; }
         };
-        window.copyRef = () => { navigator.clipboard.writeText(document.getElementById('ref-link').value); showT('Успешно', getTrans('link_copied')); };
-        window.shareRef = async () => { if (navigator.share) { try { await navigator.share({ title: 'Doolcoin Wallet', text: 'Bonus!', url: document.getElementById('ref-link').value }); } catch (err) {} } else copyRef(); };
+        
+        window.copyRef = () => { navigator.clipboard.writeText(document.getElementById('ref-link').value); showT('Успешно', 'Скопировано'); };
+        window.shareRef = async () => { if (navigator.share) { try { await navigator.share({ title: 'Doolcoin', text: 'Bonus!', url: document.getElementById('ref-link').value }); } catch (err) {} } else copyRef(); };
         document.getElementById('btn-logout').onclick = () => signOut(auth);
-        window.copyMyEmail = () => { navigator.clipboard.writeText(auth.currentUser.email); showT('Успешно', getTrans('addr_copied')); };
+        window.copyMyEmail = () => { navigator.clipboard.writeText(auth.currentUser.email); showT('Успешно', 'Скопировано'); };
     </script>
 </body>
 </html>
