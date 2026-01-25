@@ -68,7 +68,7 @@
         .nft-card { background: #0f0f0f; border-radius: 20px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); position: relative; }
         .nft-image { width: 100%; aspect-ratio: 1/1; object-fit: cover; background: #1a1a1a; }
         .nft-info { padding: 12px; }
-        .nft-title { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #fff; truncate; }
+        .nft-title { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .nft-price { font-size: 13px; font-weight: 900; color: #FF4D00; }
         .nft-action-btn { width: 100%; padding: 8px; border-radius: 10px; font-size: 10px; font-weight: 800; text-transform: uppercase; margin-top: 8px; cursor: pointer; transition: all 0.2s; }
         .nft-btn-primary { background: #fff; color: #000; }
@@ -829,6 +829,81 @@
             if(tab === 'inventory') loadInventory();
         };
 
+        // --- SAFE DOM CREATION FOR NFTS ---
+        async function createSafeNftCard(d, id, isMarket, userInfo = null) {
+            const el = document.createElement('div');
+            el.className = 'nft-card';
+            
+            const img = document.createElement('img');
+            img.src = d.image;
+            img.className = 'nft-image';
+            
+            const info = document.createElement('div');
+            info.className = 'nft-info';
+            
+            if (isMarket) {
+                const titleRow = document.createElement('div');
+                titleRow.className = "flex justify-between items-start mb-2";
+                
+                const title = document.createElement('p');
+                title.className = "nft-title";
+                title.textContent = d.name;
+                
+                const price = document.createElement('p');
+                price.className = "nft-price";
+                price.textContent = `${d.price} Đ`;
+                
+                titleRow.append(title, price);
+                
+                const authorRow = document.createElement('div');
+                authorRow.className = "flex items-center gap-1 mb-2";
+                
+                const author = document.createElement('p');
+                author.className = "text-[9px] text-neutral-500 truncate";
+                author.textContent = `By: ${d.owner}`;
+                authorRow.appendChild(author);
+                
+                if (userInfo && userInfo.isVerified) {
+                    const vIcon = document.createElement('img');
+                    vIcon.src = "https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff";
+                    vIcon.className = "w-3 h-3";
+                    vIcon.title = "Verified";
+                    authorRow.appendChild(vIcon);
+                }
+                
+                const btn = document.createElement('button');
+                btn.className = "nft-action-btn nft-btn-primary";
+                btn.textContent = "Купить";
+                btn.onclick = () => buyNFT(id, d.price, d.owner);
+                
+                info.append(titleRow, authorRow, btn);
+            } else {
+                // Inventory or Public Profile View
+                const title = document.createElement('p');
+                title.className = "nft-title mb-1";
+                title.textContent = d.name;
+                info.appendChild(title);
+
+                // Only show buttons if it's my inventory
+                if (d.owner === auth.currentUser.email) {
+                    const btn = document.createElement('button');
+                    if (d.isListed) {
+                        btn.className = "nft-action-btn nft-btn-secondary";
+                        btn.textContent = `Снять (${d.price} Đ)`;
+                        btn.onclick = () => unlistNFT(id);
+                    } else {
+                        btn.className = "nft-action-btn nft-btn-primary";
+                        btn.textContent = "Продать";
+                        btn.onclick = () => listNFT(id);
+                    }
+                    info.appendChild(btn);
+                }
+            }
+            
+            el.append(img, info);
+            return el;
+        }
+
         async function loadMarket() {
             const container = document.getElementById('nft-view-market');
             container.innerHTML = '<div class="col-span-2 text-center py-10"><div class="w-8 h-8 border-2 border-white/10 border-t-orange-500 rounded-full animate-spin mx-auto"></div></div>';
@@ -839,31 +914,13 @@
             
             if(snap.empty) { container.innerHTML = '<p class="col-span-2 text-center text-neutral-600 text-[10px] font-bold uppercase mt-10">Магазин пуст</p>'; return; }
             
-            // Create array of promises to fetch users
             const docs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             
             for(const d of docs) {
                 if(d.owner === auth.currentUser.email) continue;
-                
                 const userInfo = await getUserInfo(d.owner);
-                const verifiedHtml = userInfo.isVerified ? `<img src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" class="w-3 h-3" title="Verified">` : '';
-                
-                const el = document.createElement('div'); el.className = 'nft-card';
-                el.innerHTML = `
-                    <img src="${d.image}" class="nft-image">
-                    <div class="nft-info">
-                        <div class="flex justify-between items-start mb-2">
-                            <p class="nft-title">${d.name}</p>
-                            <p class="nft-price">${d.price} Đ</p>
-                        </div>
-                        <div class="flex items-center gap-1 mb-2">
-                            <p class="text-[9px] text-neutral-500 truncate">By: ${d.owner}</p>
-                            ${verifiedHtml}
-                        </div>
-                        <button onclick="buyNFT('${d.id}', ${d.price}, '${d.owner}')" class="nft-action-btn nft-btn-primary">Купить</button>
-                    </div>
-                `;
-                container.appendChild(el);
+                const card = await createSafeNftCard(d, d.id, true, userInfo);
+                container.appendChild(card);
             }
         }
 
@@ -877,19 +934,9 @@
             
             if(snap.empty) { container.innerHTML = '<p class="col-span-2 text-center text-neutral-600 text-[10px] font-bold uppercase mt-10">Пусто. Создайте NFT!</p>'; return; }
 
-            snap.forEach(doc => {
-                const d = doc.data();
-                const el = document.createElement('div'); el.className = 'nft-card';
-                const btnAction = d.isListed ? `onclick="unlistNFT('${doc.id}')" class="nft-action-btn nft-btn-secondary">Снять (${d.price} Đ)` : `onclick="listNFT('${doc.id}')" class="nft-action-btn nft-btn-primary">Продать`;
-                
-                el.innerHTML = `
-                    <img src="${d.image}" class="nft-image">
-                    <div class="nft-info">
-                        <p class="nft-title mb-1">${d.name}</p>
-                        <button ${btnAction}</button>
-                    </div>
-                `;
-                container.appendChild(el);
+            snap.forEach(async doc => {
+                const card = await createSafeNftCard(doc.data(), doc.id, false);
+                container.appendChild(card);
             });
         }
 
@@ -987,11 +1034,10 @@
                 document.getElementById('pub-profile-empty').classList.remove('hidden');
             } else {
                 const container = document.getElementById('pub-profile-nfts');
-                nftSnap.forEach(doc => {
-                    const d = doc.data();
-                    const el = document.createElement('div'); el.className = 'nft-card';
-                    el.innerHTML = `<img src="${d.image}" class="nft-image"><div class="nft-info"><p class="nft-title">${d.name}</p></div>`;
-                    container.appendChild(el);
+                nftSnap.forEach(async doc => {
+                    // Safe creation for public profile
+                    const card = await createSafeNftCard(doc.data(), doc.id, false);
+                    container.appendChild(card);
                 });
             }
         };
@@ -1054,32 +1100,75 @@
                 document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-loading').classList.add('hidden'); document.getElementById('view-main').classList.replace('hidden', 'flex'); switchTab('wallet'); document.getElementById('btn-login').disabled = false; document.getElementById('btn-register').disabled = false;
             });
 
-            // History Listener with Profile Click
+            // SAFE HISTORY LISTENER
             const qTx = query(collection(db, "transactions"), where("parties", "array-contains", u.email));
             onSnapshot(qTx, async (snap) => {
-                const list = document.getElementById('tx-history'); if (snap.empty) { list.innerHTML = `<p class="text-center text-neutral-600 text-[10px] uppercase font-bold py-4">...</p>`; return; }
-                const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date); let html = '';
-                for (const tx of docs) {
-                    const isSent = tx.from === u.email, partner = isSent ? tx.to : tx.from, dateStr = tx.date ? new Date(tx.date.toMillis()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
-                    // Added onclick to the container div of the partner info
-                    const clickAction = partner.includes('@') ? `onclick="openPublicProfile('${partner}')" style="cursor:pointer"` : '';
-                    
-                    html += `<div class="flex items-center justify-between p-4 rounded-[1.5rem] bg-white/[0.03] border border-white/5">
-                        <div class="flex items-center gap-3 overflow-hidden" ${clickAction}>
-                            <img id="av-${tx.date.toMillis()}" src="https://ui-avatars.com/api/?background=222&color=666&name=${partner.charAt(0)}" class="w-10 h-10 rounded-full bg-neutral-800 object-cover border border-white/5 shrink-0">
-                            <div class="min-w-0">
-                                <p class="text-[9px] font-black uppercase ${isSent ? 'text-neutral-500' : 'text-[#FF4D00]'} tracking-widest mb-0.5">${isSent ? 'To:' : 'From:'}</p>
-                                <div class="flex items-center gap-1"><p class="text-[11px] font-bold text-white truncate max-w-[120px] leading-tight hover:text-orange-500 transition-colors">${partner}</p></div>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-sm font-black ${isSent ? 'text-white' : 'text-[#FF4D00]'}">${isSent ? '-' : '+'}${tx.amount.toFixed(1)}</p>
-                            <p class="text-[9px] text-neutral-600 font-bold uppercase">${dateStr}</p>
-                        </div>
-                    </div>`;
-                    if(partner.includes('@')) getUserInfo(partner).then(inf => { const el = document.getElementById(`av-${tx.date.toMillis()}`); if(el) el.src = inf.avatar; });
+                const list = document.getElementById('tx-history'); 
+                list.innerHTML = ''; // Clear via innerHTML is safe if we append elements next
+                
+                if (snap.empty) { 
+                    list.innerHTML = `<p class="text-center text-neutral-600 text-[10px] uppercase font-bold py-4">...</p>`; 
+                    return; 
                 }
-                list.innerHTML = html;
+                
+                const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date); 
+                
+                docs.forEach(tx => {
+                    const isSent = tx.from === u.email;
+                    const partner = isSent ? tx.to : tx.from;
+                    const dateStr = tx.date ? new Date(tx.date.toMillis()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+                    
+                    const item = document.createElement('div');
+                    item.className = "flex items-center justify-between p-4 rounded-[1.5rem] bg-white/[0.03] border border-white/5";
+                    
+                    const leftDiv = document.createElement('div');
+                    leftDiv.className = "flex items-center gap-3 overflow-hidden";
+                    if (partner.includes('@')) {
+                         leftDiv.style.cursor = "pointer";
+                         leftDiv.onclick = () => openPublicProfile(partner);
+                    }
+
+                    const img = document.createElement('img');
+                    img.id = `av-${tx.date ? tx.date.toMillis() : Math.random()}`;
+                    img.src = `https://ui-avatars.com/api/?background=222&color=666&name=${partner.charAt(0)}`;
+                    img.className = "w-10 h-10 rounded-full bg-neutral-800 object-cover border border-white/5 shrink-0";
+                    
+                    const textDiv = document.createElement('div');
+                    textDiv.className = "min-w-0";
+                    
+                    const label = document.createElement('p');
+                    label.className = `text-[9px] font-black uppercase ${isSent ? 'text-neutral-500' : 'text-[#FF4D00]'} tracking-widest mb-0.5`;
+                    label.textContent = isSent ? 'To:' : 'From:';
+                    
+                    const nameWrapper = document.createElement('div');
+                    nameWrapper.className = "flex items-center gap-1";
+                    
+                    const nameP = document.createElement('p');
+                    nameP.className = "text-[11px] font-bold text-white truncate max-w-[120px] leading-tight hover:text-orange-500 transition-colors";
+                    nameP.textContent = partner; // Safe Text Content
+                    
+                    nameWrapper.appendChild(nameP);
+                    textDiv.append(label, nameWrapper);
+                    leftDiv.append(img, textDiv);
+                    
+                    const rightDiv = document.createElement('div');
+                    rightDiv.className = "text-right";
+                    
+                    const amountP = document.createElement('p');
+                    amountP.className = `text-sm font-black ${isSent ? 'text-white' : 'text-[#FF4D00]'}`;
+                    amountP.textContent = `${isSent ? '-' : '+'}${tx.amount.toFixed(1)}`;
+                    
+                    const dateP = document.createElement('p');
+                    dateP.className = "text-[9px] text-neutral-600 font-bold uppercase";
+                    dateP.textContent = dateStr;
+                    
+                    rightDiv.append(amountP, dateP);
+                    item.append(leftDiv, rightDiv);
+                    
+                    if(partner.includes('@')) getUserInfo(partner).then(inf => { if(img) img.src = inf.avatar; });
+                    
+                    list.appendChild(item);
+                });
             });
         }
         
