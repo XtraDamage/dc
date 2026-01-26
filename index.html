@@ -1091,15 +1091,6 @@
                 const showNftSetting = (d.settings && d.settings.showNfts !== undefined) ? d.settings.showNfts : true;
                 document.getElementById('setting-show-nft').checked = showNftSetting;
 
-                // Verification
-                const vIcon = document.getElementById('header-verified-icon');
-                const vSection = document.getElementById('profile-verification-status');
-                if (d.isVerified) { vIcon.classList.remove('hidden'); vSection.innerHTML = `<div class="flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 px-4 py-2 rounded-xl"><img src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" class="w-5 h-5"><span class="text-xs font-bold text-blue-400 uppercase tracking-wider">Верифицирован</span></div>`; } 
-                else { vIcon.classList.add('hidden'); vSection.innerHTML = `<button onclick="requestVerification()" class="flex items-center gap-2 bg-white/5 border border-white/10 hover:bg-white/10 px-4 py-2 rounded-xl transition-colors group cursor-pointer"><span class="text-xs font-bold text-neutral-400 group-hover:text-white uppercase tracking-wider">Получить галочку</span><img src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" class="w-4 h-4 opacity-50 grayscale group-hover:grayscale-0 group-hover:opacity-100 transition-all"></button>`; }
-
-                document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-loading').classList.add('hidden'); document.getElementById('view-main').classList.replace('hidden', 'flex'); switchTab('wallet'); document.getElementById('btn-login').disabled = false; document.getElementById('btn-register').disabled = false;
-            });
-
             // SAFE HISTORY LISTENER
             const qTx = query(collection(db, "transactions"), where("parties", "array-contains", u.email));
             onSnapshot(qTx, async (snap) => {
