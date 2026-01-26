@@ -507,7 +507,7 @@
                         <div class="p-1 gradient-bg rounded-full"><img id="edit-avatar-img" src="" class="w-24 h-24 rounded-full object-cover border-4 border-[#111] bg-neutral-900"></div>
                         <label class="absolute bottom-0 right-0 bg-white text-black w-8 h-8 flex items-center justify-center rounded-full cursor-pointer hover:scale-110 transition-transform shadow-lg"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg><input type="file" id="avatar-input" class="hidden" accept="image/*"></label>
                     </div>
-                    <div id="profile-verification-status" class="mb-6 flex flex-col items-center min-h-[40px]"></div>
+                    <!-- Verification UI removed -->
                     <p id="profile-email" class="text-xs text-neutral-500 font-bold mb-6 truncate px-2">...</p>
                     <button onclick="closeModal('profile')" class="w-full h-12 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer" data-lang="close">Закрыть</button>
                 </div>
@@ -1163,7 +1163,7 @@
             });
         }
         
-        window.requestVerification = async () => { try { await updateDoc(doc(db, "users", auth.currentUser.uid), { isVerified: true }); showT('Успешно', 'Вы верифицированы!'); } catch (e) { showT('Ошибка', 'Не удалось верифицировать', '', null, true); } };
+        // Функция верификации удалена (безопасность)
         async function handleIncomingTransfer(myEmail, amountDiff) { try { const q = query(collection(db, "transactions"), where("to", "==", myEmail)); const snap = await getDocs(q); if (!snap.empty) { const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date); if (Math.abs(docs[0].amount - amountDiff) < 0.01) { if (docs[0].type === 'referral_bonus') showT('Bonus', 'Ref Bonus', `+${amountDiff.toFixed(1)} Đ`); else showT('Transfer', docs[0].from, `+${amountDiff.toFixed(1)} Đ`, docs[0].from); return; } } showT('Банк', 'В банке', `+${amountDiff.toFixed(1)} Đ`); } catch(e) {} }
         
         document.getElementById('avatar-input').onchange = (e) => { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = async (ev) => { try { await updateDoc(doc(db, "users", auth.currentUser.uid), { avatar: ev.target.result }); showT('Profile', 'Updated'); } catch { showT('Error', 'Failed', '', null, true); } }; reader.readAsDataURL(file); };
