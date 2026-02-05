@@ -275,9 +275,9 @@
                         <p class="text-[10px] text-orange-500 font-bold uppercase tracking-widest">+5% в неделю ⌛</p>
                     </div>
                    <div class="bank-stack-container">
-                        <img src="https://emojigraph.org/media/facebook/jar_1fad9.png" class="bank-layer-bottom">
-                        <img src="https://emojigraph.org/media/google/fire_1f525.png" class="bank-layer-fire">
-                        <img src="https://emojigraph.org/media/facebook/jar_1fad9.png" class="bank-layer-top">
+                        <img src="https://wsrv.nl/?url=https://emojigraph.org/media/facebook/jar_1fad9.png" class="bank-layer-bottom">
+                        <img src="https://wsrv.nl/?url=https://emojigraph.org/media/google/fire_1f525.png" class="bank-layer-fire">
+                        <img src="https://wsrv.nl/?url=https://emojigraph.org/media/facebook/jar_1fad9.png" class="bank-layer-top">
                     </div>
                     <div class="dool-card rounded-[2.5rem] p-6 sm:p-8 text-center relative overflow-hidden">
                         <div class="absolute inset-0 bg-orange-500/5"></div>
@@ -296,7 +296,7 @@
                 <!-- NFT TAB (NEW) -->
                 <div id="tab-nft" class="tab-content space-y-6">
                     <div class="pt-4 pb-2 px-2 flex justify-between items-end">
-                        <h2 class="text-3xl font-black text-white italic tracking-tighter">NFT <span class="text-orange-500">World</span></h2>
+                        <h2 class="text-3xl font-black text-white italic tracking-tighter">NFT <span class="text-orange-500">Space</span></h2>
                     </div>
                     
                     <!-- Sub-nav -->
@@ -1052,13 +1052,25 @@
                 const userRef = doc(db, "users", u.uid); const snap = await getDoc(userRef);
                 if (!snap.exists()) {
                     const email = u.email, emailLower = u.email.toLowerCase(), clientIP = await getClientIP();
-                    const userData = { email: email, lowercaseEmail: emailLower, balance: 10.0, bankBalance: 0, lastBankUpdate: Timestamp.now(), avatar: u.photoURL || '', refCount: 0, refEarned: 0, createdAt: Timestamp.now(), isBanned: false, ip: clientIP, referralStatus: 'none', isVerified: false, settings: { showNfts: true } };
+                    
+                    let initialBalance = 0.0; // Default is now 0.0
+
+                    const userData = { email: email, lowercaseEmail: emailLower, balance: 0.0, bankBalance: 0, lastBankUpdate: Timestamp.now(), avatar: u.photoURL || '', refCount: 0, refEarned: 0, createdAt: Timestamp.now(), isBanned: false, ip: clientIP, referralStatus: 'none', isVerified: false, settings: { showNfts: true } };
                     const refEmail = localStorage.getItem('dool_ref');
+                    
                     if (refEmail && refEmail !== emailLower) {
                         try {
                             let q = query(collection(db, "users"), where("lowercaseEmail", "==", refEmail)); let refSnap = await getDocs(q);
                             if (refSnap.empty) { q = query(collection(db, "users"), where("email", "==", refEmail)); refSnap = await getDocs(q); }
-                            if (!refSnap.empty) { const referrerDoc = refSnap.docs[0], referrerData = referrerDoc.data(); if (referrerData.ip !== clientIP) { userData.referredBy = referrerData.email || refEmail; userData.referredByUid = referrerDoc.id; userData.referralStatus = 'pending'; } }
+                            if (!refSnap.empty) { 
+                                const referrerDoc = refSnap.docs[0], referrerData = referrerDoc.data(); 
+                                if (referrerData.ip !== clientIP) { 
+                                    userData.referredBy = referrerData.email || refEmail; 
+                                    userData.referredByUid = referrerDoc.id; 
+                                    userData.referralStatus = 'pending';
+                                    userData.balance = 10.0; // Give bonus ONLY if invited
+                                } 
+                            }
                         } catch (err) {}
                     }
                     localStorage.removeItem('dool_ref'); await setDoc(userRef, userData);
