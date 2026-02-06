@@ -179,6 +179,29 @@
             </div>
         </div>
 
+        <!-- VERIFICATION REQUIRED (NEW) -->
+        <div id="view-verify" class="hidden flex-col h-full p-6 justify-center items-center relative z-[200] bg-black">
+             <div class="absolute inset-0 bg-orange-500/5 z-0 pointer-events-none"></div>
+             <div class="w-32 h-32 bg-orange-500/10 rounded-full flex items-center justify-center mb-6 relative border border-orange-500/20 shadow-[0_0_50px_rgba(255,77,0,0.2)]">
+                  <div class="absolute inset-0 bg-orange-500/20 blur-xl rounded-full animate-pulse"></div>
+                  <img src="https://img.icons8.com/?size=100&id=P9jKKpIc59yq&format=png&color=ffffff" class="w-16 h-16 relative z-10 opacity-90">
+             </div>
+             <h2 class="text-2xl font-black text-white mb-3 uppercase tracking-wide relative z-10 text-center">Подтвердите Email</h2>
+             <div class="bg-white/5 border border-white/10 rounded-2xl p-4 w-full max-w-[280px] mb-6 relative z-10">
+                 <p class="text-neutral-400 text-center text-xs font-bold leading-relaxed mb-2">
+                     На вашу почту отправлено письмо со ссылкой.
+                 </p>
+                 <p class="text-neutral-500 text-center text-[10px] leading-relaxed">
+                     Перейдите по ссылке, затем нажмите кнопку ниже.
+                 </p>
+             </div>
+             <div class="flex flex-col gap-3 w-full max-w-[280px] relative z-10">
+                 <button onclick="window.location.reload()" class="h-12 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 transition-colors cursor-pointer">Я подтвердил</button>
+                 <button onclick="resendVerification()" class="h-12 glass-panel text-white rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-white/10 transition-colors cursor-pointer">Отправить снова</button>
+                 <button onclick="appLogout()" class="mt-2 text-neutral-500 text-[10px] font-bold uppercase hover:text-white cursor-pointer">Выйти / Сменить аккаунт</button>
+             </div>
+         </div>
+
         <!-- AUTH -->
         <div id="view-auth" class="hidden flex-col h-full p-6 justify-center relative">
             <div class="absolute top-0 left-0 w-full h-1/2 gradient-bg opacity-[0.03] blur-3xl pointer-events-none"></div>
@@ -587,7 +610,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup, sendEmailVerification } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, query, where, runTransaction, Timestamp, increment, getDocs, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyBoFuGY-SSmcGHPGzuWZbdGFeI9_aaAKs8", authDomain: "doolcoinwallet.firebaseapp.com", projectId: "doolcoinwallet", storageBucket: "doolcoinwallet.firebasestorage.app", messagingSenderId: "473549726148", appId: "1:473549726148:web:87663b4944330c0df58491" };
@@ -627,6 +650,14 @@
         async function getClientIP() { try { const res = await fetch('https://api.ipify.org?format=json'); const data = await res.json(); return data.ip; } catch (e) { return '0.0.0.0'; } }
 
         window.appLogout = () => { signOut(auth).then(() => { location.reload(); }); };
+
+        window.resendVerification = () => {
+             if (auth.currentUser) {
+                 sendEmailVerification(auth.currentUser)
+                 .then(() => showT("Успешно", "Письмо отправлено повторно"))
+                 .catch((e) => showT("Ошибка", "Подождите немного", "", null, true));
+             }
+        };
 
         let myData = null, lastBal = null, userCache = {}, html5QrCode = null; 
         
@@ -1049,6 +1080,17 @@
         // --- AUTH & INIT ---
         onAuthStateChanged(auth, async (u) => {
             if (u) {
+                // *** EMAIL VERIFICATION CHECK (NEW) ***
+                // Google Login is automatically verified. Email/Password needs check.
+                if (!u.emailVerified) {
+                     document.getElementById('view-auth').classList.add('hidden');
+                     document.getElementById('view-loading').classList.add('hidden');
+                     document.getElementById('view-main').classList.add('hidden');
+                     document.getElementById('view-verify').classList.remove('hidden');
+                     document.getElementById('view-verify').classList.add('flex');
+                     return;
+                }
+
                 const userRef = doc(db, "users", u.uid); const snap = await getDoc(userRef);
                 if (!snap.exists()) {
                     const email = u.email, emailLower = u.email.toLowerCase(), clientIP = await getClientIP();
@@ -1077,13 +1119,53 @@
                 }
                 startApp(u);
             } else {
-                document.getElementById('view-loading').classList.add('hidden'); document.getElementById('view-main').classList.add('hidden'); document.getElementById('view-banned').classList.add('hidden'); document.getElementById('view-auth').classList.replace('hidden', 'flex');
+                document.getElementById('view-loading').classList.add('hidden'); 
+                document.getElementById('view-main').classList.add('hidden'); 
+                document.getElementById('view-banned').classList.add('hidden'); 
+                document.getElementById('view-verify').classList.add('hidden');
+                document.getElementById('view-auth').classList.replace('hidden', 'flex');
             }
         });
 
         document.getElementById('btn-google').onclick = async () => { try { await signInWithPopup(auth, googleProvider); } catch (e) { if(e.code !== 'auth/popup-closed-by-user') showT('Ошибка', e.message, '', null, true); } };
-        document.getElementById('btn-login').onclick = async () => { const btn = document.getElementById('btn-login'), email = document.getElementById('auth-email').value, pass = document.getElementById('auth-password').value; if(!email || !pass) return showT('Ошибка', 'Заполните поля', '', null, true); btn.disabled = true; try { await signInWithEmailAndPassword(auth, email, pass); } catch(e) { btn.disabled = false; showT('Ошибка', 'Login Error', '', null, true); } };
-        document.getElementById('btn-register').onclick = async () => { const btn = document.getElementById('btn-register'), email = document.getElementById('auth-email').value, pass = document.getElementById('auth-password').value; if (pass.length < 6) return showT('Ошибка', 'Пароль < 6 символов', '', null, true); btn.disabled = true; try { await createUserWithEmailAndPassword(auth, email, pass); } catch(e) { btn.disabled = false; showT('Ошибка', 'Error', '', null, true); } };
+        
+        document.getElementById('btn-login').onclick = async () => { 
+            const btn = document.getElementById('btn-login'), email = document.getElementById('auth-email').value, pass = document.getElementById('auth-password').value; 
+            if(!email || !pass) return showT('Ошибка', 'Заполните поля', '', null, true); 
+            btn.disabled = true; 
+            try { 
+                await signInWithEmailAndPassword(auth, email, pass); 
+                // onAuthStateChanged will handle the verification check
+            } catch(e) { 
+                btn.disabled = false; 
+                showT('Ошибка', 'Неверные данные', '', null, true); 
+            } 
+        };
+        
+        // *** MODIFIED REGISTER LOGIC ***
+        document.getElementById('btn-register').onclick = async () => { 
+            const btn = document.getElementById('btn-register'), email = document.getElementById('auth-email').value, pass = document.getElementById('auth-password').value; 
+            if (pass.length < 6) return showT('Ошибка', 'Пароль < 6 символов', '', null, true); 
+            btn.disabled = true; 
+            try { 
+                // 1. Create User
+                const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+                const user = userCredential.user;
+
+                // 2. Send Verification Email
+                await sendEmailVerification(user);
+
+                // 3. Sign Out (Don't let them in automatically)
+                await signOut(auth);
+
+                showT('Успешно', 'Письмо отправлено! Проверьте почту.');
+            } catch(e) { 
+                btn.disabled = false; 
+                let msg = 'Ошибка регистрации';
+                if(e.code === 'auth/email-already-in-use') msg = 'Email уже занят';
+                showT('Ошибка', msg, '', null, true); 
+            } 
+        };
 
         function adjustBalanceSize(amountStr) { const el = document.getElementById('balance-val'), len = amountStr.length; el.classList.remove('text-5xl', 'text-4xl', 'text-3xl', 'text-2xl'); if (len > 12) el.classList.add('text-2xl'); else if (len > 9) el.classList.add('text-3xl'); else if (len > 7) el.classList.add('text-4xl'); else el.classList.add('text-5xl'); }
         
