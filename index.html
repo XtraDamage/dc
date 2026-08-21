@@ -1,608 +1,841 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <link rel="icon" href="https://raw.githubusercontent.com/ShalfeyArt/admin/refs/heads/main/icon.png" type="image/png" media="(prefers-color-scheme: light)">
-    <link rel="icon" href="https://raw.githubusercontent.com/ShalfeyArt/admin/refs/heads/main/icon2.png" type="image/png" media="(prefers-color-scheme: dark)">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Doolcoin Wallet</title>
+    <title>Doolcoin Wallet - MD3</title>
+    
+    <!-- Material Symbols Rounded (Verified included) -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=verified" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- External Scripts -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
-        /* BASE & RESET */
-        * { -webkit-user-select: none; -moz-user-select: none; user-select: none; -webkit-touch-callout: none; box-sizing: border-box; }
-        input, textarea { -webkit-user-select: text !important; -moz-user-select: text !important; user-select: text !important; }
-        img { -webkit-user-drag: none; user-drag: none; pointer-events: none; }
-        body { background-color: #050505; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; height: 100dvh; display: flex; justify-content: center; align-items: center; overflow: hidden; transition: background-color 0.4s ease, color 0.4s ease; }
-        
-        /* UI COMPONENTS */
-        .dool-card { background: #0a0a0a; border: 1px solid rgba(255,255,255,0.05); transition: all 0.3s ease; }
-        .gradient-text { background: linear-gradient(135deg, #FF4D00, #FF005C); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .gradient-bg { background: linear-gradient(135deg, #FF4D00, #FF005C); }
-        .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); transition: all 0.3s ease; }
+        /* --- MATERIAL DESIGN 3 DESIGN TOKENS (Dynamic Engine) --- */
+        :root {
+            /* Fallback (Monochrome Dark) */
+            --md-sys-color-primary: #FFFFFF;
+            --md-sys-color-on-primary: #000000;
+            --md-sys-color-primary-container: #333333;
+            --md-sys-color-on-primary-container: #FFFFFF;
+            --md-sys-color-secondary-container: #222222;
+            --md-sys-color-on-secondary-container: #E0E0E0;
+            --md-sys-color-background: #000000;
+            --md-sys-color-on-background: #FFFFFF;
+            --md-sys-color-surface: #0A0A0A;
+            --md-sys-color-on-surface: #FFFFFF;
+            --md-sys-color-on-surface-variant: #A0A0A0;
+            --md-sys-color-outline: #555555;
+            --md-sys-color-outline-variant: #333333;
+            --md-sys-color-surface-container-lowest: #000000;
+            --md-sys-color-surface-container-low: #0F0F0F;
+            --md-sys-color-surface-container: #141414;
+            --md-sys-color-surface-container-high: #1F1F1F;
+            --md-sys-color-surface-container-highest: #292929;
+        }
 
-        /* ANIMATIONS */
-        .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+        /* BASE & RESET */
+        * { -webkit-user-select: none; user-select: none; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        input, textarea { -webkit-user-select: text !important; user-select: text !important; }
+        img { -webkit-user-drag: none; }
+        body { 
+            background-color: var(--md-sys-color-background); 
+            color: var(--md-sys-color-on-background); 
+            font-family: 'Roboto', sans-serif; 
+            margin: 0; padding: 0; 
+            height: 100dvh; display: flex; justify-content: center; align-items: center; overflow: hidden; 
+            transition: background-color 0.4s ease, color 0.4s ease; 
+        }
+
+        /* MATERIAL SYMBOLS */
+        .material-symbols-rounded {
+          font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+          font-size: 24px;
+        }
+        .material-symbols-rounded.filled {
+          font-variation-settings: 'FILL' 1;
+        }
+        .icon-lg { font-size: 32px; }
+        .icon-xl { font-size: 48px; }
         
-        /* TOAST */
+        /* MD3 UTILITIES */
+        .md-surface { background-color: var(--md-sys-color-surface); color: var(--md-sys-color-on-surface); transition: background-color 0.4s ease; }
+        .md-surface-container { background-color: var(--md-sys-color-surface-container); transition: background-color 0.4s ease; }
+        .md-surface-container-high { background-color: var(--md-sys-color-surface-container-high); transition: background-color 0.4s ease; }
+        .md-surface-container-highest { background-color: var(--md-sys-color-surface-container-highest); transition: background-color 0.4s ease; }
+        .md-primary { color: var(--md-sys-color-primary); transition: color 0.4s ease; }
+        .md-on-surface-variant { color: var(--md-sys-color-on-surface-variant); }
+        
+        /* HEADER HUG EFFECT */
+        #main-header {
+            transition: all 0.3s cubic-bezier(0.2, 0, 0, 1), background-color 0.4s ease;
+        }
+        
+        /* MD3 COMPONENTS */
+        .md-card {
+            background-color: var(--md-sys-color-surface-container-low);
+            border-radius: 24px;
+            padding: 24px;
+            border: 1px solid var(--md-sys-color-outline-variant);
+            transition: background-color 0.4s ease, border-color 0.4s ease;
+        }
+        
+        .md-btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            height: 40px; padding: 0 24px; border-radius: 40px; font-weight: 500; font-size: 14px;
+            transition: opacity 0.2s, transform 0.15s cubic-bezier(0.2, 0, 0, 1), background-color 0.4s ease, color 0.4s ease; cursor: pointer; border: none;
+        }
+        .md-btn:active { transform: scale(0.95); }
+        .md-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .md-btn-primary { background-color: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); }
+        .md-btn-tonal { background-color: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); }
+        .md-btn-outlined { background-color: transparent; border: 1px solid var(--md-sys-color-outline); color: var(--md-sys-color-primary); }
+        
+        .md-btn-large { height: 56px; border-radius: 28px; font-size: 16px; font-weight: 700; }
+        .md-fab { width: 56px; height: 56px; border-radius: 16px; background-color: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.15s, background-color 0.4s ease;}
+        .md-fab:active { transform: scale(0.92); }
+
+        /* MD3 FILLED TEXT FIELDS */
+        .md-input-container {
+            background-color: var(--md-sys-color-surface-container-highest);
+            border-radius: 12px 12px 0 0;
+            border-bottom: 2px solid var(--md-sys-color-outline-variant);
+            padding: 8px 16px 6px 16px;
+            transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+            position: relative;
+            cursor: text;
+        }
+        .md-input-container:hover {
+            background-color: var(--md-sys-color-surface-container-high);
+            border-bottom-color: var(--md-sys-color-outline);
+        }
+        .md-input-container:focus-within {
+            background-color: var(--md-sys-color-surface-container-high);
+            border-bottom-color: var(--md-sys-color-primary);
+        }
+        .md-input-label {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface-variant);
+            transition: color 0.2s ease;
+            display: block;
+        }
+        .md-input-container:focus-within .md-input-label { color: var(--md-sys-color-primary); font-weight: 700; }
+        .md-input { background: transparent; border: none; outline: none; color: var(--md-sys-color-on-surface); font-size: 16px; width: 100%; padding: 2px 0 4px 0; font-weight: 500; }
+        .md-input::placeholder { color: var(--md-sys-color-on-surface-variant); opacity: 0.5; }
+
+        /* MD3 SWITCH */
+        .md-switch { position: relative; display: inline-block; width: 52px; height: 32px; flex-shrink: 0; }
+        .md-switch input { opacity: 0; width: 0; height: 0; }
+        .md-slider {
+            position: absolute; cursor: pointer; inset: 0;
+            background-color: var(--md-sys-color-surface-container-highest);
+            border: 2px solid var(--md-sys-color-outline);
+            border-radius: 32px; transition: all .25s cubic-bezier(0.2, 0, 0, 1);
+            box-sizing: border-box;
+        }
+        .md-slider:before {
+            position: absolute; content: "";
+            height: 16px; width: 16px;
+            left: 6px; top: 6px;
+            background-color: var(--md-sys-color-outline);
+            border-radius: 50%; transition: all .25s cubic-bezier(0.2, 0, 0, 1);
+        }
+        input:checked + .md-slider { background-color: var(--md-sys-color-primary); border-color: var(--md-sys-color-primary); }
+        input:checked + .md-slider:before { transform: translateX(20px); background-color: var(--md-sys-color-on-primary); width: 24px; height: 24px; left: 2px; top: 2px; }
+
+        /* Navigation Bar */
+        .md-bottom-nav {
+            background-color: var(--md-sys-color-surface-container);
+            height: 80px; width: 100%; max-width: 420px;
+            display: flex; align-items: center; justify-content: space-around;
+            padding: 0 8px; z-index: 50; transition: background-color 0.4s ease;
+        }
+        @media (min-width: 640px) { .md-bottom-nav { border-radius: 0 0 48px 48px; border-top: 1px solid var(--md-sys-color-outline-variant); } }
+        
+        .md-nav-item {
+            flex: 1; display: flex; flex-direction: column; items-center justify-content: center; align-items: center; gap: 4px;
+            color: var(--md-sys-color-on-surface-variant); transition: color 0.2s; cursor: pointer;
+        }
+        .md-nav-indicator {
+            width: 64px; height: 32px; border-radius: 16px; display: flex; align-items: center; justify-content: center;
+            transition: background-color 0.4s ease;
+        }
+        .md-nav-item.active .md-nav-indicator { background-color: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); }
+        .md-nav-item.active { color: var(--md-sys-color-on-surface); font-weight: 700; }
+        
+        /* Modals (MD3 Bottom Sheets) */
+        .md-bottom-sheet {
+            background-color: var(--md-sys-color-surface-container-low);
+            border-radius: 28px 28px 0 0;
+            padding: 0 0 24px 0;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1), background-color 0.4s ease;
+        }
+        .swipe-handle-container { width: 100%; height: 36px; display: flex; align-items: center; justify-content: center; cursor: grab; }
+        .swipe-handle { width: 32px; height: 4px; background-color: var(--md-sys-color-outline); border-radius: 2px; opacity: 0.5; }
+        
+        /* TOAST (MD3 Snackbar variant) */
         #toast { 
-            position: absolute; top: 12px; left: 50%; transform: translateX(-50%) translateY(-150%);
-            width: auto; max-width: 92%; min-width: 300px;
-            background: rgba(20, 20, 20, 0.95);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 999px; padding: 8px 16px 8px 8px;
-            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.8);
-            z-index: 200; display: flex; align-items: center; gap: 12px;
-            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); opacity: 0; pointer-events: none;
+            position: absolute; top: 16px; left: 50%; transform: translateX(-50%) translateY(-150%);
+            width: auto; max-width: 92%; min-width: 320px;
+            background: var(--md-sys-color-surface-container-highest);
+            color: var(--md-sys-color-on-surface);
+            border-radius: 16px; padding: 12px 16px;
+            box-shadow: 0 4px 8px 3px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.3);
+            z-index: 200; display: flex; align-items: center; gap: 16px;
+            transition: transform 0.4s cubic-bezier(0.2, 0, 0, 1), opacity 0.4s, background-color 0.4s ease; opacity: 0; pointer-events: none;
         }
         #toast.active { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: auto; }
-        
-        /* SCANNER & MISC */
-        .hide-scroll::-webkit-scrollbar { display: none; }
-        #modal-scan-content { background: #000; }
-        #reader video { object-fit: cover !important; }
-        .scan-focus-area { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 260px; height: 260px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.85); border-radius: 2.5rem; z-index: 10; pointer-events: none; }
-        .scan-border-glow { position: absolute; inset: 0; border-radius: 2.5rem; border: 2px solid rgba(255, 77, 0, 0.5); box-shadow: 0 0 30px rgba(255, 77, 0, 0.3); }
-        .scan-laser { position: absolute; width: 100%; height: 2px; background: #FF4D00; box-shadow: 0 0 15px #FF4D00; top: 50%; animation: scanAnim 2s infinite ease-in-out; }
-        @keyframes scanAnim { 0%, 100% { transform: translateY(-100px); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateY(100px); opacity: 0; } }
-        
-        .qr-card-premium { background: linear-gradient(180deg, #1a1a1a 0%, #050505 100%); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 32px; padding: 24px; width: 100%; max-width: 280px; position: relative; box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .qr-card-premium::before { content: ''; position: absolute; inset: 0; border-radius: 32px; padding: 1px; background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0)); -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
-        
+
+        /* TABS ANIMATION */
+        .tab-content { display: none; opacity: 0; transition: opacity 0.2s; }
+        .tab-content.active { display: block; opacity: 1; animation: fadeIn 0.3s cubic-bezier(0.2, 0, 0, 1); }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+
+        /* BANK FIRE JAR VIBE */
         .bank-stack-container { width: 140px; height: 140px; margin: 0 auto; position: relative; display: flex; align-items: center; justify-content: center; }
         .bank-layer-bottom { width: 120px; position: absolute; z-index: 10; filter: brightness(0.6) sepia(0.2); }
-        .bank-layer-fire { width: 50px; position: absolute; z-index: 20; bottom: 30px; left: 50%; transform: translateX(-50%); animation: firePulse 2s infinite alternate ease-in-out; opacity: 0; transition: opacity 0.5s ease; filter: drop-shadow(0 0 15px #FF4D00); }
+        .bank-layer-fire { width: 50px; position: absolute; z-index: 20; bottom: 30px; left: 50%; transform: translateX(-50%); animation: firePulse 2s infinite alternate ease-in-out; opacity: 0; transition: opacity 0.5s ease; filter: drop-shadow(0 0 15px var(--md-sys-color-primary)); }
         .bank-layer-top { width: 120px; position: absolute; z-index: 30; pointer-events: none; mix-blend-mode: overlay; opacity: 0.4; }
-        @keyframes firePulse { 0% { transform: translateX(-50%) scale(0.95); filter: drop-shadow(0 0 10px #FF4D00); } 100% { transform: translateX(-50%) scale(1.1); filter: drop-shadow(0 0 25px #FF4D00); } }
+        @keyframes firePulse { 0% { transform: translateX(-50%) scale(0.95); filter: drop-shadow(0 0 10px var(--md-sys-color-primary)); } 100% { transform: translateX(-50%) scale(1.1); filter: drop-shadow(0 0 25px var(--md-sys-color-primary)); } }
 
-        .swipe-zone { width: 100%; height: 32px; display: flex; align-items: center; justify-content: center; cursor: grab; touch-action: none; }
-        .swipe-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 10px; }
+        /* SCANNER & MISC */
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .scan-focus-area { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 260px; height: 260px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6); border-radius: 24px; z-index: 10; pointer-events: none; border: 2px solid var(--md-sys-color-primary); transition: border-color 0.4s ease; }
+        .scan-laser { position: absolute; width: 100%; height: 2px; background: var(--md-sys-color-primary); box-shadow: 0 0 10px var(--md-sys-color-primary); top: 50%; animation: scanAnim 2s infinite ease-in-out; transition: background-color 0.4s ease, box-shadow 0.4s ease; }
+        @keyframes scanAnim { 0%, 100% { transform: translateY(-120px); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateY(120px); opacity: 0; } }
 
         /* NFT STYLES */
         .nft-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        .nft-card { background: #0f0f0f; border-radius: 20px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); position: relative; }
-        .nft-image { width: 100%; aspect-ratio: 1/1; object-fit: cover; background: #1a1a1a; }
+        .nft-card { background: var(--md-sys-color-surface-container-high); border-radius: 20px; overflow: hidden; transition: background-color 0.4s ease; }
+        .nft-image { width: 100%; aspect-ratio: 1/1; object-fit: cover; background: var(--md-sys-color-surface-container-highest); }
         .nft-info { padding: 12px; }
-        .nft-title { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .nft-price { font-size: 13px; font-weight: 900; color: #FF4D00; }
-        .nft-action-btn { width: 100%; padding: 8px; border-radius: 10px; font-size: 10px; font-weight: 800; text-transform: uppercase; margin-top: 8px; cursor: pointer; transition: all 0.2s; }
-        .nft-btn-primary { background: #fff; color: #000; }
-        .nft-btn-primary:hover { background: #e5e5e5; }
-        .nft-btn-secondary { background: rgba(255,255,255,0.05); color: #fff; }
-        .nft-btn-secondary:hover { background: rgba(255,255,255,0.1); }
-        
-        .sub-tab-btn { opacity: 0.5; transition: all 0.3s; filter: grayscale(1); }
-        .sub-tab-btn.active { opacity: 1; transform: scale(1.05); filter: grayscale(0); }
 
-        /* --- LIGHT THEME FIXES --- */
-        body.light-theme { background-color: #f0f2f5; color: #1a1a1a; }
-        body.light-theme #app { background-color: #ffffff; border-color: rgba(0,0,0,0.05); box-shadow: 0 20px 60px rgba(0,0,0,0.08); }
-        
-        body.light-theme .text-white { color: #111827 !important; }
-        body.light-theme .text-neutral-500 { color: #6b7280; }
-        body.light-theme .text-neutral-400 { color: #4b5563; }
-        
-        body.light-theme .dool-card, body.light-theme .nft-card { background: #f9fafb; border-color: rgba(0,0,0,0.06); }
-        body.light-theme .glass-panel { background: #f3f4f6; border-color: rgba(0,0,0,0.08); color: #000; }
-        
-        body.light-theme input { color: #111 !important; }
-        body.light-theme input::placeholder { color: #9ca3af !important; }
-        body.light-theme .bg-white\/5 { background-color: rgba(0,0,0,0.04); }
-        body.light-theme .bg-white\/10 { background-color: rgba(0,0,0,0.08); }
-        body.light-theme .border-white\/10 { border-color: rgba(0,0,0,0.1); }
-        body.light-theme .border-white\/5 { border-color: rgba(0,0,0,0.06); }
-        
-        body.light-theme #modal-send-content, 
-        body.light-theme #modal-receive-content,
-        body.light-theme #modal-deposit-content,
-        body.light-theme #modal-withdraw-content,
-        body.light-theme #modal-settings-content,
-        body.light-theme #modal-nft-create-content,
-        body.light-theme #modal-public-profile-content,
-        body.light-theme #modal-nft-view-content,
-        body.light-theme #modal-confirm-content { background-color: #ffffff; color: #000; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); }
-        
-        body.light-theme #toast { background: rgba(255,255,255,0.98); border-color: rgba(0,0,0,0.08); box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1); }
-        body.light-theme #toast-msg { color: #111; }
-        
-        body.light-theme .settings-icon, 
-        body.light-theme .logout-icon,
-        body.light-theme .nav-icon { filter: invert(1) brightness(0.2); }
-        body.light-theme .nav-icon-active { filter: brightness(0) saturate(100%) invert(32%) sepia(98%) saturate(2329%) hue-rotate(358deg) brightness(101%) contrast(106%) !important; opacity: 1 !important; }
-        
-        body.light-theme .swipe-handle { background: #e5e7eb; }
-        body.light-theme nav { background: rgba(255,255,255,0.9); border-color: rgba(0,0,0,0.05); }
-        body.light-theme .qr-card-premium { background: linear-gradient(180deg, #f3f4f6 0%, #ffffff 100%); border-color: rgba(0,0,0,0.1); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1); }
+        /* MATERIAL YOU COLOR SWATCHES */
+        .color-swatch-item {
+            width: 52px; height: 52px; border-radius: 50%;
+            background-color: var(--md-sys-color-surface-container-high);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; cursor: pointer; position: relative;
+            transition: transform 0.15s ease, border-color 0.2s ease;
+            border: 2px solid transparent;
+            scroll-snap-align: center;
+        }
+        .color-swatch-item:active { transform: scale(0.92); }
+        .color-swatch-item.active { border-color: var(--swatch-color); }
+        .color-swatch-inner {
+            width: 32px; height: 32px; border-radius: 50%;
+            background-color: var(--swatch-color);
+            transition: transform 0.2s ease;
+        }
 
-        .about-card { position: relative; background: linear-gradient(160deg, #111, #000); border-radius: 24px; padding: 2px; overflow: hidden; }
-        .about-card::before { content: ""; position: absolute; inset: 0; background: linear-gradient(45deg, rgba(255, 77, 0, 0.5), transparent, rgba(255, 77, 0, 0.2)); border-radius: 24px; -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
-        .about-inner { background: #0a0a0a; border-radius: 22px; padding: 20px; position: relative; height: 100%; }
-        body.light-theme .about-inner { background: #fff; }
-        
-        .lang-btn.active { border: 1px solid #FF4D00; color: #FF4D00; background: rgba(255, 77, 0, 0.05); }
-        .theme-btn.active { border: 1px solid #FF4D00; opacity: 1; transform: scale(1); }
-        .theme-btn { opacity: 0.6; transform: scale(0.96); transition: all 0.2s; }
+        /* Perfect Split Circle for Monochrome / Auto Theme */
+        .split-theme-circle {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: linear-gradient(to bottom, #FFFFFF 50%, transparent 50%),
+                        linear-gradient(to right, #2B2B2B 50%, #8E8E8E 50%);
+        }
 
-        /* TOGGLE SWITCH */
-        .toggle-checkbox { position: absolute; opacity: 0; cursor: pointer; height: 0; width: 0; }
-        .toggle-slot { position: relative; height: 24px; width: 44px; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; background-color: rgba(255,255,255,0.05); transition: background-color .3s; }
-        .toggle-checkbox:checked ~ .toggle-slot { background-color: #FF4D00; border-color: #FF4D00; }
-        .toggle-button { transform: translate(2px, 2px); height: 18px; width: 18px; border-radius: 50%; background-color: #fff; transition: transform .3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        .toggle-checkbox:checked ~ .toggle-slot .toggle-button { transform: translate(22px, 2px); }
-        body.light-theme .toggle-slot { background-color: rgba(0,0,0,0.1); border-color: rgba(0,0,0,0.1); }
+        /* Layout constraints for Desktop/Mobile wrapper */
+        #app-wrapper {
+            width: 100%; height: 100dvh;
+            display: flex; flex-direction: column;
+            background-color: var(--md-sys-color-surface);
+            position: relative;
+            transition: background-color 0.4s ease;
+        }
+        @media (min-width: 640px) {
+            #app-wrapper {
+                height: 95vh; max-height: 850px; max-width: 420px;
+                border-radius: 48px;
+                box-shadow: 0 24px 48px -12px rgba(0,0,0,0.2);
+                border: 1px solid var(--md-sys-color-outline-variant);
+            }
+        }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
-    <div id="app" class="w-full h-[100dvh] sm:h-[95vh] sm:max-h-[850px] sm:max-w-[420px] sm:rounded-[3rem] relative bg-black shadow-2xl overflow-hidden border-0 sm:border border-white/10 flex flex-col">
+    <div id="app-wrapper" class="overflow-hidden">
         
-        <!-- TOAST -->
+        <!-- TOAST / SNACKBAR -->
         <div id="toast">
-            <div class="relative shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-[#111] border border-white/10 overflow-hidden">
+            <div class="relative shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] overflow-hidden">
                 <img id="toast-avatar" src="" class="w-full h-full object-cover hidden">
-                <div id="toast-icon-sys" class="text-xl hidden">🔔</div>
+                <span id="toast-sys-icon" class="material-symbols-rounded filled">notifications</span>
             </div>
-            <div class="flex-1 min-w-0 flex flex-col justify-center">
-                <p id="toast-title" class="text-[9px] font-black uppercase text-neutral-500 tracking-widest leading-tight">Система</p>
-                <div class="flex items-baseline gap-2">
-                    <p id="toast-msg" class="text-sm font-bold text-white truncate leading-tight">Уведомление</p>
-                    <p id="toast-amount" class="text-sm font-black text-[#FF4D00] whitespace-nowrap hidden"></p>
+            <div class="flex-1 min-w-0">
+                <p id="toast-title" class="text-xs font-medium md-on-surface-variant mb-0.5">Система</p>
+                <div class="flex items-baseline justify-between gap-2">
+                    <p id="toast-msg" class="text-sm font-bold truncate">Уведомление</p>
+                    <p id="toast-amount" class="text-sm font-black md-primary whitespace-nowrap hidden"></p>
                 </div>
             </div>
         </div>
 
         <!-- LOADING -->
-        <div id="view-loading" class="absolute inset-0 z-[100] bg-black flex items-center justify-center">
-            <div class="relative">
-                <div class="w-32 h-32 gradient-bg rounded-full blur-[60px] opacity-30 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
-                <span class="text-8xl font-black gradient-text relative z-10 animate-pulse">Đ</span>
-            </div>
+        <div id="view-loading" class="absolute inset-0 z-[100] md-surface flex flex-col items-center justify-center">
+            <span class="text-7xl font-black md-primary animate-pulse select-none">Đ</span>
+            <p class="mt-4 font-medium md-on-surface-variant tracking-widest text-sm">ЗАГРУЗКА...</p>
         </div>
 
         <!-- BANNED -->
-        <div id="view-banned" class="hidden flex-col h-full p-6 justify-center items-center relative z-[200] bg-black">
-            <div class="absolute inset-0 bg-red-500/5 z-0 pointer-events-none"></div>
-            <div class="w-32 h-32 bg-red-500/10 rounded-full flex items-center justify-center mb-6 relative border border-red-500/20 shadow-[0_0_50px_rgba(255,0,0,0.2)]">
-                 <div class="absolute inset-0 bg-red-500/20 blur-xl rounded-full animate-pulse"></div>
-                 <img src="https://img.icons8.com/?size=100&id=bQBCD3cqTiwW&format=png&color=ffffff" class="w-16 h-16 relative z-10 opacity-90 drop-shadow-[0_0_10px_rgba(255,0,0,0.5)]">
+        <div id="view-banned" class="hidden absolute inset-0 z-[100] md-surface flex-col p-8 justify-center items-center text-center">
+            <div class="w-24 h-24 rounded-full bg-[var(--md-sys-color-error)] text-[var(--md-sys-color-on-error)] flex flex-col items-center justify-center mb-6">
+                 <span class="material-symbols-rounded icon-xl">block</span>
             </div>
-            <h2 class="text-2xl font-black text-white mb-3 uppercase tracking-wide relative z-10" data-lang="access_denied">Доступ ограничен</h2>
-            <div class="bg-white/5 border border-white/10 rounded-2xl p-4 w-full max-w-[280px] mb-8 relative z-10">
-                <p id="ban-text" class="text-neutral-400 text-center text-xs font-bold leading-relaxed">
-                    Ваш аккаунт был заблокирован администрацией.
-                </p>
-            </div>
+            <h2 class="text-2xl font-bold mb-2">Доступ ограничен</h2>
+            <p id="ban-text" class="md-on-surface-variant text-sm leading-relaxed">
+                Ваш аккаунт был заблокирован администрацией.
+            </p>
         </div>
 
-        <!-- VERIFICATION REQUIRED (NEW) -->
-        <div id="view-verify" class="hidden flex-col h-full p-6 justify-center items-center relative z-[200] bg-black">
-             <div class="absolute inset-0 bg-orange-500/5 z-0 pointer-events-none"></div>
-             <div class="w-32 h-32 bg-orange-500/10 rounded-full flex items-center justify-center mb-6 relative border border-orange-500/20 shadow-[0_0_50px_rgba(255,77,0,0.2)]">
-                  <div class="absolute inset-0 bg-orange-500/20 blur-xl rounded-full animate-pulse"></div>
-                  <img src="https://img.icons8.com/?size=100&id=DkMDtLs1NDpy&format=png&color=ffffff" class="w-16 h-16 relative z-10 opacity-90">
+        <!-- VERIFICATION REQUIRED -->
+        <div id="view-verify" class="hidden absolute inset-0 z-[100] md-surface flex-col p-8 justify-center items-center text-center">
+             <div class="w-24 h-24 rounded-full bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] flex items-center justify-center mb-6">
+                  <span class="material-symbols-rounded icon-xl">mark_email_unread</span>
              </div>
-             <h2 class="text-2xl font-black text-white mb-3 uppercase tracking-wide relative z-10 text-center">Подтвердите Email</h2>
-             <div class="bg-white/5 border border-white/10 rounded-2xl p-4 w-full max-w-[280px] mb-6 relative z-10">
-                 <p class="text-neutral-400 text-center text-xs font-bold leading-relaxed mb-2">
-                     На вашу почту отправлено письмо со ссылкой.
-                 </p>
-                 <p class="text-neutral-500 text-center text-[10px] leading-relaxed">
-                     Перейдите по ссылке, затем нажмите кнопку ниже. Проверьте папку "Спам".
-                 </p>
-             </div>
-             <div class="flex flex-col gap-3 w-full max-w-[280px] relative z-10">
-                 <button onclick="window.location.reload()" class="h-12 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 transition-colors cursor-pointer">Я подтвердил</button>
-                 <button onclick="resendVerification()" class="h-12 glass-panel text-white rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-white/10 transition-colors cursor-pointer">Отправить снова</button>
-                 <button onclick="appLogout()" class="mt-2 text-neutral-500 text-[10px] font-bold uppercase hover:text-white cursor-pointer">Выйти / Сменить аккаунт</button>
+             <h2 class="text-2xl font-bold mb-4">Подтвердите Email</h2>
+             <p class="md-on-surface-variant text-sm mb-8 leading-relaxed max-w-[280px]">
+                 На вашу почту отправлено письмо со ссылкой. Перейдите по ней, затем нажмите кнопку ниже. Проверьте папку "Спам".
+             </p>
+             <div class="flex flex-col gap-4 w-full max-w-[280px]">
+                 <button onclick="window.location.reload()" class="md-btn md-btn-primary md-btn-large">Я подтвердил</button>
+                 <button onclick="resendVerification()" class="md-btn md-btn-tonal md-btn-large">Отправить снова</button>
+                 <button onclick="appLogout()" class="md-btn md-btn-outlined mt-2 border-none">Выйти / Сменить аккаунт</button>
              </div>
          </div>
 
         <!-- AUTH -->
-        <div id="view-auth" class="hidden flex-col h-full p-6 justify-center relative">
-            <div class="absolute top-0 left-0 w-full h-1/2 gradient-bg opacity-[0.03] blur-3xl pointer-events-none"></div>
-            <div class="text-center mb-10 relative z-10">
-                <span class="text-8xl font-black gradient-text inline-block mb-4 transform hover:scale-105 transition-transform duration-500">Đ</span>
-                <h1 class="text-4xl font-extrabold tracking-tight text-white">Doolcoin</h1>
-                <p class="text-neutral-500 mt-2 text-sm font-medium" data-lang="wallet_future">Кошелек будущего</p>
+        <div id="view-auth" class="hidden absolute inset-0 z-[10] md-surface flex-col p-8 justify-center overflow-y-auto">
+            <div class="text-center mb-10 mt-10">
+                <div class="inline-flex items-center justify-center w-20 h-20 rounded-[28px] bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-primary)] mb-4 font-black text-5xl shadow-lg transition-colors">
+                    Đ
+                </div>
+                <h1 class="text-3xl font-black md-primary mb-1">Doolcoin</h1>
+                <p class="text-sm font-medium md-on-surface-variant">Кошелек будущего</p>
             </div>
-            <div class="space-y-3 relative z-10">
-                <button id="btn-google" class="w-full h-14 bg-white text-black rounded-2xl font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-3 transition-all active:scale-95 cursor-pointer relative overflow-hidden group">
-                    <div class="absolute inset-0 bg-neutral-200 opacity-0 group-hover:opacity-10 transition-opacity"></div>
+            <div class="space-y-4 max-w-sm w-full mx-auto pb-10">
+                <button id="btn-google" class="w-full md-btn md-btn-tonal md-btn-large justify-center gap-3">
                     <svg width="24" height="24" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.84.81-.81z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-                    <span>Google</span>
+                    Вход через Google
                 </button>
                 <div class="flex items-center gap-4 py-2">
-                    <div class="h-[1px] bg-white/10 flex-1"></div>
-                    <span class="text-[10px] text-neutral-600 font-bold uppercase tracking-widest" data-lang="or">Или</span>
-                    <div class="h-[1px] bg-white/10 flex-1"></div>
+                    <div class="h-[1px] bg-[var(--md-sys-color-outline-variant)] flex-1"></div>
+                    <span class="text-xs font-bold md-on-surface-variant uppercase tracking-widest">Или</span>
+                    <div class="h-[1px] bg-[var(--md-sys-color-outline-variant)] flex-1"></div>
                 </div>
-                <div class="glass-panel rounded-3xl p-1.5 space-y-1.5">
-                    <input type="email" id="auth-email" placeholder="Email" class="w-full bg-transparent text-white px-5 py-3.5 outline-none placeholder:text-neutral-600 font-bold">
-                    <div class="h-[1px] bg-white/5 mx-5"></div>
-                    <input type="password" id="auth-password" data-lang-placeholder="password" placeholder="Пароль" class="w-full bg-transparent text-white px-5 py-3.5 outline-none placeholder:text-neutral-600 font-bold">
+                
+                <div class="md-input-container">
+                    <label class="md-input-label">Email</label>
+                    <input type="email" id="auth-email" placeholder="example@mail.com" class="md-input">
                 </div>
+                <div class="md-input-container">
+                    <label class="md-input-label">Пароль</label>
+                    <input type="password" id="auth-password" placeholder="••••••••" class="md-input">
+                </div>
+
                 <div class="grid grid-cols-2 gap-3 pt-2">
-                    <button id="btn-login" class="h-12 glass-panel border border-white/5 text-white rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-white/10 transition-colors disabled:opacity-50" data-lang="login">Войти</button>
-                    <button id="btn-register" class="h-12 glass-panel border border-white/5 text-neutral-400 rounded-2xl font-black text-xs uppercase tracking-wider hover:text-white hover:bg-white/5 transition-colors disabled:opacity-50" data-lang="create">Создать</button>
+                    <button id="btn-login" class="md-btn md-btn-primary md-btn-large">Войти</button>
+                    <button id="btn-register" class="md-btn md-btn-outlined md-btn-large">Создать</button>
                 </div>
             </div>
         </div>
 
-        <!-- MAIN -->
-        <div id="view-main" class="hidden flex flex-col h-full">
-            <header class="px-6 pt-12 pb-4 flex justify-between items-center z-20">
-                <div class="flex items-center gap-3 active:opacity-70 transition-opacity cursor-pointer" onclick="openModal('profile')">
-                    <div class="p-[2px] gradient-bg rounded-full shadow-[0_0_20px_rgba(255,77,0,0.3)]">
-                        <img id="main-avatar" src="https://img.icons8.com/?size=100&id=DkMDtLs1NDpy&format=png&color=ffffff" class="w-10 h-10 rounded-full object-cover bg-black border-2 border-black">
+        <!-- MAIN VIEW -->
+        <div id="view-main" class="hidden flex-col h-full relative">
+            
+            <!-- HEADER (With Hug Scroll Effect) -->
+            <header id="main-header" class="px-6 pt-10 pb-4 flex justify-between items-center z-20 shrink-0 sticky top-0 bg-transparent">
+                <div class="flex items-center gap-3 cursor-pointer" onclick="openModal('profile')">
+                    <div class="relative inline-block">
+                        <img id="main-avatar" src="" class="w-11 h-11 rounded-full object-cover border-[3px] border-[var(--md-sys-color-surface)] bg-[var(--md-sys-color-surface-container)]">
+                        <!-- Clean MD3 Verified Font Icon -->
+                        <span id="header-verified-icon" class="material-symbols-rounded filled text-[16px] md-primary absolute -bottom-1 -right-1 hidden bg-[var(--md-sys-color-surface)] rounded-full">verified</span>
                     </div>
                     <div class="flex flex-col justify-center">
-                        <div class="flex items-center gap-1">
-                            <p id="main-username" class="text-xs font-bold truncate max-w-[140px] leading-tight text-white">...</p>
-                            <img id="header-verified-icon" src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" class="w-3 h-3 hidden" title="Verified">
-                        </div>
-                        <p class="text-[9px] font-black text-neutral-500 uppercase tracking-widest leading-tight" data-lang="profile">Профиль</p>
+                        <p id="main-username" class="text-sm font-bold truncate max-w-[140px] leading-tight">Загрузка...</p>
+                        <p class="text-[10px] md-on-surface-variant font-bold uppercase tracking-widest mt-0.5">Ваш профиль</p>
                     </div>
                 </div>
-                
                 <div class="flex items-center gap-2">
-                    <button onclick="openModal('settings')" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer">
-                        <img src="https://img.icons8.com/?size=100&id=xyFoc6U1Hu3c&format=png&color=ffffff" class="w-5 h-5 opacity-80 settings-icon" alt="Settings">
+                    <button onclick="openModal('settings')" class="w-11 h-11 rounded-full flex items-center justify-center md-on-surface-variant hover:bg-[var(--md-sys-color-surface-container-highest)] transition-colors">
+                        <span class="material-symbols-rounded">settings</span>
                     </button>
-                    <button id="btn-logout" class="w-10 h-10 rounded-full glass-panel flex items-center justify-center text-neutral-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer">
-                        <img src="https://img.icons8.com/?size=100&id=5HW1YsFkzHio&format=png&color=ffffff" class="w-5 h-5 opacity-80 logout-icon" alt="Logout">
+                    <button id="btn-logout" class="w-11 h-11 rounded-full flex items-center justify-center md-on-surface-variant hover:bg-[var(--md-sys-color-surface-container-highest)] transition-colors">
+                        <span class="material-symbols-rounded">logout</span>
                     </button>
                 </div>
             </header>
 
-            <main class="flex-1 overflow-y-auto px-5 hide-scroll pb-32 z-10">
-                <!-- WALLET -->
-                <div id="tab-wallet" class="tab-content active space-y-6">
-                    <div class="dool-card rounded-[2.5rem] p-6 sm:p-8 relative overflow-hidden group">
-                        <div class="absolute inset-0 gradient-bg opacity-[0.03] group-hover:opacity-[0.05] transition-opacity duration-500"></div>
-                        <div class="absolute -right-12 -top-12 w-48 h-48 bg-[#FF4D00] rounded-full blur-[80px] opacity-20"></div>
-                        <div class="relative z-10 flex flex-col items-center justify-center py-6">
-                            <span class="text-[10px] font-bold text-neutral-500 uppercase tracking-[0.2em] mb-2" data-lang="total_balance">Общий баланс</span>
-                            <div class="w-full flex items-baseline justify-center gap-1 mb-2 px-2">
-                                <h2 id="balance-val" class="text-5xl font-black tracking-tighter leading-none whitespace-nowrap overflow-visible text-white">0.00</h2>
-                                <span class="text-2xl font-black gradient-text leading-none mb-1 self-end pb-1">Đ</span>
-                            </div>
-                        </div>
-                        <div class="flex gap-3 mt-4 relative z-10">
-                            <button onclick="openModal('send')" class="flex-1 h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 active:scale-95 transition-all shadow-lg shadow-white/5 cursor-pointer flex flex-col items-center justify-center"><span data-lang="send">Отправить</span></button>
-                            <button onclick="openModal('scan')" class="w-14 h-14 glass-panel text-white rounded-2xl flex items-center justify-center hover:bg-white/10 active:scale-95 transition-all cursor-pointer border border-white/10 hover:border-orange-500/50"><img src="https://img.icons8.com/?size=100&id=XdgEzmYg0J8k&format=png&color=ffffff" class="w-6 h-6 settings-icon" alt="Scan"></button>
-                            <button onclick="openModal('receive')" class="flex-1 h-14 glass-panel text-white border border-white/10 rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-white/10 active:scale-95 transition-all cursor-pointer flex flex-col items-center justify-center"><span data-lang="receive">Получить</span></button>
+            <!-- TABS CONTENT -->
+            <main id="main-scroll" class="flex-1 overflow-y-auto hide-scroll px-4 pb-[90px] relative z-10 transition-all duration-300 ease-out">
+                
+                <!-- WALLET TAB -->
+                <div id="tab-wallet" class="tab-content active space-y-4">
+                    <div class="md-card flex flex-col items-center justify-center py-8 relative overflow-hidden bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] border-none">
+                        <span class="text-xs font-medium uppercase tracking-widest opacity-80 mb-2">Общий баланс</span>
+                        <div class="w-full flex items-baseline justify-center gap-2">
+                            <h2 id="balance-val" class="text-5xl font-black tracking-tight leading-none">0.00</h2>
+                            <span class="text-2xl font-bold opacity-80">Đ</span>
                         </div>
                     </div>
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between px-2">
-                            <h3 class="text-[11px] font-black text-neutral-500 uppercase tracking-widest" data-lang="history">История операций</h3>
-                        </div>
-                        <div id="tx-history" class="space-y-2 pb-10">
-                            <div class="text-center py-10">
-                                <div class="w-8 h-8 border-2 border-white/10 border-t-orange-500 rounded-full animate-spin mx-auto mb-4"></div>
-                                <p class="text-[10px] font-bold text-neutral-600 uppercase tracking-widest" data-lang="loading">Загрузка...</p>
+                    
+                    <div class="flex gap-4 px-2 py-4 justify-around">
+                        <button onclick="openModal('send')" class="flex flex-col items-center gap-2 flex-1">
+                            <div class="md-fab"><span class="material-symbols-rounded filled">send</span></div>
+                            <span class="text-xs font-medium">Отправить</span>
+                        </button>
+                        <button onclick="openModal('scan')" class="flex flex-col items-center gap-2 flex-1">
+                            <div class="md-fab bg-[var(--md-sys-color-surface-container-highest)] text-[var(--md-sys-color-on-surface)]"><span class="material-symbols-rounded">qr_code_scanner</span></div>
+                            <span class="text-xs font-medium">Скан</span>
+                        </button>
+                        <button onclick="openModal('receive')" class="flex flex-col items-center gap-2 flex-1">
+                            <div class="md-fab bg-[var(--md-sys-color-surface-container-highest)] text-[var(--md-sys-color-on-surface)]"><span class="material-symbols-rounded">download</span></div>
+                            <span class="text-xs font-medium">Получить</span>
+                        </button>
+                    </div>
+
+                    <div class="pt-2">
+                        <h3 class="text-xs font-bold md-on-surface-variant uppercase tracking-widest mb-4 px-2">История операций</h3>
+                        <div id="tx-history" class="space-y-2 pb-6">
+                            <div class="text-center py-8">
+                                <span class="material-symbols-rounded animate-spin md-on-surface-variant">sync</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- BANK -->
-                <div id="tab-bank" class="tab-content space-y-6">
-                    <div class="text-center pt-4 pb-2">
-                        <h2 class="text-xl font-black uppercase tracking-widest text-neutral-400" data-lang="staking">Стейкинг</h2>
-                        <p class="text-[10px] text-orange-500 font-bold uppercase tracking-widest">+5% в неделю ⌛</p>
+                <!-- BANK TAB -->
+                <div id="tab-bank" class="tab-content space-y-4">
+                    <div class="text-center py-4">
+                        <h2 class="text-2xl font-bold">Стейкинг</h2>
+                        <div class="inline-flex items-center gap-1 bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] px-3 py-1 rounded-full mt-2 transition-colors">
+                            <span class="material-symbols-rounded text-sm filled">trending_up</span>
+                            <span class="text-xs font-bold">+5% в неделю</span>
+                        </div>
                     </div>
-                   <div class="bank-stack-container">
+                    
+                    <!-- Bank Jar Animation -->
+                    <div class="bank-stack-container my-2">
                         <img src="https://wsrv.nl/?url=https://emojigraph.org/media/facebook/jar_1fad9.png" class="bank-layer-bottom">
                         <img src="https://wsrv.nl/?url=https://emojigraph.org/media/google/fire_1f525.png" class="bank-layer-fire">
                         <img src="https://wsrv.nl/?url=https://emojigraph.org/media/facebook/jar_1fad9.png" class="bank-layer-top">
                     </div>
-                    <div class="dool-card rounded-[2.5rem] p-6 sm:p-8 text-center relative overflow-hidden">
-                        <div class="absolute inset-0 bg-orange-500/5"></div>
-                        <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-2 relative z-10" data-lang="in_jar">В банке</p>
-                        <div class="flex items-center justify-center gap-2 relative z-10">
-                            <h2 id="bank-balance-val" class="text-4xl font-black text-white">0.0</h2>
-                            <span class="text-xl font-black text-orange-500">Đ</span>
+
+                    <div class="md-card text-center mb-4 bg-[var(--md-sys-color-surface-container)] border-none">
+                        <p class="text-[10px] font-bold md-on-surface-variant uppercase tracking-widest mb-1">В банке</p>
+                        <div class="flex items-center justify-center gap-2">
+                            <h2 id="bank-balance-val" class="text-4xl font-black">0.0</h2>
+                            <span class="text-xl font-bold md-primary">Đ</span>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <button onclick="openModal('deposit')" class="h-20 glass-panel rounded-[2rem] flex flex-col items-center justify-center gap-1 hover:bg-white/10 transition-colors border border-white/10"><img src="https://img.icons8.com/?size=100&id=8P1z54VQlHYr&format=png&color=000000" class="w-12 h-12 settings-icon" alt="Deposit"></button>
-                        <button onclick="openModal('withdraw')" class="h-20 glass-panel rounded-[2rem] flex flex-col items-center justify-center gap-1 hover:bg-white/10 transition-colors border border-white/10"><img src="https://img.icons8.com/?size=100&id=qRJUAI2xNkqe&format=png&color=000000" class="w-12 h-12 settings-icon" alt="Withdraw"></button>
+
+                    <!-- Capsule Buttons -->
+                    <div class="flex gap-3 pt-1">
+                        <button onclick="openModal('deposit')" class="flex-1 h-12 bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)] rounded-full flex items-center justify-center gap-2 font-bold text-sm hover:opacity-90 active:scale-95 transition-all cursor-pointer border-none shadow-sm">
+                            <span class="material-symbols-rounded filled text-xl">add_card</span>
+                            <span>Положить</span>
+                        </button>
+                        <button onclick="openModal('withdraw')" class="flex-1 h-12 bg-[var(--md-sys-color-surface-container-high)] text-[var(--md-sys-color-on-surface)] rounded-full flex items-center justify-center gap-2 font-bold text-sm hover:opacity-90 active:scale-95 transition-all cursor-pointer border-none shadow-sm">
+                            <span class="material-symbols-rounded text-xl">payments</span>
+                            <span>Достать</span>
+                        </button>
                     </div>
                 </div>
 
-                <!-- NFT TAB (NEW) -->
-                <div id="tab-nft" class="tab-content space-y-6">
-                    <div class="pt-4 pb-2 px-2 flex justify-between items-end">
-                        <h2 class="text-3xl font-black text-white italic tracking-tighter">NFT <span class="text-orange-500">Space</span></h2>
+                <!-- NFT TAB -->
+                <div id="tab-nft" class="tab-content space-y-4">
+                    <div class="pt-4 pb-2 flex justify-between items-end px-2">
+                        <h2 class="text-3xl font-black">NFT <span class="md-primary">Space</span></h2>
                     </div>
                     
-                    <!-- Sub-nav -->
-                    <div class="flex gap-4 justify-between px-4 pb-4 border-b border-white/5">
-                        <button onclick="switchNftSubTab('market')" id="nft-sub-market" class="sub-tab-btn flex flex-col items-center gap-1 active">
-                            <div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10">
-                                <img src="https://img.icons8.com/?size=100&id=LwNLQyWraKTr&format=png&color=ffffff" class="w-6 h-6">
-                            </div>
-                            <span class="text-[9px] font-bold uppercase tracking-wider text-neutral-400">Shop</span>
+                    <div class="flex gap-2 overflow-x-auto hide-scroll pb-4 px-2">
+                        <button onclick="switchNftSubTab('market')" id="nft-sub-market" class="md-btn md-btn-tonal shrink-0 active-nft-tab">
+                            <span class="material-symbols-rounded text-lg">storefront</span> Магазин
                         </button>
-                        <button onclick="switchNftSubTab('inventory')" id="nft-sub-inventory" class="sub-tab-btn flex flex-col items-center gap-1">
-                            <div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10">
-                                <img src="https://img.icons8.com/?size=100&id=Q4Mp5MaDRZyl&format=png&color=ffffff" class="w-6 h-6">
-                            </div>
-                            <span class="text-[9px] font-bold uppercase tracking-wider text-neutral-400">Inventory</span>
+                        <button onclick="switchNftSubTab('inventory')" id="nft-sub-inventory" class="md-btn md-btn-outlined border-[var(--md-sys-color-outline-variant)] shrink-0">
+                            <span class="material-symbols-rounded text-lg">inventory_2</span> Инвентарь
                         </button>
-                        <button onclick="openModal('nft-create')" class="sub-tab-btn flex flex-col items-center gap-1" style="opacity:1; filter:none">
-                            <div class="w-12 h-12 rounded-2xl bg-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/20">
-                                <img src="https://img.icons8.com/?size=100&id=owhiHVzjr30B&format=png&color=ffffff" class="w-6 h-6">
-                            </div>
-                            <span class="text-[9px] font-bold uppercase tracking-wider text-white">Create</span>
+                        <button onclick="openModal('nft-create')" class="md-btn md-btn-primary shrink-0 ml-auto">
+                            <span class="material-symbols-rounded text-lg">add_photo_alternate</span> Создать
                         </button>
                     </div>
 
-                    <!-- NFT Grid Container -->
-                    <div id="nft-view-market" class="nft-grid pb-20">
-                        <!-- Items injected by JS -->
-                    </div>
-                    <div id="nft-view-inventory" class="nft-grid pb-20 hidden">
-                        <!-- Items injected by JS -->
-                    </div>
+                    <div id="nft-view-market" class="nft-grid pb-10"></div>
+                    <div id="nft-view-inventory" class="nft-grid pb-10 hidden"></div>
                 </div>
 
-                <!-- REFERRALS -->
-                <div id="tab-referrals" class="tab-content space-y-6">
-                    <div class="dool-card rounded-[2.5rem] p-6 sm:p-8 relative overflow-hidden">
-                        <div class="absolute top-0 right-0 w-32 h-32 gradient-bg blur-[60px] opacity-20"></div>
-                        <h3 class="text-2xl font-black mb-2 relative z-10 text-white" data-lang="invite_friend">Пригласи друга</h3>
-                        <p class="text-neutral-500 text-xs mb-8 leading-relaxed max-w-[80%] relative z-10">
-                            <span data-lang="ref_desc">Получи</span> <span class="text-white font-bold">10.00 Đ</span>
-                        </p>
-                        <div class="bg-black/40 border border-white/5 p-4 rounded-2xl space-y-3 relative z-10 backdrop-blur-sm">
-                            <div class="flex items-center justify-between gap-4">
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-[9px] font-black text-neutral-600 uppercase tracking-widest mb-1" data-lang="your_link">Ваша ссылка</p>
-                                    <input readonly id="ref-link" class="w-full text-[10px] font-mono text-neutral-400 bg-transparent outline-none truncate" value="...">
-                                </div>
-                                <div class="flex gap-2">
-                                    <button onclick="shareRef()" class="w-10 h-10 flex items-center justify-center bg-white/10 text-white rounded-xl hover:bg-white/20 transition-transform cursor-pointer"><img src="https://img.icons8.com/?size=100&id=PuZtTk7UXaiT&format=png&color=ffffff" class="w-4 h-4 settings-icon" alt="Share"></button>
-                                    <button onclick="copyRef()" class="w-10 h-10 flex items-center justify-center bg-orange-500 rounded-xl hover:bg-orange-600 transition-all cursor-pointer"><img src="https://img.icons8.com/?size=100&id=v6i0IST6rKnE&format=png&color=000000" class="w-4 h-4" alt="Copy"></button>
-                                </div>
+                <!-- REFERRALS TAB -->
+                <div id="tab-referrals" class="tab-content space-y-4">
+                    <div class="md-card bg-[var(--md-sys-color-secondary-container)] text-[var(--md-sys-color-on-secondary-container)] border-none">
+                        <h3 class="text-2xl font-bold mb-2">Пригласи друга</h3>
+                        <p class="text-sm mb-6 opacity-90">Получи бонус <span class="font-bold">10.00 Đ</span></p>
+                        
+                        <div class="bg-[var(--md-sys-color-surface-container-highest)] rounded-xl p-4 flex items-center justify-between gap-3">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-xs font-medium opacity-70 mb-1">Ваша ссылка</p>
+                                <input readonly id="ref-link" class="w-full text-sm font-medium bg-transparent outline-none truncate text-[var(--md-sys-color-on-surface)]">
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="shareRef()" class="w-10 h-10 rounded-full flex items-center justify-center bg-[var(--md-sys-color-surface-container-lowest)] text-[var(--md-sys-color-on-surface)]"><span class="material-symbols-rounded text-[18px]">share</span></button>
+                                <button onclick="copyRef()" class="w-10 h-10 rounded-full flex items-center justify-center bg-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-primary)]"><span class="material-symbols-rounded text-[18px]">content_copy</span></button>
                             </div>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="dool-card p-5 rounded-[2rem] flex flex-col items-center justify-center gap-1 aspect-square">
-                            <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center mb-2 text-neutral-400"><img src="https://img.icons8.com/?size=100&id=p8UFrp2VUgHR&format=png&color=000000" class="w-5 h-5 opacity-70 settings-icon" alt="Friends"></div>
-                            <p id="ref-count" class="text-2xl font-black text-white">0</p>
-                            <p class="text-[9px] font-bold text-neutral-600 uppercase tracking-wider" data-lang="friends">Друзей</p>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="md-card flex flex-col items-center justify-center gap-2 text-center py-6 border-none">
+                            <span class="material-symbols-rounded md-on-surface-variant icon-lg">group</span>
+                            <p id="ref-count" class="text-3xl font-black mt-2">0</p>
+                            <p class="text-[10px] font-bold md-on-surface-variant uppercase tracking-widest">Друзей</p>
                         </div>
-                        <div class="dool-card p-5 rounded-[2rem] flex flex-col items-center justify-center gap-1 aspect-square">
-                            <div class="w-10 h-10 rounded-full bg-orange-500/10 flex items-center justify-center mb-2 text-orange-500"><img src="https://img.icons8.com/?size=100&id=djfFWeKjwcd3&format=png&color=ffffff" class="w-5 h-5" style="filter: brightness(0) saturate(100%) invert(32%) sepia(98%) saturate(2329%) hue-rotate(358deg) brightness(101%) contrast(106%);" alt="Earned"></div>
-                            <p id="ref-earned" class="text-2xl font-black text-white">0</p>
-                            <p class="text-[9px] font-bold text-neutral-600 uppercase tracking-wider" data-lang="earned">Заработано</p>
+                        <div class="md-card flex flex-col items-center justify-center gap-2 text-center py-6 border-none">
+                            <span class="material-symbols-rounded md-primary icon-lg filled">monetization_on</span>
+                            <p id="ref-earned" class="text-3xl font-black mt-2">0</p>
+                            <p class="text-[10px] font-bold md-on-surface-variant uppercase tracking-widest">Заработано</p>
                         </div>
                     </div>
                 </div>
+
             </main>
 
-            <!-- NAV (UPDATED WITH NFT) -->
-            <nav class="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-[380px] h-16 bg-[#111]/90 backdrop-blur-xl border border-white/10 rounded-[2rem] flex items-center justify-around px-2 z-50 shadow-2xl transition-colors duration-300">
-                <button onclick="switchTab('wallet')" id="nav-wallet" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-orange-500 cursor-pointer">
-                    <img src="https://img.icons8.com/?size=100&id=Pv8alVtwvuFB&format=png&color=ffffff" class="w-8 h-8 nav-icon nav-icon-active" alt="Wallet">
+            <!-- BOTTOM NAVIGATION (MD3) -->
+            <nav class="md-bottom-nav absolute bottom-0 left-0">
+                <button onclick="switchTab('wallet')" id="nav-wallet" class="md-nav-item active">
+                    <div class="md-nav-indicator"><span class="material-symbols-rounded nav-icon filled">account_balance_wallet</span></div>
+                    <span class="text-[11px] font-medium mt-1">Кошелек</span>
                 </button>
-                <button onclick="switchTab('bank')" id="nav-bank" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
-                     <img src="https://img.icons8.com/?size=100&id=MRDxs37r5Fp9&format=png&color=ffffff" class="w-8 h-8 nav-icon" alt="Bank">
+                <button onclick="switchTab('bank')" id="nav-bank" class="md-nav-item">
+                    <div class="md-nav-indicator"><span class="material-symbols-rounded nav-icon">savings</span></div>
+                    <span class="text-[11px] font-medium mt-1">Банк</span>
                 </button>
-                <button onclick="switchTab('nft')" id="nav-nft" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
-                    <img src="https://img.icons8.com/?size=100&id=2xm6PmHSTPzF&format=png&color=ffffff" class="w-9 h-9 nav-icon" alt="NFT">
-               </button>
-                <button onclick="switchTab('referrals')" id="nav-referrals" class="flex-1 flex flex-col items-center justify-center gap-1 h-full rounded-[1.5rem] transition-all text-neutral-600 cursor-pointer">
-                    <img src="https://img.icons8.com/?size=100&id=N9EwPosvU1Rm&format=png&color=ffffff" class="w-8 h-8 nav-icon" alt="Referrals">
+                <button onclick="switchTab('nft')" id="nav-nft" class="md-nav-item">
+                    <div class="md-nav-indicator"><span class="material-symbols-rounded nav-icon">storefront</span></div>
+                    <span class="text-[11px] font-medium mt-1">NFT</span>
+                </button>
+                <button onclick="switchTab('referrals')" id="nav-referrals" class="md-nav-item">
+                    <div class="md-nav-indicator"><span class="material-symbols-rounded nav-icon">group_add</span></div>
+                    <span class="text-[11px] font-medium mt-1">Друзья</span>
                 </button>
             </nav>
         </div>
 
         <!-- SETTINGS MODAL -->
-        <div id="modal-settings" onclick="if(event.target===this) closeModal('settings')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
-            <div class="bg-[#0f0f0f] border-t border-white/10 rounded-t-[2.5rem] p-0 transform translate-y-full transition-transform duration-300" id="modal-settings-content">
-                <div class="swipe-zone"><div class="swipe-handle"></div></div>
-                <div class="p-8 pb-10 space-y-8 overflow-y-auto max-h-[80vh]">
-                    <div class="flex items-center gap-3 mb-2">
-                        <img src="https://img.icons8.com/?size=100&id=xyFoc6U1Hu3c&format=png&color=ffffff" class="w-8 h-8 settings-icon">
-                        <h2 class="text-2xl font-black text-white" data-lang="settings">Настройки</h2>
-                    </div>
-                    <!-- Privacy Toggle -->
-                    <div class="bg-white/5 rounded-2xl p-4 flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-bold text-white mb-0.5">Показывать мои NFT</p>
-                            <p class="text-[10px] text-neutral-500 font-medium">Видны в публичном профиле</p>
+        <div id="modal-settings" onclick="if(event.target===this) closeModal('settings')" class="hidden absolute inset-0 z-[120] bg-black/50 backdrop-blur-sm flex flex-col justify-end opacity-0 transition-opacity duration-300">
+            <div class="md-bottom-sheet w-full max-w-[420px] mx-auto h-[85vh] flex flex-col" id="modal-settings-content">
+                <div class="swipe-handle-container shrink-0"><div class="swipe-handle"></div></div>
+                <div class="px-6 flex items-center gap-3 mb-6 shrink-0">
+                    <span class="material-symbols-rounded icon-lg md-on-surface-variant">settings</span>
+                    <h2 class="text-2xl font-bold">Настройки</h2>
+                </div>
+                
+                <div class="px-6 space-y-6 overflow-y-auto hide-scroll flex-1 pb-10">
+                    <!-- Theme & Color Picker -->
+                    <div>
+                        <p class="text-[10px] font-bold md-on-surface-variant uppercase tracking-widest mb-3">ОФОРМЛЕНИЕ</p>
+                        
+                        <!-- Dark Mode Toggle -->
+                        <div class="flex items-center justify-between md-card bg-[var(--md-sys-color-surface-container)] px-4 py-4 border-none mb-4">
+                            <span class="text-sm font-bold">Тёмная тема</span>
+                            <label class="md-switch">
+                                <input type="checkbox" id="setting-dark-mode" onchange="toggleDarkMode(this.checked)">
+                                <span class="md-slider"></span>
+                            </label>
                         </div>
-                        <label class="relative inline-block w-11 h-6 cursor-pointer">
-                            <input type="checkbox" id="setting-show-nft" class="toggle-checkbox" onchange="toggleNftPrivacy(this.checked)">
-                            <div class="toggle-slot"><div class="toggle-button"></div></div>
+                        
+                        <!-- Color Carousel -->
+                        <div class="flex gap-3 overflow-x-auto hide-scroll py-2 px-1 snap-x" id="color-carousel">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Privacy Toggle -->
+                    <div class="flex items-center justify-between md-card bg-[var(--md-sys-color-surface-container)] px-4 py-5 border-none">
+                        <div>
+                            <p class="text-sm font-bold mb-1">Показывать мои NFT</p>
+                            <p class="text-xs md-on-surface-variant">Видны в публичном профиле</p>
+                        </div>
+                        <label class="md-switch">
+                            <input type="checkbox" id="setting-show-nft" onchange="toggleNftPrivacy(this.checked)">
+                            <span class="md-slider"></span>
                         </label>
                     </div>
-                    <!-- Theme -->
+
+                    <!-- About / Links -->
                     <div>
-                        <p class="text-[10px] font-bold text-neutral-500 uppercase tracking-widest mb-3" data-lang="theme">Тема оформления</p>
-                        <div class="grid grid-cols-2 gap-3">
-                            <button onclick="setTheme('light')" id="theme-btn-light" class="theme-btn h-14 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center gap-2 text-white"><img src="https://img.icons8.com/?size=100&id=nGdbxRylhrdU&format=png&color=ffffff" class="w-6 h-6 settings-icon"><span class="font-bold text-xs uppercase" data-lang="theme_light">Светлая</span></button>
-                            <button onclick="setTheme('dark')" id="theme-btn-dark" class="theme-btn h-14 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center gap-2 text-white"><img src="https://img.icons8.com/?size=100&id=I0BKFITuoSCV&format=png&color=ffffff" class="w-6 h-6 settings-icon"><span class="font-bold text-xs uppercase" data-lang="theme_dark">Тёмная</span></button>
-                        </div>
-                    </div>
-                    <!-- About -->
-                    <div class="about-card">
-                        <div class="about-inner">
-                            <div class="flex items-center justify-between mb-4">
-                                <div class="flex items-center gap-2"><div class="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center"><span class="font-black text-black">Đ</span></div><span class="font-black text-sm tracking-widest text-white">DOOLCOIN</span></div>
-                                <span class="text-[9px] font-mono text-neutral-500">v1.2.0 (Verified)</span>
+                        <!-- Telegram Button (Replaced with specific SVG and colored via CSS Mask) -->
+                        <a href="https://t.me/D00lcoin" target="_blank" class="md-card bg-[var(--md-sys-color-surface-container)] px-4 py-4 border-none mb-4 flex items-center justify-between cursor-pointer hover:bg-[var(--md-sys-color-surface-container-high)] transition-colors no-underline">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-[var(--md-sys-color-surface-container-highest)] flex items-center justify-center">
+                                    <div class="w-5 h-5 bg-[var(--md-sys-color-primary)]" style="-webkit-mask: url('https://files.svgcdn.io/icon-park/telegram.svg') no-repeat center; mask: url('https://files.svgcdn.io/icon-park/telegram.svg') no-repeat center; -webkit-mask-size: contain; mask-size: contain;"></div>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-[var(--md-sys-color-on-surface)] mb-0.5">Наш Telegram</p>
+                                    <p class="text-xs text-[var(--md-sys-color-on-surface-variant)]">@D00lcoin</p>
+                                </div>
                             </div>
-                            <h3 class="text-xs font-bold text-white mb-2" data-lang="legal_title">Юридическая информация</h3>
-                            <p class="text-[10px] text-neutral-400 font-medium leading-relaxed mb-4 text-justify" data-lang="legal_text">Doolcoin (Đ) — это внутриигровая условная единица. Не является платёжным средством.</p>
-                            <div class="h-[1px] bg-white/10 w-full mb-3"></div>
-                            <div class="flex justify-between items-center"><span class="text-[9px] text-neutral-600">© 2026 Doolcoin Inc.</span><a href="https://icons8.com" target="_blank" class="text-[9px] font-bold text-orange-500 hover:text-white transition-colors flex items-center gap-1"><span>Icons by Icons8</span></a></div>
+                            <span class="material-symbols-rounded text-[var(--md-sys-color-on-surface-variant)]">open_in_new</span>
+                        </a>
+
+                        <div class="md-card bg-[var(--md-sys-color-surface-container)] border-none">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 rounded-full bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-primary)] flex items-center justify-center font-black transition-colors">Đ</div>
+                                    <span class="font-bold text-sm tracking-widest">DOOLCOIN</span>
+                                </div>
+                                <span class="text-xs font-mono md-on-surface-variant">v3.1</span>
+                            </div>
+                            <h3 class="text-sm font-bold mb-2">Юридическая информация</h3>
+                            <p class="text-xs md-on-surface-variant leading-relaxed text-justify">Doolcoin (Đ) — это внутриигровая условная единица. Не является платёжным средством.</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- CONFIRM MODAL (NEW) -->
-        <div id="modal-confirm" class="hidden absolute inset-0 z-[130] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
-            <div class="bg-[#111] border-t border-white/10 rounded-t-[2.5rem] p-8 pb-10 transform translate-y-full transition-transform duration-300" id="modal-confirm-content">
-                 <h2 id="confirm-title" class="text-xl font-black mb-2 text-white">Подтвердите</h2>
-                 <p id="confirm-msg" class="text-xs text-neutral-400 font-bold mb-6">Вы уверены?</p>
+        <!-- CONFIRM MODAL -->
+        <div id="modal-confirm" class="hidden absolute inset-0 z-[130] bg-black/50 backdrop-blur-sm flex flex-col justify-center items-center p-4 opacity-0 transition-opacity duration-300">
+            <div class="w-full max-w-[320px] bg-[var(--md-sys-color-surface-container-high)] rounded-3xl p-6 shadow-xl transform scale-95 transition-transform duration-300" id="modal-confirm-content">
+                 <h2 id="confirm-title" class="text-xl font-bold mb-2">Подтвердите</h2>
+                 <p id="confirm-msg" class="text-sm md-on-surface-variant mb-6">Вы уверены?</p>
                  
-                 <!-- Input for listing -->
-                 <div id="confirm-input-container" class="hidden mb-6 bg-white/5 rounded-2xl p-4 border border-white/5">
-                    <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Цена (Đ)</p>
-                    <input type="number" id="confirm-input" class="w-full bg-transparent outline-none font-black text-2xl text-white" placeholder="0.0">
+                 <div id="confirm-input-container" class="hidden mb-6">
+                    <div class="md-input-container">
+                        <label class="md-input-label">Цена (Đ)</label>
+                        <input type="number" id="confirm-input" class="md-input font-bold" placeholder="0.0">
+                    </div>
                  </div>
 
-                 <div class="flex gap-3">
-                    <button onclick="closeConfirm()" class="flex-1 h-14 bg-white/5 text-neutral-400 rounded-2xl font-bold text-xs uppercase tracking-wider cursor-pointer">Отмена</button>
-                    <button id="btn-confirm-yes" class="flex-[2] h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer">Да</button>
+                 <div class="flex justify-end gap-2">
+                    <button onclick="closeConfirm()" class="md-btn md-btn-outlined border-none text-sm">Отмена</button>
+                    <button id="btn-confirm-yes" class="md-btn md-btn-primary text-sm">Да</button>
                  </div>
             </div>
         </div>
 
         <!-- PUBLIC PROFILE MODAL -->
-        <div id="modal-public-profile" onclick="if(event.target===this) closeModal('public-profile')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
-             <div class="bg-[#0f0f0f] border-t border-white/10 rounded-t-[2.5rem] p-0 transform translate-y-full transition-transform duration-300 h-[85vh] flex flex-col" id="modal-public-profile-content">
-                <div class="swipe-zone shrink-0"><div class="swipe-handle"></div></div>
+        <div id="modal-public-profile" onclick="if(event.target===this) closeModal('public-profile')" class="hidden absolute inset-0 z-[120] bg-black/50 backdrop-blur-sm flex flex-col justify-end opacity-0 transition-opacity duration-300">
+             <div class="md-bottom-sheet w-full max-w-[420px] mx-auto h-[85vh] flex flex-col" id="modal-public-profile-content">
+                <div class="swipe-handle-container shrink-0"><div class="swipe-handle"></div></div>
                 <div class="p-6 flex flex-col items-center shrink-0">
-                    <img id="pub-profile-avatar" src="" class="w-20 h-20 rounded-full border-4 border-[#1a1a1a] shadow-xl mb-3 object-cover">
-                    <div class="flex items-center gap-1 mb-1">
-                        <h2 id="pub-profile-email" class="text-lg font-black text-white"></h2>
-                        <img id="pub-profile-verified" src=https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" class="w-4 h-4 hidden">
+                    <div class="relative inline-block mb-3">
+                        <img id="pub-profile-avatar" src="" class="w-24 h-24 rounded-full border-4 border-[var(--md-sys-color-surface-container-high)] shadow-lg object-cover bg-[var(--md-sys-color-surface-container)]">
+                        <!-- Verified Font Icon -->
+                        <span id="pub-profile-verified" class="material-symbols-rounded filled text-[24px] md-primary absolute bottom-0 right-0 hidden bg-[var(--md-sys-color-surface)] rounded-full">verified</span>
                     </div>
+                    <h2 id="pub-profile-email" class="text-xl font-bold"></h2>
                 </div>
                 <div class="flex-1 overflow-y-auto px-6 pb-10 hide-scroll">
-                    <p class="text-[10px] font-black text-neutral-600 uppercase tracking-widest mb-4">Коллекция NFT</p>
-                    <div id="pub-profile-nfts" class="nft-grid">
-                        <!-- Public NFTs loaded here -->
-                    </div>
+                    <p class="text-[10px] font-bold md-on-surface-variant uppercase tracking-widest mb-4">Коллекция NFT</p>
+                    <div id="pub-profile-nfts" class="nft-grid"></div>
                     <div id="pub-profile-empty" class="hidden text-center py-10">
-                        <p class="text-neutral-600 text-xs font-bold">Коллекция скрыта или пуста</p>
+                        <p class="md-on-surface-variant text-sm font-medium">Коллекция скрыта или пуста</p>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- CREATE NFT MODAL -->
-        <div id="modal-nft-create" onclick="if(event.target===this) closeModal('nft-create')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
-             <div class="bg-[#0f0f0f] border-t border-white/10 rounded-t-[2.5rem] p-0 transform translate-y-full transition-transform duration-300" id="modal-nft-create-content">
-                <div class="swipe-zone"><div class="swipe-handle"></div></div>
-                <div class="p-8 pb-10">
-                    <h2 class="text-xl font-black mb-4 text-white">Создать NFT</h2>
-                    <div class="space-y-4">
-                        <div class="flex justify-center mb-4">
-                            <label class="w-32 h-32 rounded-2xl border-2 border-dashed border-white/20 flex flex-col items-center justify-center cursor-pointer hover:border-orange-500 hover:bg-white/5 transition-all relative overflow-hidden group">
-                                <img id="nft-preview-img" class="absolute inset-0 w-full h-full object-cover hidden">
-                                <div class="text-center p-2 z-10" id="nft-upload-placeholder">
-                                    <span class="text-2xl">📷</span>
-                                    <p class="text-[9px] font-bold text-neutral-500 mt-2 uppercase">Загрузить</p>
-                                </div>
-                                <input type="file" id="nft-file-input" class="hidden" accept="image/*" onchange="previewNftImage(this)">
-                            </label>
+        <div id="modal-nft-create" onclick="if(event.target===this) closeModal('nft-create')" class="hidden absolute inset-0 z-[120] bg-black/50 backdrop-blur-sm flex flex-col justify-end opacity-0 transition-opacity duration-300">
+             <div class="md-bottom-sheet w-full max-w-[420px] mx-auto" id="modal-nft-create-content">
+                <div class="swipe-handle-container"><div class="swipe-handle"></div></div>
+                <div class="px-8 pb-8 space-y-6">
+                    <h2 class="text-2xl font-bold">Создать NFT</h2>
+                    
+                    <div class="flex justify-center">
+                        <label class="w-40 h-40 rounded-3xl bg-[var(--md-sys-color-surface-container-high)] border-2 border-dashed border-[var(--md-sys-color-outline)] flex flex-col items-center justify-center cursor-pointer hover:border-[var(--md-sys-color-primary)] transition-colors relative overflow-hidden">
+                            <img id="nft-preview-img" class="absolute inset-0 w-full h-full object-cover hidden">
+                            <div class="text-center p-2 z-10" id="nft-upload-placeholder">
+                                <span class="material-symbols-rounded icon-lg md-on-surface-variant mb-2">add_photo_alternate</span>
+                                <p class="text-xs font-bold md-on-surface-variant uppercase">Фото</p>
+                            </div>
+                            <input type="file" id="nft-file-input" class="hidden" accept="image/*" onchange="previewNftImage(this)">
+                        </label>
+                    </div>
+                    
+                    <div class="md-input-container">
+                        <label class="md-input-label">Название шедевра</label>
+                        <input type="text" id="nft-create-name" placeholder="Мой NFT" class="md-input font-bold" maxlength="20">
+                    </div>
+                    
+                    <button id="btn-create-nft" onclick="mintNFT()" class="w-full md-btn md-btn-primary md-btn-large mt-4">Минт (Создать)</button>
+                    <p class="text-xs text-center md-on-surface-variant mt-4">Система Антиплагиат активна (70%)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- PROFILE MODAL -->
+        <div id="modal-profile" onclick="if(event.target===this) closeModal('profile')" class="hidden absolute inset-0 z-[120] bg-black/50 backdrop-blur-sm flex flex-col items-center justify-center p-6 opacity-0 transition-opacity duration-300">
+            <div class="w-full max-w-[320px] transform scale-95 transition-transform duration-300" id="modal-profile-content">
+                <div class="bg-[var(--md-sys-color-surface-container-high)] p-8 rounded-[32px] text-center shadow-xl transition-colors relative">
+                    <h2 class="text-2xl font-bold mb-6">Ваш Профиль</h2>
+                    
+                    <div class="relative inline-block mb-6">
+                        <img id="edit-avatar-img" src="" class="w-28 h-28 rounded-full object-cover border-4 border-[var(--md-sys-color-surface-container-highest)] bg-[var(--md-sys-color-surface-container)]">
+                        <label class="absolute bottom-0 right-0 bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] w-10 h-10 flex items-center justify-center rounded-full cursor-pointer hover:scale-105 transition-transform shadow-md">
+                            <span class="material-symbols-rounded text-[20px]">edit</span>
+                            <input type="file" id="avatar-input" class="hidden" accept="image/*">
+                        </label>
+                    </div>
+                    
+                    <div id="profile-verification-status" class="mb-4 flex flex-col items-center min-h-[40px]"></div>
+                    <p id="profile-email" class="text-sm md-on-surface-variant font-medium mb-8 truncate px-2">...</p>
+                    
+                    <button onclick="closeModal('profile')" class="w-full md-btn md-btn-tonal md-btn-large border-none">Закрыть</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEND MODAL -->
+        <div id="modal-send" onclick="if(event.target===this) closeModal('send')" class="hidden absolute inset-0 z-[120] bg-black/50 backdrop-blur-sm flex flex-col justify-end opacity-0 transition-opacity duration-300">
+            <div class="md-bottom-sheet w-full max-w-[420px] mx-auto" id="modal-send-content">
+                <div class="swipe-handle-container"><div class="swipe-handle"></div></div>
+                <div class="px-8 pb-8 space-y-4">
+                    <h2 class="text-2xl font-bold mb-2">Перевод</h2>
+                    
+                    <div id="proposal-notice" class="hidden bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] p-4 rounded-2xl flex items-start gap-3 transition-colors">
+                        <span class="material-symbols-rounded mt-0.5">info</span>
+                        <div>
+                            <p class="text-sm font-bold">Данные из QR</p>
+                            <p class="text-xs opacity-80 mt-1">Поля заполнены автоматически</p>
                         </div>
-                        <div class="bg-white/5 rounded-2xl p-4 border border-white/5">
-                            <p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1">Название</p>
-                            <input type="text" id="nft-create-name" placeholder="Мой шедевр" class="w-full bg-transparent outline-none font-bold text-white text-sm" maxlength="20">
+                    </div>
+                    
+                    <div class="md-input-container">
+                        <label class="md-input-label">Email получателя</label>
+                        <input type="email" id="send-email" placeholder="example@mail.com" class="md-input">
+                    </div>
+                    
+                    <div class="md-input-container flex items-center">
+                        <div class="flex-1">
+                            <label class="md-input-label">Сумма (Мин 0.1)</label>
+                            <input type="number" id="send-amt" placeholder="0.0" class="md-input font-bold text-2xl">
                         </div>
-                        <button id="btn-create-nft" onclick="mintNFT()" class="w-full h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer">Создать</button>
-                        <p class="text-[9px] text-center text-neutral-600 font-medium">Система Антиплагиат активна (70%)</p>
+                        <span class="text-2xl font-bold md-primary px-2">Đ</span>
+                    </div>
+
+                    <div class="flex gap-3 pt-6">
+                        <button onclick="closeModal('send')" class="flex-1 md-btn md-btn-tonal md-btn-large">Отмена</button>
+                        <button id="btn-do-send" class="flex-[2] md-btn md-btn-primary md-btn-large">Отправить</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- OTHER MODALS (Send, Receive, etc.) -->
-        <div id="modal-profile" onclick="if(event.target===this) closeModal('profile')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col items-center justify-center p-8 opacity-0 transition-opacity duration-300">
-            <div class="w-full max-w-xs transform scale-90 transition-transform duration-300" id="modal-profile-content">
-                <div class="bg-[#111] border border-white/10 p-8 rounded-[2.5rem] text-center shadow-2xl dool-card">
-                    <h2 class="text-xl font-black mb-6 text-white" data-lang="your_profile">Ваш Профиль</h2>
-                    <div class="relative inline-block mb-6 group">
-                        <div class="p-1 gradient-bg rounded-full"><img id="edit-avatar-img" src="" class="w-24 h-24 rounded-full object-cover border-4 border-[#111] bg-neutral-900"></div>
-                        <label class="absolute bottom-0 right-0 bg-white text-black w-8 h-8 flex items-center justify-center rounded-full cursor-pointer hover:scale-110 transition-transform shadow-lg"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg><input type="file" id="avatar-input" class="hidden" accept="image/*"></label>
+        <!-- RECEIVE MODAL -->
+        <div id="modal-receive" onclick="if(event.target===this) closeModal('receive')" class="hidden absolute inset-0 z-[120] bg-black/50 backdrop-blur-sm flex flex-col justify-end opacity-0 transition-opacity duration-300">
+            <div class="md-bottom-sheet w-full max-w-[420px] mx-auto" id="modal-receive-content">
+                <div class="swipe-handle-container"><div class="swipe-handle"></div></div>
+                <div class="px-8 pb-8">
+                    <div class="text-center mb-6">
+                        <h2 class="text-2xl font-bold mb-1">Получить</h2>
+                        <p class="text-sm md-on-surface-variant">Покажите QR отправителю</p>
                     </div>
-                    <div id="profile-verification-status" class="mb-6 flex flex-col items-center min-h-[40px]"></div>
-                    <p id="profile-email" class="text-xs text-neutral-500 font-bold mb-6 truncate px-2">...</p>
-                    <button onclick="closeModal('profile')" class="w-full h-12 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer" data-lang="close">Закрыть</button>
-                </div>
-            </div>
-        </div>
+                    
+                    <div class="flex justify-center mb-8">
+                        <div class="bg-white p-6 rounded-3xl shadow-lg border-2 border-gray-100 flex flex-col items-center">
+                            <div class="flex items-center gap-1 mb-4 text-black opacity-80">
+                                <span class="font-black text-lg text-[var(--md-sys-color-primary)]">Đ</span>
+                                <span class="text-xs font-bold uppercase tracking-widest text-black">Doolcoin</span>
+                            </div>
+                            <div id="qrcode-container"></div>
+                        </div>
+                    </div>
 
-        <div id="modal-send" onclick="if(event.target===this) closeModal('send')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
-            <div class="bg-[#0f0f0f] border-t border-white/10 rounded-t-[2.5rem] p-0 transform translate-y-full transition-transform duration-300" id="modal-send-content">
-                <div class="swipe-zone"><div class="swipe-handle"></div></div>
-                <div class="p-8 pb-10">
-                    <h2 class="text-2xl font-black mb-6 px-2 text-white" data-lang="send_title">Перевод</h2>
-                    <div id="proposal-notice" class="hidden mb-4 bg-orange-500/10 border border-orange-500/20 p-3 rounded-2xl flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-black"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>
-                        <div><p class="text-[10px] font-black uppercase text-orange-500 tracking-wider">Предложение</p><p class="text-xs text-neutral-400 font-bold">Данные заполнены автоматически</p></div>
-                    </div>
-                    <div class="space-y-3">
-                        <div class="bg-white/5 rounded-2xl p-4 border border-white/5 focus-within:border-orange-500/50 transition-colors"><p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1" data-lang="recipient">Получатель</p><input type="email" id="send-email" placeholder="email@example.com" class="w-full bg-transparent outline-none font-bold text-sm placeholder:text-neutral-700 text-white"></div>
-                        <div class="bg-white/5 rounded-2xl p-4 border border-white/5 focus-within:border-orange-500/50 transition-colors"><p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1" data-lang="amount">Сумма (Мин 0.1)</p><div class="flex items-center gap-2"><input type="number" id="send-amt" placeholder="0.0" class="w-full bg-transparent outline-none font-black text-3xl placeholder:text-neutral-700 text-white"><span class="text-xl font-black text-orange-500">Đ</span></div></div>
-                        <div class="flex gap-3 pt-4"><button onclick="closeModal('send')" class="flex-1 h-14 bg-white/5 text-neutral-400 rounded-2xl font-bold text-xs uppercase tracking-wider cursor-pointer" data-lang="cancel">Отмена</button><button id="btn-do-send" class="flex-[2] h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer" data-lang="send_action">Отправить</button></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="modal-receive" onclick="if(event.target===this) closeModal('receive')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
-            <div class="bg-[#0f0f0f] border border-white/10 rounded-t-[2.5rem] p-0 w-full transform translate-y-full transition-transform duration-300 shadow-2xl" id="modal-receive-content">
-                <div class="swipe-zone"><div class="swipe-handle"></div></div>
-                <div class="p-8 pb-10">
-                    <div class="text-center mb-6"><h2 class="text-2xl font-black mb-1 text-white" data-lang="receive">Получить</h2><p class="text-neutral-500 text-xs font-medium" data-lang="show_qr">Покажите этот код отправителю</p></div>
-                    <div class="flex justify-center mb-8"><div class="qr-card-premium"><div class="flex items-center gap-2 mb-4 opacity-70"><span class="text-xl font-black text-white">Đ</span><span class="text-[10px] font-bold uppercase tracking-[0.2em] text-white">Doolcoin</span></div><div id="qrcode-container"></div></div></div>
                     <div class="space-y-4">
-                        <div class="bg-white/5 p-4 rounded-2xl border border-white/5 flex items-center justify-between"><div class="flex-1"><p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1" data-lang="req_amount">Предложить сумму</p><input type="number" id="receive-amt-req" data-lang-placeholder="any" placeholder="Любая" class="w-full bg-transparent outline-none font-bold text-lg placeholder:text-neutral-700 text-white"></div><span class="text-lg font-black text-orange-500 ml-3">Đ</span></div>
-                        <div onclick="copyMyEmail()" class="bg-white/5 p-4 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-white/10 active:scale-95 transition-all border border-white/5"><div class="flex-1 min-w-0 pr-2"><p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1" data-lang="your_addr">Ваш адрес</p><p id="my-email-addr" class="font-mono text-orange-500 truncate text-sm">...</p></div><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" class="text-neutral-500"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></div>
+                        <div class="md-input-container flex items-center">
+                            <div class="flex-1">
+                                <label class="md-input-label">Запросить сумму</label>
+                                <input type="number" id="receive-amt-req" placeholder="Любая" class="md-input font-bold">
+                            </div>
+                            <span class="text-xl font-bold md-primary px-2">Đ</span>
+                        </div>
+                        
+                        <div onclick="copyMyEmail()" class="md-card py-4 px-5 flex items-center justify-between cursor-pointer hover:bg-[var(--md-sys-color-surface-container)] transition-colors border-none">
+                            <div class="flex-1 min-w-0 pr-4">
+                                <p class="text-[10px] font-bold md-on-surface-variant uppercase tracking-widest mb-1">Ваш адрес</p>
+                                <p id="my-email-addr" class="font-mono text-sm md-primary truncate">...</p>
+                            </div>
+                            <span class="material-symbols-rounded md-on-surface-variant">content_copy</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
         
-        <div id="modal-deposit" onclick="if(event.target===this) closeModal('deposit')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
-            <div class="bg-[#111] border-t border-white/10 rounded-t-[2.5rem] p-0 transform translate-y-full transition-transform duration-300" id="modal-deposit-content">
-                <div class="swipe-zone"><div class="swipe-handle"></div></div>
-                <div class="p-8 pb-10">
-                    <h2 class="text-xl font-black mb-4 text-white" data-lang="deposit_title">Положить в банку</h2>
-                    <div class="bg-white/5 rounded-2xl p-4 border border-white/5 mb-4"><p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1" data-lang="amount">Сумма</p><div class="flex items-center gap-2"><input type="number" id="deposit-amt" placeholder="0.0" class="w-full bg-transparent outline-none font-black text-3xl placeholder:text-neutral-700 text-white"><span class="text-xl font-black text-orange-500">Đ</span></div></div>
-                    <button id="btn-do-deposit" class="w-full h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer" data-lang="deposit_action">Положить</button>
-                    <button onclick="closeModal('deposit')" class="w-full mt-2 h-10 text-neutral-500 font-bold text-[10px] uppercase cursor-pointer" data-lang="cancel">Отмена</button>
+        <!-- DEPOSIT MODAL -->
+        <div id="modal-deposit" onclick="if(event.target===this) closeModal('deposit')" class="hidden absolute inset-0 z-[120] bg-black/50 backdrop-blur-sm flex flex-col justify-end opacity-0 transition-opacity duration-300">
+            <div class="md-bottom-sheet w-full max-w-[420px] mx-auto" id="modal-deposit-content">
+                <div class="swipe-handle-container"><div class="swipe-handle"></div></div>
+                <div class="px-8 pb-8 space-y-4">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="material-symbols-rounded md-primary icon-lg">add_card</span>
+                        <h2 class="text-2xl font-bold">Пополнить вклад</h2>
+                    </div>
+                    
+                    <div class="md-input-container flex items-center mb-6">
+                        <div class="flex-1">
+                            <label class="md-input-label">Сумма</label>
+                            <input type="number" id="deposit-amt" placeholder="0.0" class="md-input font-bold text-3xl">
+                        </div>
+                        <span class="text-2xl font-bold md-primary px-2">Đ</span>
+                    </div>
+                    
+                    <button id="btn-do-deposit" class="w-full md-btn md-btn-primary md-btn-large">Положить в банк</button>
+                    <button onclick="closeModal('deposit')" class="w-full md-btn md-btn-tonal mt-2 h-[48px] rounded-full">Отмена</button>
                 </div>
             </div>
         </div>
 
-        <div id="modal-withdraw" onclick="if(event.target===this) closeModal('withdraw')" class="hidden absolute inset-0 z-[120] bg-black/80 backdrop-blur-xl flex flex-col justify-end opacity-0 transition-opacity duration-300">
-             <div class="bg-[#111] border-t border-white/10 rounded-t-[2.5rem] p-0 transform translate-y-full transition-transform duration-300" id="modal-withdraw-content">
-                <div class="swipe-zone"><div class="swipe-handle"></div></div>
-                <div class="p-8 pb-10">
-                    <h2 class="text-xl font-black mb-4 text-white" data-lang="withdraw_title">Достать из банки</h2>
-                    <div class="bg-white/5 rounded-2xl p-4 border border-white/5 mb-4"><p class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mb-1" data-lang="amount">Сумма</p><div class="flex items-center gap-2"><input type="number" id="withdraw-amt" placeholder="0.0" class="w-full bg-transparent outline-none font-black text-3xl placeholder:text-neutral-700 text-white"><span class="text-xl font-black text-orange-500">Đ</span></div></div>
-                    <button id="btn-do-withdraw" class="w-full h-14 bg-white text-black rounded-2xl font-black text-xs uppercase tracking-wider hover:bg-neutral-200 cursor-pointer" data-lang="withdraw_action">Достать</button>
-                    <button onclick="closeModal('withdraw')" class="w-full mt-2 h-10 text-neutral-500 font-bold text-[10px] uppercase cursor-pointer" data-lang="cancel">Отмена</button>
+        <!-- WITHDRAW MODAL -->
+        <div id="modal-withdraw" onclick="if(event.target===this) closeModal('withdraw')" class="hidden absolute inset-0 z-[120] bg-black/50 backdrop-blur-sm flex flex-col justify-end opacity-0 transition-opacity duration-300">
+             <div class="md-bottom-sheet w-full max-w-[420px] mx-auto" id="modal-withdraw-content">
+                <div class="swipe-handle-container"><div class="swipe-handle"></div></div>
+                <div class="px-8 pb-8 space-y-4">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="material-symbols-rounded md-on-surface-variant icon-lg">payments</span>
+                        <h2 class="text-2xl font-bold">Вывод из банка</h2>
+                    </div>
+                    
+                    <div class="md-input-container flex items-center mb-6">
+                        <div class="flex-1">
+                            <label class="md-input-label">Сумма</label>
+                            <input type="number" id="withdraw-amt" placeholder="0.0" class="md-input font-bold text-3xl">
+                        </div>
+                        <span class="text-2xl font-bold md-primary px-2">Đ</span>
+                    </div>
+                    
+                    <button id="btn-do-withdraw" class="w-full md-btn md-btn-primary md-btn-large">Достать из банка</button>
+                    <button onclick="closeModal('withdraw')" class="w-full md-btn md-btn-tonal mt-2 h-[48px] rounded-full">Отмена</button>
                 </div>
             </div>
         </div>
 
-        <div id="modal-scan" class="hidden absolute inset-0 z-[120] bg-black flex flex-col opacity-0 transition-opacity duration-300">
+        <!-- SCAN MODAL -->
+        <div id="modal-scan" class="hidden absolute inset-0 z-[120] bg-black flex-col opacity-0 transition-opacity duration-300">
             <div class="absolute top-0 left-0 w-full p-6 z-20 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent">
-                 <h2 class="text-xl font-black text-white drop-shadow-md" data-lang="scanning">Сканирование</h2>
-                 <button onclick="closeModal('scan')" class="w-10 h-10 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center text-white cursor-pointer hover:bg-white/20 transition-all border border-white/10"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+                 <h2 class="text-xl font-bold text-white drop-shadow-md">Сканирование QR</h2>
+                 <button onclick="closeModal('scan')" class="w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-colors hover:bg-white/30 border border-white/10">
+                    <span class="material-symbols-rounded">close</span>
+                 </button>
             </div>
             <div class="w-full h-full relative" id="modal-scan-content">
-                <div id="reader"></div>
-                <div class="scan-focus-area"><div class="scan-border-glow"></div><div class="scan-laser"></div></div>
+                <div id="reader" class="h-full w-full object-cover"></div>
+                <div class="scan-focus-area"><div class="scan-laser"></div></div>
             </div>
         </div>
+        
     </div>
 
     <!-- Hidden Canvas for Hash Generation -->
@@ -611,45 +844,204 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, GoogleAuthProvider, signInWithPopup, sendEmailVerification } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, query, where, runTransaction, Timestamp, increment, getDocs, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection, query, where, runTransaction, Timestamp, increment, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
         const firebaseConfig = { apiKey: "AIzaSyBoFuGY-SSmcGHPGzuWZbdGFeI9_aaAKs8", authDomain: "doolcoinwallet.firebaseapp.com", projectId: "doolcoinwallet", storageBucket: "doolcoinwallet.firebasestorage.app", messagingSenderId: "473549726148", appId: "1:473549726148:web:87663b4944330c0df58491" };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        
-        // --- FIX: Установка языка для писем на русский ---
         auth.languageCode = 'ru'; 
-        
         const db = getFirestore(app);
         const googleProvider = new GoogleAuthProvider();
 
-        const langData = {
-            ru: {
-                total_balance: "Общий баланс", send: "Отправить", receive: "Получить", history: "История операций", loading: "Загрузка...", invite_friend: "Пригласи друга", ref_desc: "Получи", your_link: "Ваша ссылка", friends: "Друзей", earned: "Заработано", staking: "Стейкинг", in_jar: "В банке", profile: "Профиль", wallet_future: "Кошелек будущего", or: "Или", login: "Войти", create: "Создать", settings: "Настройки", theme: "Тема оформления", theme_light: "Светлая", theme_dark: "Тёмная", language: "Язык", your_profile: "Ваш Профиль", close: "Закрыть", send_title: "Перевод", recipient: "Получатель", amount: "Сумма (Мин 0.1)", cancel: "Отмена", send_action: "Отправить", show_qr: "Покажите этот код отправителю", req_amount: "Предложить сумму", your_addr: "Ваш адрес", deposit_title: "Положить в банку", deposit_action: "Положить", withdraw_title: "Достать из банки", withdraw_action: "Достать", scanning: "Сканирование", access_denied: "Доступ ограничен", password_ph: "Пароль", deposit_success: "Депозит успешен", withdraw_success: "Вывод успешен", addr_copied: "Адрес скопирован", link_copied: "Ссылка скопирована", sent_to: "Отправлено", error_fill: "Заполните поля", error_pass_len: "Пароль < 6 символов", error_self: "Нельзя отправить себе", error_min: "Минимум 0.1 Đ", error_fund: "Недостаточно средств",
-                legal_title: "Юридическая информация",
-                legal_text: "Doolcoin (Đ) — это внутриигровая условная единица. Она не является платёжным средством, электронной валютой или ценной бумагой. Đ не имеет реальной денежной стоимости и не гарантирует возможности обмена на фиатные деньги.",
-                any: "Любая"
-            }
-        };
-
-        // --- CORE FUNCTIONS & STATE ---
-        let currentLang = 'ru';
-        let currentTheme = localStorage.getItem('dool_theme') || 'dark';
-
-        window.setTheme = (theme) => {
-            currentTheme = theme;
-            localStorage.setItem('dool_theme', theme);
-            if (theme === 'light') {
-                document.body.classList.add('light-theme');
-                document.getElementById('theme-btn-light').classList.add('active');
-                document.getElementById('theme-btn-dark').classList.remove('active');
+        // --- DYNAMIC HEADER HUG EFFECT (Scroll detection) ---
+        const scrollArea = document.getElementById('main-scroll');
+        const mainHeader = document.getElementById('main-header');
+        const appWrapper = document.getElementById('app-wrapper');
+        
+        scrollArea.addEventListener('scroll', () => {
+            if (scrollArea.scrollTop > 10) {
+                // Изменяем отступы шапки
+                mainHeader.classList.add('pb-3', 'pt-8');
+                mainHeader.classList.remove('pb-4', 'pt-10');
+                
+                // Затемняем фон приложения (шапка становится темной)
+                appWrapper.style.backgroundColor = 'var(--md-sys-color-background)';
+                // Контент остается цвета surface и скругляется сверху
+                scrollArea.classList.add('bg-[var(--md-sys-color-surface)]', 'rounded-t-[32px]');
             } else {
-                document.body.classList.remove('light-theme');
-                document.getElementById('theme-btn-light').classList.remove('active');
-                document.getElementById('theme-btn-dark').classList.add('active');
+                // Возвращаем все обратно
+                mainHeader.classList.remove('pb-3', 'pt-8');
+                mainHeader.classList.add('pb-4', 'pt-10');
+                
+                appWrapper.style.backgroundColor = 'var(--md-sys-color-surface)';
+                scrollArea.classList.remove('bg-[var(--md-sys-color-surface)]', 'rounded-t-[32px]');
+            }
+        });
+
+        // --- MATERIAL YOU (ACCURATE PALETTE) ---
+        const mdColors = [
+            { h: 0, s: 0, isSystem: true },    // 0: Monochrome / Black & White
+            { h: 8, s: 85 },   // Soft Rose
+            { h: 22, s: 90 },  // Peach
+            { h: 45, s: 85 },  // Gold
+            { h: 145, s: 65 }, // Mint Green
+            { h: 165, s: 70 }, // Sage / Teal
+            { h: 190, s: 80 }, // Cyan
+            { h: 215, s: 85 }, // Blue
+            { h: 245, s: 75 }, // Indigo
+            { h: 275, s: 75 }, // Orchid
+            { h: 320, s: 80 }, // Berry
+            { h: 350, s: 85 }, // Crimson Red
+            { h: 30, s: 95 },  // Tangerine
+            { h: 75, s: 75 },  // Lime
+            { h: 125, s: 70 }, // Forest
+            { h: 18, s: 100 }  // Doolcoin Orange
+        ];
+
+        let currentIsDark = localStorage.getItem('dool_theme_dark') !== 'false';
+        let currentHue = localStorage.getItem('dool_theme_hue') || 0;
+        let currentSat = localStorage.getItem('dool_theme_sat') || 0;
+
+        window.setDynamicTheme = (hue, sat, isDark) => {
+            const root = document.documentElement;
+            
+            if (sat == 0) {
+                // Monochrome Theme
+                if (isDark) {
+                    root.style.setProperty('--md-sys-color-primary', '#FFFFFF');
+                    root.style.setProperty('--md-sys-color-on-primary', '#000000');
+                    root.style.setProperty('--md-sys-color-primary-container', '#333333');
+                    root.style.setProperty('--md-sys-color-on-primary-container', '#FFFFFF');
+                    root.style.setProperty('--md-sys-color-secondary-container', '#222222');
+                    root.style.setProperty('--md-sys-color-on-secondary-container', '#E0E0E0');
+                    root.style.setProperty('--md-sys-color-background', '#000000');
+                    root.style.setProperty('--md-sys-color-on-background', '#FFFFFF');
+                    root.style.setProperty('--md-sys-color-surface', '#0A0A0A');
+                    root.style.setProperty('--md-sys-color-on-surface', '#FFFFFF');
+                    root.style.setProperty('--md-sys-color-on-surface-variant', '#A0A0A0');
+                    root.style.setProperty('--md-sys-color-outline', '#555555');
+                    root.style.setProperty('--md-sys-color-outline-variant', '#333333');
+                    root.style.setProperty('--md-sys-color-surface-container-lowest', '#000000');
+                    root.style.setProperty('--md-sys-color-surface-container-low', '#0F0F0F');
+                    root.style.setProperty('--md-sys-color-surface-container', '#141414');
+                    root.style.setProperty('--md-sys-color-surface-container-high', '#1F1F1F');
+                    root.style.setProperty('--md-sys-color-surface-container-highest', '#292929');
+                } else {
+                    root.style.setProperty('--md-sys-color-primary', '#000000');
+                    root.style.setProperty('--md-sys-color-on-primary', '#FFFFFF');
+                    root.style.setProperty('--md-sys-color-primary-container', '#E0E0E0');
+                    root.style.setProperty('--md-sys-color-on-primary-container', '#000000');
+                    root.style.setProperty('--md-sys-color-secondary-container', '#EEEEEE');
+                    root.style.setProperty('--md-sys-color-on-secondary-container', '#111111');
+                    root.style.setProperty('--md-sys-color-background', '#FFFFFF');
+                    root.style.setProperty('--md-sys-color-on-background', '#000000');
+                    root.style.setProperty('--md-sys-color-surface', '#FAFAFA');
+                    root.style.setProperty('--md-sys-color-on-surface', '#000000');
+                    root.style.setProperty('--md-sys-color-on-surface-variant', '#666666');
+                    root.style.setProperty('--md-sys-color-outline', '#999999');
+                    root.style.setProperty('--md-sys-color-outline-variant', '#CCCCCC');
+                    root.style.setProperty('--md-sys-color-surface-container-lowest', '#FFFFFF');
+                    root.style.setProperty('--md-sys-color-surface-container-low', '#F5F5F5');
+                    root.style.setProperty('--md-sys-color-surface-container', '#EEEEEE');
+                    root.style.setProperty('--md-sys-color-surface-container-high', '#E0E0E0');
+                    root.style.setProperty('--md-sys-color-surface-container-highest', '#D4D4D4');
+                }
+            } else {
+                // Colorful HSL Theme
+                if (isDark) {
+                    root.style.setProperty('--md-sys-color-primary', `hsl(${hue}, ${sat}%, 82%)`);
+                    root.style.setProperty('--md-sys-color-on-primary', `hsl(${hue}, ${sat}%, 18%)`);
+                    root.style.setProperty('--md-sys-color-primary-container', `hsl(${hue}, ${sat}%, 28%)`);
+                    root.style.setProperty('--md-sys-color-on-primary-container', `hsl(${hue}, ${sat}%, 92%)`);
+                    root.style.setProperty('--md-sys-color-secondary-container', `hsl(${hue}, 20%, 25%)`);
+                    root.style.setProperty('--md-sys-color-on-secondary-container', `hsl(${hue}, 20%, 90%)`);
+                    root.style.setProperty('--md-sys-color-background', `hsl(${hue}, 10%, 8%)`);
+                    root.style.setProperty('--md-sys-color-on-background', `hsl(${hue}, 10%, 92%)`);
+                    root.style.setProperty('--md-sys-color-surface', `hsl(${hue}, 10%, 10%)`);
+                    root.style.setProperty('--md-sys-color-on-surface', `hsl(${hue}, 10%, 92%)`);
+                    root.style.setProperty('--md-sys-color-on-surface-variant', `hsl(${hue}, 10%, 72%)`);
+                    root.style.setProperty('--md-sys-color-outline', `hsl(${hue}, 10%, 55%)`);
+                    root.style.setProperty('--md-sys-color-outline-variant', `hsl(${hue}, 10%, 25%)`);
+                    root.style.setProperty('--md-sys-color-surface-container-lowest', `hsl(${hue}, 10%, 5%)`);
+                    root.style.setProperty('--md-sys-color-surface-container-low', `hsl(${hue}, 10%, 9%)`);
+                    root.style.setProperty('--md-sys-color-surface-container', `hsl(${hue}, 10%, 13%)`);
+                    root.style.setProperty('--md-sys-color-surface-container-high', `hsl(${hue}, 10%, 17%)`);
+                    root.style.setProperty('--md-sys-color-surface-container-highest', `hsl(${hue}, 10%, 21%)`);
+                } else {
+                    root.style.setProperty('--md-sys-color-primary', `hsl(${hue}, ${sat}%, 38%)`);
+                    root.style.setProperty('--md-sys-color-on-primary', `hsl(${hue}, ${sat}%, 100%)`);
+                    root.style.setProperty('--md-sys-color-primary-container', `hsl(${hue}, ${sat}%, 92%)`);
+                    root.style.setProperty('--md-sys-color-on-primary-container', `hsl(${hue}, ${sat}%, 12%)`);
+                    root.style.setProperty('--md-sys-color-secondary-container', `hsl(${hue}, 20%, 90%)`);
+                    root.style.setProperty('--md-sys-color-on-secondary-container', `hsl(${hue}, 20%, 12%)`);
+                    root.style.setProperty('--md-sys-color-background', `hsl(${hue}, 15%, 98%)`);
+                    root.style.setProperty('--md-sys-color-on-background', `hsl(${hue}, 15%, 10%)`);
+                    root.style.setProperty('--md-sys-color-surface', `hsl(${hue}, 15%, 96%)`);
+                    root.style.setProperty('--md-sys-color-on-surface', `hsl(${hue}, 15%, 10%)`);
+                    root.style.setProperty('--md-sys-color-on-surface-variant', `hsl(${hue}, 10%, 40%)`);
+                    root.style.setProperty('--md-sys-color-outline', `hsl(${hue}, 10%, 50%)`);
+                    root.style.setProperty('--md-sys-color-outline-variant', `hsl(${hue}, 10%, 82%)`);
+                    root.style.setProperty('--md-sys-color-surface-container-lowest', `hsl(${hue}, 15%, 100%)`);
+                    root.style.setProperty('--md-sys-color-surface-container-low', `hsl(${hue}, 15%, 96%)`);
+                    root.style.setProperty('--md-sys-color-surface-container', `hsl(${hue}, 15%, 92%)`);
+                    root.style.setProperty('--md-sys-color-surface-container-high', `hsl(${hue}, 15%, 88%)`);
+                    root.style.setProperty('--md-sys-color-surface-container-highest', `hsl(${hue}, 15%, 84%)`);
+                }
             }
         };
-        window.setTheme(currentTheme);
+
+        // Init Theme
+        setDynamicTheme(currentHue, currentSat, currentIsDark);
+        document.getElementById('setting-dark-mode').checked = currentIsDark;
+
+        // Populate Swatches
+        const colorCarousel = document.getElementById('color-carousel');
+        mdColors.forEach((color, idx) => {
+            const btn = document.createElement('div');
+            btn.className = 'color-swatch-item';
+            
+            let swatchColor = `hsl(${color.h}, ${color.s}%, ${currentIsDark ? '75%' : '45%'})`;
+            if (color.s == 0) swatchColor = currentIsDark ? '#FFFFFF' : '#000000';
+            btn.style.setProperty('--swatch-color', swatchColor);
+
+            if (color.isSystem) {
+                const split = document.createElement('div');
+                split.className = 'split-theme-circle';
+                btn.appendChild(split);
+            } else {
+                const inner = document.createElement('div');
+                inner.className = 'color-swatch-inner';
+                btn.appendChild(inner);
+            }
+
+            if ((color.s == 0 && currentSat == 0) || (color.s != 0 && currentHue == color.h)) {
+                btn.classList.add('active');
+            }
+
+            btn.onclick = () => {
+                document.querySelectorAll('.color-swatch-item').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentHue = color.h; currentSat = color.s;
+                localStorage.setItem('dool_theme_hue', currentHue);
+                localStorage.setItem('dool_theme_sat', currentSat);
+                setDynamicTheme(currentHue, currentSat, currentIsDark);
+            };
+            colorCarousel.appendChild(btn);
+        });
+
+        window.toggleDarkMode = (isDark) => {
+            currentIsDark = isDark;
+            localStorage.setItem('dool_theme_dark', isDark);
+            setDynamicTheme(currentHue, currentSat, currentIsDark);
+            
+            // Re-render swatch centers based on mode
+            document.querySelectorAll('.color-swatch-item').forEach((btn, idx) => {
+                const color = mdColors[idx];
+                let newColor = `hsl(${color.h}, ${color.s}%, ${isDark ? '75%' : '45%'})`;
+                if (color.s == 0) newColor = isDark ? '#FFFFFF' : '#000000';
+                btn.style.setProperty('--swatch-color', newColor);
+            });
+        };
 
         async function getClientIP() { try { const res = await fetch('https://api.ipify.org?format=json'); const data = await res.json(); return data.ip; } catch (e) { return '0.0.0.0'; } }
 
@@ -660,12 +1052,8 @@
                  sendEmailVerification(auth.currentUser)
                  .then(() => showT("Успешно", "Письмо отправлено повторно"))
                  .catch((e) => {
-                     // Обработка частых нажатий
-                     if(e.code === 'auth/too-many-requests') {
-                         showT("Ошибка", "Слишком часто. Подождите.", "", null, true);
-                     } else {
-                         showT("Ошибка", e.message, "", null, true);
-                     }
+                     if(e.code === 'auth/too-many-requests') showT("Ошибка", "Слишком часто. Подождите.", "", null, true);
+                     else showT("Ошибка", e.message, "", null, true);
                  });
              }
         };
@@ -674,16 +1062,17 @@
         
         // --- SWIPE TO CLOSE ---
         function initSwipeClose(modalName) {
-            const modalId = 'modal-' + modalName, contentId = modalId + '-content', content = document.getElementById(contentId), handle = content.querySelector('.swipe-zone');
+            const modalId = 'modal-' + modalName, contentId = modalId + '-content', content = document.getElementById(contentId);
+            if(!content) return;
+            const handle = content.querySelector('.swipe-handle-container');
             if(!handle) return;
             let startY = 0, currentY = 0, isDragging = false;
             handle.addEventListener('touchstart', (e) => { startY = e.touches[0].clientY; isDragging = true; content.style.transition = 'none'; }, {passive: true});
             handle.addEventListener('touchmove', (e) => { if(!isDragging) return; currentY = e.touches[0].clientY; const diff = currentY - startY; if(diff > 0) content.style.transform = `translateY(${diff}px)`; }, {passive: true});
-            handle.addEventListener('touchend', (e) => { isDragging = false; const diff = currentY - startY; content.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'; if(diff > 120) closeModal(modalName); else content.style.transform = ''; });
+            handle.addEventListener('touchend', (e) => { isDragging = false; const diff = currentY - startY; content.style.transition = ''; if(diff > 120) closeModal(modalName); else content.style.transform = ''; });
         }
-        ['send', 'receive', 'deposit', 'withdraw', 'settings', 'nft-create', 'public-profile', 'confirm'].forEach(initSwipeClose);
+        ['send', 'receive', 'deposit', 'withdraw', 'settings', 'nft-create', 'public-profile'].forEach(initSwipeClose);
 
-        // --- USER INFO & CACHE ---
         async function getUserInfo(email) {
             if (userCache[email]) return userCache[email];
             let info = { avatar: `https://ui-avatars.com/api/?background=random&color=fff&name=${email.charAt(0).toUpperCase()}`, email: email, isVerified: false };
@@ -695,19 +1084,27 @@
             userCache[email] = info; return info;
         }
 
-        // --- MODAL MANAGEMENT ---
         window.openModal = (n) => {
             const m = document.getElementById('modal-'+n), c = document.getElementById(`modal-${n}-content`);
             if(!m || !c) return; m.classList.remove('hidden'); void m.offsetWidth; m.classList.remove('opacity-0');
-            if(['send', 'receive', 'deposit', 'withdraw', 'settings', 'nft-create', 'public-profile', 'confirm'].includes(n)) { c.style.transform = ''; setTimeout(() => c.classList.remove('translate-y-full'), 10); } else if(n !== 'scan') c.classList.remove('scale-90');
+            if(['send', 'receive', 'deposit', 'withdraw', 'settings', 'nft-create', 'public-profile'].includes(n)) { 
+                c.style.transform = ''; setTimeout(() => c.style.transform = 'translateY(0)', 10); 
+            } else if (n === 'profile' || n === 'confirm') {
+                setTimeout(() => c.classList.remove('scale-95'), 10);
+            }
             if(n === 'receive') updateQR(); if(n === 'scan') startScannerV2();
         };
 
         window.closeModal = (n) => {
             const m = document.getElementById('modal-'+n), c = document.getElementById(`modal-${n}-content`);
             if(!m || !c) return; m.classList.add('opacity-0');
-            if(['send', 'receive', 'deposit', 'withdraw', 'settings', 'nft-create', 'public-profile', 'confirm'].includes(n)) c.classList.add('translate-y-full'); else if(n !== 'scan') c.classList.add('scale-90');
-            if(n === 'scan') stopScannerV2(); if(n === 'send') clearSendForm(); setTimeout(() => m.classList.add('hidden'), 300);
+            if(['send', 'receive', 'deposit', 'withdraw', 'settings', 'nft-create', 'public-profile'].includes(n)) {
+                c.style.transform = 'translateY(100%)'; 
+            } else if (n === 'profile' || n === 'confirm') {
+                c.classList.add('scale-95');
+            }
+            if(n === 'scan') stopScannerV2(); if(n === 'send') clearSendForm(); 
+            setTimeout(() => { m.classList.add('hidden'); c.style.transform = ''; }, 300);
         };
         
         let confirmCallback = null;
@@ -724,11 +1121,9 @@
             } else {
                 inputContainer.classList.add('hidden');
             }
-            
             confirmCallback = callback;
             openModal('confirm');
         };
-        
         window.closeConfirm = () => { closeModal('confirm'); confirmCallback = null; };
         
         document.getElementById('btn-confirm-yes').onclick = () => {
@@ -740,37 +1135,51 @@
         };
 
         function clearSendForm() { setTimeout(() => { document.getElementById('send-amt').value = ''; document.getElementById('send-email').value = ''; document.getElementById('send-amt').readOnly = false; document.getElementById('send-email').readOnly = false; document.getElementById('proposal-notice').classList.add('hidden'); document.getElementById('btn-do-send').textContent = "Отправить"; }, 300); }
+        
         let toastTimeout;
         window.showT = async (title, msg, amountStr = '', senderEmail = null, isError = false) => {
-            const t = document.getElementById('toast'), icon = document.getElementById('toast-icon-sys'), avImg = document.getElementById('toast-avatar'), amtEl = document.getElementById('toast-amount'), titleEl = document.getElementById('toast-title');
+            const t = document.getElementById('toast'), icon = document.getElementById('toast-sys-icon'), avImg = document.getElementById('toast-avatar'), amtEl = document.getElementById('toast-amount'), titleEl = document.getElementById('toast-title');
             clearTimeout(toastTimeout); t.classList.remove('active');
             setTimeout(async () => {
-                let displayTitle = title;
-                titleEl.textContent = displayTitle; document.getElementById('toast-msg').textContent = msg;
+                titleEl.textContent = title; document.getElementById('toast-msg').textContent = msg;
                 if (amountStr) { amtEl.textContent = amountStr; amtEl.classList.remove('hidden'); } else amtEl.classList.add('hidden');
-                avImg.className = "w-full h-full hidden"; avImg.style.filter = ''; 
-                if (senderEmail) { icon.classList.add('hidden'); avImg.classList.remove('hidden'); avImg.classList.add('object-cover'); const u = await getUserInfo(senderEmail); avImg.src = u.avatar; } 
-                else {
-                    let sysImg = null;
-                    if (isError) sysImg = "https://img.icons8.com/?size=100&id=5PexHbhSpPcd&format=png&color=ffffff";
-                    else if (title.includes('Банка')) sysImg = "https://emojigraph.org/media/facebook/jar_1fad9.png";
-                    else if (title.includes('Success') || title.includes('Успешно')) sysImg = "https://img.icons8.com/?size=100&id=ThDU3IFKpFui&format=png&color=ffffff";
-                    else sysImg = "https://img.icons8.com/?size=100&id=oStKNuPVzV7A&format=png&color=ffffff"; 
-                    if (sysImg) { icon.classList.add('hidden'); avImg.classList.remove('hidden'); avImg.classList.add('object-contain', 'p-1.5'); avImg.src = sysImg; if(currentTheme === 'light' && !displayTitle.includes('Банка')) avImg.style.filter = 'invert(0.8)'; } 
+                
+                avImg.className = "w-full h-full hidden"; 
+                if (senderEmail) { 
+                    icon.classList.add('hidden'); avImg.classList.remove('hidden'); avImg.classList.add('object-cover'); 
+                    const u = await getUserInfo(senderEmail); avImg.src = u.avatar; 
+                } else {
+                    icon.classList.remove('hidden'); avImg.classList.add('hidden');
+                    let iconName = 'notifications';
+                    if (isError) iconName = 'error';
+                    else if (title.includes('Банк')) iconName = 'savings';
+                    else if (title.includes('Success') || title.includes('Успешно')) iconName = 'check_circle';
+                    
+                    icon.textContent = iconName;
+                    if(isError) icon.style.color = 'var(--md-sys-color-error)';
+                    else icon.style.color = 'var(--md-sys-color-on-primary-container)';
                 }
                 t.classList.add('active'); toastTimeout = setTimeout(() => t.classList.remove('active'), 4000);
             }, 100);
         };
 
         window.switchTab = (tab) => {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); document.getElementById('tab-'+tab).classList.add('active');
-            document.querySelectorAll('.nav-icon').forEach(img => { img.style.filter = ''; if(currentTheme === 'light') img.style.filter = 'invert(0.8)'; img.style.opacity = '0.5'; img.classList.remove('nav-icon-active'); });
-            const activeImg = document.getElementById('nav-'+tab).querySelector('img'); activeImg.style.opacity = '1'; activeImg.style.filter = 'brightness(0) saturate(100%) invert(32%) sepia(98%) saturate(2329%) hue-rotate(358deg) brightness(101%) contrast(106%)'; activeImg.classList.add('nav-icon-active');
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); 
+            document.getElementById('tab-'+tab).classList.add('active');
+            
+            document.querySelectorAll('.md-nav-item').forEach(btn => {
+                btn.classList.remove('active');
+                const icon = btn.querySelector('.material-symbols-rounded');
+                if(icon) icon.classList.remove('filled');
+            });
+            const activeBtn = document.getElementById('nav-'+tab);
+            activeBtn.classList.add('active');
+            activeBtn.querySelector('.material-symbols-rounded').classList.add('filled');
+            
             if(tab === 'nft') loadMarket();
         };
 
-        // --- NFT SYSTEM LOGIC ---
-        
+        // --- NFT LOGIC ---
         async function computeImageHash(imgElement) {
             const canvas = document.getElementById('hash-canvas');
             const ctx = canvas.getContext('2d');
@@ -810,7 +1219,6 @@
             const btn = document.getElementById('btn-create-nft');
 
             if(img.classList.contains('hidden') || !name) return showT('Ошибка', 'Фото и название обязательны', '', null, true);
-
             btn.disabled = true; btn.textContent = 'Проверка...';
 
             try {
@@ -820,27 +1228,18 @@
                 let isPlagiarized = false;
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    if(data.hash) {
-                        const similarity = checkSimilarity(myHash, data.hash);
-                        if(similarity > 0.70) isPlagiarized = true;
-                    }
+                    if(data.hash && checkSimilarity(myHash, data.hash) > 0.70) isPlagiarized = true;
                 });
 
                 if(isPlagiarized) {
                     showT('Отклонено', 'Сходство > 70% с существующим NFT', '', null, true);
-                    btn.disabled = false; btn.textContent = 'Создать';
+                    btn.disabled = false; btn.textContent = 'Минт (Создать)';
                     return;
                 }
 
                 btn.textContent = 'Минтинг...';
                 await setDoc(doc(collection(db, "nfts")), {
-                    owner: auth.currentUser.email,
-                    name: name,
-                    image: img.src, 
-                    hash: myHash,
-                    price: 0,
-                    isListed: false,
-                    createdAt: serverTimestamp()
+                    owner: auth.currentUser.email, name: name, image: img.src, hash: myHash, price: 0, isListed: false, createdAt: serverTimestamp()
                 });
                 
                 closeModal('nft-create');
@@ -848,20 +1247,21 @@
                 img.classList.add('hidden');
                 document.getElementById('nft-upload-placeholder').classList.remove('hidden');
                 showT('Успешно', 'NFT создан!');
-                if(document.getElementById('nft-sub-inventory').classList.contains('active')) loadInventory();
+                if(document.getElementById('nft-sub-inventory').classList.contains('md-btn-tonal')) loadInventory();
 
             } catch(e) {
-                console.error(e);
                 showT('Ошибка', 'Не удалось создать NFT', '', null, true);
             } finally {
-                btn.disabled = false; btn.textContent = 'Создать';
+                btn.disabled = false; btn.textContent = 'Минт (Создать)';
             }
         };
 
         window.switchNftSubTab = (tab) => {
-            document.getElementById('nft-sub-market').classList.remove('active');
-            document.getElementById('nft-sub-inventory').classList.remove('active');
-            document.getElementById('nft-sub-'+tab).classList.add('active');
+            const marketBtn = document.getElementById('nft-sub-market');
+            const inventoryBtn = document.getElementById('nft-sub-inventory');
+            
+            marketBtn.className = tab === 'market' ? "md-btn md-btn-tonal shrink-0 active-nft-tab" : "md-btn md-btn-outlined border-[var(--md-sys-color-outline-variant)] shrink-0";
+            inventoryBtn.className = tab === 'inventory' ? "md-btn md-btn-tonal shrink-0 active-nft-tab" : "md-btn md-btn-outlined border-[var(--md-sys-color-outline-variant)] shrink-0";
             
             document.getElementById('nft-view-market').classList.add('hidden');
             document.getElementById('nft-view-inventory').classList.add('hidden');
@@ -871,93 +1271,54 @@
             if(tab === 'inventory') loadInventory();
         };
 
-        // --- SAFE DOM CREATION FOR NFTS ---
         async function createSafeNftCard(d, id, isMarket, userInfo = null) {
-            const el = document.createElement('div');
-            el.className = 'nft-card';
-            
-            const img = document.createElement('img');
-            img.src = d.image;
-            img.className = 'nft-image';
-            
-            const info = document.createElement('div');
-            info.className = 'nft-info';
+            const el = document.createElement('div'); el.className = 'nft-card';
+            const img = document.createElement('img'); img.src = d.image; img.className = 'nft-image';
+            const info = document.createElement('div'); info.className = 'nft-info';
             
             if (isMarket) {
-                const titleRow = document.createElement('div');
-                titleRow.className = "flex justify-between items-start mb-2";
-                
-                const title = document.createElement('p');
-                title.className = "nft-title";
-                title.textContent = d.name;
-                
-                const price = document.createElement('p');
-                price.className = "nft-price";
-                price.textContent = `${d.price} Đ`;
-                
+                const titleRow = document.createElement('div'); titleRow.className = "flex justify-between items-start mb-2";
+                const title = document.createElement('p'); title.className = "text-sm font-bold truncate pr-2"; title.textContent = d.name;
+                const price = document.createElement('p'); price.className = "text-sm font-black md-primary whitespace-nowrap"; price.textContent = `${d.price} Đ`;
                 titleRow.append(title, price);
                 
-                const authorRow = document.createElement('div');
-                authorRow.className = "flex items-center gap-1 mb-2";
-                
-                const author = document.createElement('p');
-                author.className = "text-[9px] text-neutral-500 truncate";
-                author.textContent = `By: ${d.owner}`;
+                const authorRow = document.createElement('div'); authorRow.className = "flex items-center gap-1 mb-3";
+                const author = document.createElement('p'); author.className = "text-[10px] md-on-surface-variant truncate"; author.textContent = `By: ${d.owner}`;
                 authorRow.appendChild(author);
                 
                 if (userInfo && userInfo.isVerified) {
-                    const vIcon = document.createElement('img');
-                    vIcon.src = "https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff";
-                    vIcon.className = "w-3 h-3";
-                    vIcon.title = "Verified";
+                    const vIcon = document.createElement('span'); 
+                    vIcon.className = "material-symbols-rounded filled md-primary text-[14px]"; 
+                    vIcon.textContent = "verified";
                     authorRow.appendChild(vIcon);
                 }
                 
-                const btn = document.createElement('button');
-                btn.className = "nft-action-btn nft-btn-primary";
-                btn.textContent = "Купить";
+                const btn = document.createElement('button'); btn.className = "md-btn md-btn-primary w-full"; btn.textContent = "Купить";
                 btn.onclick = () => buyNFT(id, d.price, d.owner);
                 
                 info.append(titleRow, authorRow, btn);
             } else {
-                // Inventory or Public Profile View
-                const title = document.createElement('p');
-                title.className = "nft-title mb-1";
-                title.textContent = d.name;
+                const title = document.createElement('p'); title.className = "text-sm font-bold mb-3 truncate"; title.textContent = d.name;
                 info.appendChild(title);
 
-                // Only show buttons if it's my inventory
                 if (d.owner === auth.currentUser.email) {
                     const btn = document.createElement('button');
-                    if (d.isListed) {
-                        btn.className = "nft-action-btn nft-btn-secondary";
-                        btn.textContent = `Снять (${d.price} Đ)`;
-                        btn.onclick = () => unlistNFT(id);
-                    } else {
-                        btn.className = "nft-action-btn nft-btn-primary";
-                        btn.textContent = "Продать";
-                        btn.onclick = () => listNFT(id);
-                    }
+                    if (d.isListed) { btn.className = "md-btn md-btn-outlined w-full"; btn.textContent = `Снять (${d.price} Đ)`; btn.onclick = () => unlistNFT(id); } 
+                    else { btn.className = "md-btn md-btn-primary w-full"; btn.textContent = "Продать"; btn.onclick = () => listNFT(id); }
                     info.appendChild(btn);
                 }
             }
-            
-            el.append(img, info);
-            return el;
+            el.append(img, info); return el;
         }
 
         async function loadMarket() {
             const container = document.getElementById('nft-view-market');
-            container.innerHTML = '<div class="col-span-2 text-center py-10"><div class="w-8 h-8 border-2 border-white/10 border-t-orange-500 rounded-full animate-spin mx-auto"></div></div>';
-            
+            container.innerHTML = '<div class="col-span-2 text-center py-10"><span class="material-symbols-rounded animate-spin md-on-surface-variant">sync</span></div>';
             const q = query(collection(db, "nfts"), where("isListed", "==", true));
-            const snap = await getDocs(q);
-            container.innerHTML = '';
+            const snap = await getDocs(q); container.innerHTML = '';
             
-            if(snap.empty) { container.innerHTML = '<p class="col-span-2 text-center text-neutral-600 text-[10px] font-bold uppercase mt-10">Магазин пуст</p>'; return; }
-            
+            if(snap.empty) { container.innerHTML = '<p class="col-span-2 text-center md-on-surface-variant text-sm mt-10">Магазин пуст</p>'; return; }
             const docs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            
             for(const d of docs) {
                 if(d.owner === auth.currentUser.email) continue;
                 const userInfo = await getUserInfo(d.owner);
@@ -968,87 +1329,55 @@
 
         async function loadInventory() {
             const container = document.getElementById('nft-view-inventory');
-            container.innerHTML = '<div class="col-span-2 text-center py-10"><div class="w-8 h-8 border-2 border-white/10 border-t-orange-500 rounded-full animate-spin mx-auto"></div></div>';
-            
+            container.innerHTML = '<div class="col-span-2 text-center py-10"><span class="material-symbols-rounded animate-spin md-on-surface-variant">sync</span></div>';
             const q = query(collection(db, "nfts"), where("owner", "==", auth.currentUser.email));
-            const snap = await getDocs(q);
-            container.innerHTML = '';
+            const snap = await getDocs(q); container.innerHTML = '';
             
-            if(snap.empty) { container.innerHTML = '<p class="col-span-2 text-center text-neutral-600 text-[10px] font-bold uppercase mt-10">Пусто. Создайте NFT!</p>'; return; }
-
-            snap.forEach(async doc => {
-                const card = await createSafeNftCard(doc.data(), doc.id, false);
-                container.appendChild(card);
-            });
+            if(snap.empty) { container.innerHTML = '<p class="col-span-2 text-center md-on-surface-variant text-sm mt-10">Пусто. Создайте NFT!</p>'; return; }
+            snap.forEach(async doc => { const card = await createSafeNftCard(doc.data(), doc.id, false); container.appendChild(card); });
         }
 
         window.listNFT = (id) => {
             showConfirm("Продать NFT", "Укажите цену для продажи", "input", async (val) => {
                 const price = parseFloat(val);
                 if (!price || price <= 0) return showT('Ошибка', 'Некорректная цена', '', null, true);
-                
-                try {
-                    await updateDoc(doc(db, "nfts", id), { isListed: true, price: price });
-                    showT('Успешно', 'NFT выставлен на продажу');
-                    loadInventory();
-                } catch(e) {
-                    showT('Ошибка', 'Сбой', '', null, true);
-                }
+                try { await updateDoc(doc(db, "nfts", id), { isListed: true, price: price }); showT('Успешно', 'Выставлен на продажу'); loadInventory(); } 
+                catch(e) { showT('Ошибка', 'Сбой', '', null, true); }
             });
         };
 
         window.unlistNFT = (id) => {
             showConfirm("Снять с продажи?", "NFT вернется в инвентарь", "confirm", async () => {
-                try {
-                    await updateDoc(doc(db, "nfts", id), { isListed: false });
-                    showT('Успешно', 'NFT снят с продажи');
-                    loadInventory();
-                } catch(e) {
-                    showT('Ошибка', 'Сбой', '', null, true);
-                }
+                try { await updateDoc(doc(db, "nfts", id), { isListed: false }); showT('Успешно', 'Снят с продажи'); loadInventory(); } 
+                catch(e) { showT('Ошибка', 'Сбой', '', null, true); }
             });
         };
 
         window.buyNFT = (nftId, price, ownerEmail) => {
              if(myData.balance < price) return showT('Ошибка', 'Недостаточно средств', '', null, true);
-             
              showConfirm("Купить NFT?", `Цена: ${price} Đ`, "confirm", async () => {
                 try {
                     await runTransaction(db, async (t) => {
                         const buyerRef = doc(db, "users", auth.currentUser.uid);
                         const q = query(collection(db, "users"), where("email", "==", ownerEmail));
-                        const ownerSnap = await getDocs(q);
-                        if(ownerSnap.empty) throw "Owner not found";
+                        const ownerSnap = await getDocs(q); if(ownerSnap.empty) throw "Owner not found";
                         const ownerRef = ownerSnap.docs[0].ref;
-
                         const nftRef = doc(db, "nfts", nftId);
-                        const nftDoc = await t.get(nftRef);
-                        if(!nftDoc.exists() || !nftDoc.data().isListed) throw "Item no longer available";
+                        const nftDoc = await t.get(nftRef); if(!nftDoc.exists() || !nftDoc.data().isListed) throw "Item no longer available";
+                        const buyerData = (await t.get(buyerRef)).data(); if(buyerData.balance < price) throw "Funds";
 
-                        const buyerData = (await t.get(buyerRef)).data();
-                        if(buyerData.balance < price) throw "Funds";
-
-                        t.update(buyerRef, { balance: increment(-price) });
-                        t.update(ownerRef, { balance: increment(price) });
-                        t.update(nftRef, { owner: auth.currentUser.email, isListed: false });
-                        
-                        const txRef = doc(collection(db, "transactions"));
-                        t.set(txRef, { from: auth.currentUser.email, to: ownerEmail, amount: price, date: Timestamp.now(), parties: [auth.currentUser.email, ownerEmail], type: 'nft_buy' });
+                        t.update(buyerRef, { balance: increment(-price) }); t.update(ownerRef, { balance: increment(price) }); t.update(nftRef, { owner: auth.currentUser.email, isListed: false });
+                        t.set(doc(collection(db, "transactions")), { from: auth.currentUser.email, to: ownerEmail, amount: price, date: Timestamp.now(), parties: [auth.currentUser.email, ownerEmail], type: 'nft_buy' });
                     });
-                    showT('Успешно', 'NFT куплен!');
-                    loadMarket();
-                } catch(e) {
-                    showT('Ошибка', e.message || "Сбой транзакции", '', null, true);
-                }
+                    showT('Успешно', 'NFT куплен!'); loadMarket();
+                } catch(e) { showT('Ошибка', e.message || "Сбой транзакции", '', null, true); }
              });
         };
 
         window.openPublicProfile = async (email) => {
             if(email === auth.currentUser.email) return openModal('profile');
-            document.getElementById('pub-profile-avatar').src = '';
-            document.getElementById('pub-profile-email').textContent = 'Loading...';
-            document.getElementById('pub-profile-nfts').innerHTML = '';
-            document.getElementById('pub-profile-empty').classList.add('hidden');
+            document.getElementById('pub-profile-avatar').src = ''; document.getElementById('pub-profile-email').textContent = 'Loading...';
+            document.getElementById('pub-profile-nfts').innerHTML = ''; document.getElementById('pub-profile-empty').classList.add('hidden');
             openModal('public-profile');
 
             const info = await getUserInfo(email);
@@ -1059,70 +1388,39 @@
 
             const qUser = query(collection(db, "users"), where("email", "==", email));
             const uSnap = await getDocs(qUser);
-            if(!uSnap.empty) {
-                const uData = uSnap.docs[0].data();
-                if(uData.settings && uData.settings.showNfts === false) {
-                    document.getElementById('pub-profile-empty').textContent = "Коллекция скрыта пользователем";
-                    document.getElementById('pub-profile-empty').classList.remove('hidden');
-                    return;
-                }
+            if(!uSnap.empty && uSnap.docs[0].data().settings && uSnap.docs[0].data().settings.showNfts === false) {
+                document.getElementById('pub-profile-empty').textContent = "Коллекция скрыта пользователем"; document.getElementById('pub-profile-empty').classList.remove('hidden'); return;
             }
 
             const qNft = query(collection(db, "nfts"), where("owner", "==", email));
             const nftSnap = await getDocs(qNft);
-            
-            if(nftSnap.empty) {
-                document.getElementById('pub-profile-empty').textContent = "Коллекция пуста";
-                document.getElementById('pub-profile-empty').classList.remove('hidden');
-            } else {
-                const container = document.getElementById('pub-profile-nfts');
-                nftSnap.forEach(async doc => {
-                    // Safe creation for public profile
-                    const card = await createSafeNftCard(doc.data(), doc.id, false);
-                    container.appendChild(card);
-                });
-            }
+            if(nftSnap.empty) { document.getElementById('pub-profile-empty').textContent = "Коллекция пуста"; document.getElementById('pub-profile-empty').classList.remove('hidden'); } 
+            else { nftSnap.forEach(async doc => { const card = await createSafeNftCard(doc.data(), doc.id, false); document.getElementById('pub-profile-nfts').appendChild(card); }); }
         };
 
-        window.toggleNftPrivacy = async (checked) => {
-             await updateDoc(doc(db, "users", auth.currentUser.uid), { "settings.showNfts": checked });
-        };
+        window.toggleNftPrivacy = async (checked) => { await updateDoc(doc(db, "users", auth.currentUser.uid), { "settings.showNfts": checked }); };
 
         // --- AUTH & INIT ---
         onAuthStateChanged(auth, async (u) => {
             if (u) {
-                // *** EMAIL VERIFICATION CHECK (NEW) ***
-                // Google Login is automatically verified. Email/Password needs check.
                 if (!u.emailVerified) {
-                     document.getElementById('view-auth').classList.add('hidden');
-                     document.getElementById('view-loading').classList.add('hidden');
+                     document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-loading').classList.add('hidden');
                      document.getElementById('view-main').classList.add('hidden');
-                     document.getElementById('view-verify').classList.remove('hidden');
-                     document.getElementById('view-verify').classList.add('flex');
+                     document.getElementById('view-verify').classList.remove('hidden'); document.getElementById('view-verify').classList.add('flex');
                      return;
                 }
-
                 const userRef = doc(db, "users", u.uid); const snap = await getDoc(userRef);
                 if (!snap.exists()) {
-                    const email = u.email, emailLower = u.email.toLowerCase(), clientIP = await getClientIP();
-                    
-                    let initialBalance = 0.0; // Default is now 0.0
-
-                    const userData = { email: email, lowercaseEmail: emailLower, balance: 0.0, bankBalance: 0, lastBankUpdate: Timestamp.now(), avatar: u.photoURL || '', refCount: 0, refEarned: 0, createdAt: Timestamp.now(), isBanned: false, ip: clientIP, referralStatus: 'none', isVerified: false, settings: { showNfts: true } };
+                    const emailLower = u.email.toLowerCase(), clientIP = await getClientIP();
+                    const userData = { email: u.email, lowercaseEmail: emailLower, balance: 0.0, bankBalance: 0, lastBankUpdate: Timestamp.now(), avatar: u.photoURL || '', refCount: 0, refEarned: 0, createdAt: Timestamp.now(), isBanned: false, ip: clientIP, referralStatus: 'none', isVerified: false, settings: { showNfts: true } };
                     const refEmail = localStorage.getItem('dool_ref');
-                    
                     if (refEmail && refEmail !== emailLower) {
                         try {
                             let q = query(collection(db, "users"), where("lowercaseEmail", "==", refEmail)); let refSnap = await getDocs(q);
                             if (refSnap.empty) { q = query(collection(db, "users"), where("email", "==", refEmail)); refSnap = await getDocs(q); }
                             if (!refSnap.empty) { 
                                 const referrerDoc = refSnap.docs[0], referrerData = referrerDoc.data(); 
-                                if (referrerData.ip !== clientIP) { 
-                                    userData.referredBy = referrerData.email || refEmail; 
-                                    userData.referredByUid = referrerDoc.id; 
-                                    userData.referralStatus = 'pending';
-                                    userData.balance = 10.0; // Give bonus ONLY if invited
-                                } 
+                                if (referrerData.ip !== clientIP) { userData.referredBy = referrerData.email || refEmail; userData.referredByUid = referrerDoc.id; userData.referralStatus = 'pending'; userData.balance = 10.0; } 
                             }
                         } catch (err) {}
                     }
@@ -1130,53 +1428,26 @@
                 }
                 startApp(u);
             } else {
-                document.getElementById('view-loading').classList.add('hidden'); 
-                document.getElementById('view-main').classList.add('hidden'); 
-                document.getElementById('view-banned').classList.add('hidden'); 
-                document.getElementById('view-verify').classList.add('hidden');
+                document.getElementById('view-loading').classList.add('hidden'); document.getElementById('view-main').classList.add('hidden'); 
+                document.getElementById('view-banned').classList.add('hidden'); document.getElementById('view-verify').classList.add('hidden');
                 document.getElementById('view-auth').classList.replace('hidden', 'flex');
             }
         });
 
         document.getElementById('btn-google').onclick = async () => { try { await signInWithPopup(auth, googleProvider); } catch (e) { if(e.code !== 'auth/popup-closed-by-user') showT('Ошибка', e.message, '', null, true); } };
-        
         document.getElementById('btn-login').onclick = async () => { 
             const btn = document.getElementById('btn-login'), email = document.getElementById('auth-email').value, pass = document.getElementById('auth-password').value; 
             if(!email || !pass) return showT('Ошибка', 'Заполните поля', '', null, true); 
             btn.disabled = true; 
-            try { 
-                await signInWithEmailAndPassword(auth, email, pass); 
-                // onAuthStateChanged will handle the verification check
-            } catch(e) { 
-                btn.disabled = false; 
-                showT('Ошибка', 'Неверные данные', '', null, true); 
-            } 
+            try { await signInWithEmailAndPassword(auth, email, pass); } catch(e) { btn.disabled = false; showT('Ошибка', 'Неверные данные', '', null, true); } 
         };
         
-        // *** MODIFIED REGISTER LOGIC ***
         document.getElementById('btn-register').onclick = async () => { 
             const btn = document.getElementById('btn-register'), email = document.getElementById('auth-email').value, pass = document.getElementById('auth-password').value; 
             if (pass.length < 6) return showT('Ошибка', 'Пароль < 6 символов', '', null, true); 
             btn.disabled = true; 
-            try { 
-                // 1. Create User
-                const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
-                const user = userCredential.user;
-
-                // 2. Send Verification Email
-                await sendEmailVerification(user);
-
-                // 3. FIX: Не выходим из аккаунта (signOut).
-                // Позволяем onAuthStateChanged перехватить состояние и показать экран подтверждения
-                // await signOut(auth); // <--- ЭТО БЫЛА ПРИЧИНА ПРОБЛЕМЫ
-
-                showT('Успешно', 'Письмо отправлено! Проверьте почту.');
-            } catch(e) { 
-                btn.disabled = false; 
-                let msg = 'Ошибка регистрации';
-                if(e.code === 'auth/email-already-in-use') msg = 'Email уже занят';
-                showT('Ошибка', msg, '', null, true); 
-            } 
+            try { const userCredential = await createUserWithEmailAndPassword(auth, email, pass); await sendEmailVerification(userCredential.user); showT('Успешно', 'Письмо отправлено! Проверьте почту.'); } 
+            catch(e) { btn.disabled = false; let msg = 'Ошибка регистрации'; if(e.code === 'auth/email-already-in-use') msg = 'Email уже занят'; showT('Ошибка', msg, '', null, true); } 
         };
 
         function adjustBalanceSize(amountStr) { const el = document.getElementById('balance-val'), len = amountStr.length; el.classList.remove('text-5xl', 'text-4xl', 'text-3xl', 'text-2xl'); if (len > 12) el.classList.add('text-2xl'); else if (len > 9) el.classList.add('text-3xl'); else if (len > 7) el.classList.add('text-4xl'); else el.classList.add('text-5xl'); }
@@ -1193,117 +1464,89 @@
                 document.getElementById('ref-count').textContent = d.refCount || 0; document.getElementById('ref-earned').textContent = (d.refEarned || 0).toFixed(1);
                 const av = d.avatar || `https://ui-avatars.com/api/?background=random&color=fff&name=${u.email.charAt(0)}`; document.getElementById('main-avatar').src = av; document.getElementById('edit-avatar-img').src = av;
                 
-                // Init settings toggle
-                const showNftSetting = (d.settings && d.settings.showNfts !== undefined) ? d.settings.showNfts : true;
-                document.getElementById('setting-show-nft').checked = showNftSetting;
+                document.getElementById('setting-show-nft').checked = (d.settings && d.settings.showNfts !== undefined) ? d.settings.showNfts : true;
 
-                // Verification
                 const vIcon = document.getElementById('header-verified-icon');
                 const vSection = document.getElementById('profile-verification-status');
-                if (d.isVerified) { vIcon.classList.remove('hidden'); vSection.innerHTML = `<div class="flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 px-4 py-2 rounded-xl"><img src="https://img.icons8.com/?size=100&id=FV4NhTk5WWFE&format=png&color=ffffff" class="w-5 h-5"><span class="text-xs font-bold text-blue-400 uppercase tracking-wider">Верифицирован</span></div>`; } 
-                else { vIcon.classList.add('hidden'); vSection.innerHTML = `<div class="px-4 py-2 opacity-50"><span class="text-xs font-bold text-neutral-500 uppercase tracking-wider">Не подтверждено</span></div>`; }
+                if (d.isVerified) { 
+                    vIcon.classList.remove('hidden'); 
+                    vSection.innerHTML = `<div class="inline-flex items-center gap-2 bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-on-primary-container)] px-4 py-2 rounded-full"><span class="material-symbols-rounded filled text-[18px]">verified</span><span class="text-xs font-bold uppercase tracking-wider">Верифицирован</span></div>`; 
+                } else { 
+                    vIcon.classList.add('hidden'); 
+                    vSection.innerHTML = `<div class="px-4 py-2 opacity-50"><span class="text-xs font-bold uppercase tracking-wider">Не подтверждено</span></div>`; 
+                }
 
                 document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-loading').classList.add('hidden'); document.getElementById('view-main').classList.replace('hidden', 'flex'); switchTab('wallet'); document.getElementById('btn-login').disabled = false; document.getElementById('btn-register').disabled = false;
             });
 
-            // SAFE HISTORY LISTENER
+            // TX HISTORY
             const qTx = query(collection(db, "transactions"), where("parties", "array-contains", u.email));
             onSnapshot(qTx, async (snap) => {
-                const list = document.getElementById('tx-history'); 
-                list.innerHTML = ''; // Clear via innerHTML is safe if we append elements next
-                
-                if (snap.empty) { 
-                    list.innerHTML = `<p class="text-center text-neutral-600 text-[10px] uppercase font-bold py-4">...</p>`; 
-                    return; 
-                }
-                
+                const list = document.getElementById('tx-history'); list.innerHTML = '';
+                if (snap.empty) { list.innerHTML = `<p class="text-center md-on-surface-variant text-xs uppercase font-bold py-4">Нет операций</p>`; return; }
                 const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date); 
                 
                 docs.forEach(tx => {
-                    const isSent = tx.from === u.email;
-                    const partner = isSent ? tx.to : tx.from;
+                    const isSent = tx.from === u.email; const partner = isSent ? tx.to : tx.from;
                     const dateStr = tx.date ? new Date(tx.date.toMillis()).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
                     
                     const item = document.createElement('div');
-                    item.className = "flex items-center justify-between p-4 rounded-[1.5rem] bg-white/[0.03] border border-white/5";
+                    // NO BORDERS
+                    item.className = "flex items-center justify-between p-4 rounded-[20px] bg-[var(--md-sys-color-surface-container-high)] mb-2";
                     
-                    const leftDiv = document.createElement('div');
-                    leftDiv.className = "flex items-center gap-3 overflow-hidden";
-                    if (partner.includes('@')) {
-                         leftDiv.style.cursor = "pointer";
-                         leftDiv.onclick = () => openPublicProfile(partner);
-                    }
+                    const leftDiv = document.createElement('div'); leftDiv.className = "flex items-center gap-3 overflow-hidden";
+                    if (partner.includes('@')) { leftDiv.style.cursor = "pointer"; leftDiv.onclick = () => openPublicProfile(partner); }
 
-                    const img = document.createElement('img');
-                    img.id = `av-${tx.date ? tx.date.toMillis() : Math.random()}`;
-                    img.src = `https://ui-avatars.com/api/?background=222&color=666&name=${partner.charAt(0)}`;
-                    img.className = "w-10 h-10 rounded-full bg-neutral-800 object-cover border border-white/5 shrink-0";
+                    const img = document.createElement('img'); img.src = `https://ui-avatars.com/api/?background=222&color=666&name=${partner.charAt(0)}`; img.className = "w-10 h-10 rounded-full object-cover shrink-0";
                     
-                    const textDiv = document.createElement('div');
-                    textDiv.className = "min-w-0";
+                    const textDiv = document.createElement('div'); textDiv.className = "min-w-0";
+                    const label = document.createElement('p'); label.className = `text-[10px] font-bold uppercase ${isSent ? 'md-on-surface-variant' : 'md-primary'}`; label.textContent = isSent ? 'Кому:' : 'От кого:';
+                    const nameP = document.createElement('p'); nameP.className = "text-xs font-bold truncate max-w-[120px] hover:text-[var(--md-sys-color-primary)] transition-colors"; nameP.textContent = partner;
                     
-                    const label = document.createElement('p');
-                    label.className = `text-[9px] font-black uppercase ${isSent ? 'text-neutral-500' : 'text-[#FF4D00]'} tracking-widest mb-0.5`;
-                    label.textContent = isSent ? 'To:' : 'From:';
+                    textDiv.append(label, nameP); leftDiv.append(img, textDiv);
                     
-                    const nameWrapper = document.createElement('div');
-                    nameWrapper.className = "flex items-center gap-1";
+                    const rightDiv = document.createElement('div'); rightDiv.className = "text-right";
+                    const amountP = document.createElement('p'); amountP.className = `text-sm font-black ${isSent ? '' : 'md-primary'}`; amountP.textContent = `${isSent ? '-' : '+'}${tx.amount.toFixed(1)}`;
+                    const dateP = document.createElement('p'); dateP.className = "text-[10px] md-on-surface-variant font-medium"; dateP.textContent = dateStr;
                     
-                    const nameP = document.createElement('p');
-                    nameP.className = "text-[11px] font-bold text-white truncate max-w-[120px] leading-tight hover:text-orange-500 transition-colors";
-                    nameP.textContent = partner; // Safe Text Content
-                    
-                    nameWrapper.appendChild(nameP);
-                    textDiv.append(label, nameWrapper);
-                    leftDiv.append(img, textDiv);
-                    
-                    const rightDiv = document.createElement('div');
-                    rightDiv.className = "text-right";
-                    
-                    const amountP = document.createElement('p');
-                    amountP.className = `text-sm font-black ${isSent ? 'text-white' : 'text-[#FF4D00]'}`;
-                    amountP.textContent = `${isSent ? '-' : '+'}${tx.amount.toFixed(1)}`;
-                    
-                    const dateP = document.createElement('p');
-                    dateP.className = "text-[9px] text-neutral-600 font-bold uppercase";
-                    dateP.textContent = dateStr;
-                    
-                    rightDiv.append(amountP, dateP);
-                    item.append(leftDiv, rightDiv);
-                    
+                    rightDiv.append(amountP, dateP); item.append(leftDiv, rightDiv);
                     if(partner.includes('@')) getUserInfo(partner).then(inf => { if(img) img.src = inf.avatar; });
-                    
                     list.appendChild(item);
                 });
             });
         }
         
-        async function handleIncomingTransfer(myEmail, amountDiff) { try { const q = query(collection(db, "transactions"), where("to", "==", myEmail)); const snap = await getDocs(q); if (!snap.empty) { const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date); if (Math.abs(docs[0].amount - amountDiff) < 0.01) { if (docs[0].type === 'referral_bonus') showT('Bonus', 'Ref Bonus', `+${amountDiff.toFixed(1)} Đ`); else showT('Transfer', docs[0].from, `+${amountDiff.toFixed(1)} Đ`, docs[0].from); return; } } showT('Банк', 'В банке', `+${amountDiff.toFixed(1)} Đ`); } catch(e) {} }
+        async function handleIncomingTransfer(myEmail, amountDiff) { try { const q = query(collection(db, "transactions"), where("to", "==", myEmail)); const snap = await getDocs(q); if (!snap.empty) { const docs = snap.docs.map(d => d.data()).sort((a,b) => b.date - a.date); if (Math.abs(docs[0].amount - amountDiff) < 0.01) { if (docs[0].type === 'referral_bonus') showT('Бонус', 'Реферальный бонус', `+${amountDiff.toFixed(1)} Đ`); else showT('Перевод', docs[0].from, `+${amountDiff.toFixed(1)} Đ`, docs[0].from); return; } } showT('Банк', 'Проценты зачислены', `+${amountDiff.toFixed(1)} Đ`); } catch(e) {} }
         
-        document.getElementById('avatar-input').onchange = (e) => { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = async (ev) => { try { await updateDoc(doc(db, "users", auth.currentUser.uid), { avatar: ev.target.result }); showT('Profile', 'Updated'); } catch { showT('Error', 'Failed', '', null, true); } }; reader.readAsDataURL(file); };
+        document.getElementById('avatar-input').onchange = (e) => { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = async (ev) => { try { await updateDoc(doc(db, "users", auth.currentUser.uid), { avatar: ev.target.result }); showT('Профиль', 'Аватар обновлен'); } catch { showT('Ошибка', 'Не удалось', '', null, true); } }; reader.readAsDataURL(file); };
         
         function calculateCompoundBalance(stored, lastUpdate) { if (!stored || stored <= 0 || !lastUpdate) return stored || 0; const diffWeeks = (new Date() - lastUpdate.toDate()) / (1000 * 60 * 60 * 24 * 7); return stored * Math.pow(1.05, diffWeeks); }
-        function updateBankVisuals(d) { const bankBal = calculateCompoundBalance(d.bankBalance, d.lastBankUpdate); document.getElementById('bank-balance-val').textContent = bankBal.toFixed(1); const fire = document.querySelector('.bank-layer-fire'); if (fire) fire.style.opacity = bankBal >= 0.1 ? '1' : '0'; }
+        function updateBankVisuals(d) { 
+            const bankBal = calculateCompoundBalance(d.bankBalance, d.lastBankUpdate); 
+            document.getElementById('bank-balance-val').textContent = bankBal.toFixed(1); 
+            const fire = document.querySelector('.bank-layer-fire'); 
+            if (fire) fire.style.opacity = bankBal >= 0.1 ? '1' : '0'; 
+        }
         setInterval(() => { if(myData) updateBankVisuals(myData); }, 1000);
         
-        document.getElementById('btn-do-deposit').onclick = async () => { const amt = parseFloat(document.getElementById('deposit-amt').value); if (!amt || amt < 0.1) return showT('Ошибка', 'Мин 0.1', '', null, true); if (amt > myData.balance) return showT('Ошибка', 'Недостаточно средств', '', null, true); try { const userRef = doc(db, "users", auth.currentUser.uid); await runTransaction(db, async (t) => { const d = (await t.get(userRef)).data(); const newWalletBal = d.balance - amt; if(newWalletBal < 0) throw "Funds"; t.update(userRef, { balance: newWalletBal, bankBalance: calculateCompoundBalance(d.bankBalance, d.lastBankUpdate) + amt, lastBankUpdate: serverTimestamp() }); }); closeModal('deposit'); document.getElementById('deposit-amt').value = ''; showT('Банк', 'Успешно'); } catch(e) { showT('Ошибка', e.message, '', null, true); } };
-        document.getElementById('btn-do-withdraw').onclick = async () => { const amt = parseFloat(document.getElementById('withdraw-amt').value); if (!amt || amt < 0.1) return showT('Ошибка', 'Мин 0.1', '', null, true); try { const userRef = doc(db, "users", auth.currentUser.uid); await runTransaction(db, async (t) => { const d = (await t.get(userRef)).data(); const currentBank = calculateCompoundBalance(d.bankBalance, d.lastBankUpdate); if (amt > currentBank) throw "Funds"; t.update(userRef, { balance: d.balance + amt, bankBalance: currentBank - amt, lastBankUpdate: serverTimestamp() }); }); closeModal('withdraw'); document.getElementById('withdraw-amt').value = ''; showT('Банк', 'Успешно'); } catch(e) { showT('Ошибка', e.message, '', null, true); } };
+        document.getElementById('btn-do-deposit').onclick = async () => { const amt = parseFloat(document.getElementById('deposit-amt').value); if (!amt || amt < 0.1) return showT('Ошибка', 'Мин 0.1', '', null, true); if (amt > myData.balance) return showT('Ошибка', 'Недостаточно средств', '', null, true); try { const userRef = doc(db, "users", auth.currentUser.uid); await runTransaction(db, async (t) => { const d = (await t.get(userRef)).data(); const newWalletBal = d.balance - amt; if(newWalletBal < 0) throw "Funds"; t.update(userRef, { balance: newWalletBal, bankBalance: calculateCompoundBalance(d.bankBalance, d.lastBankUpdate) + amt, lastBankUpdate: serverTimestamp() }); }); closeModal('deposit'); document.getElementById('deposit-amt').value = ''; showT('Банк', 'Успешно пополнено'); } catch(e) { showT('Ошибка', e.message, '', null, true); } };
+        document.getElementById('btn-do-withdraw').onclick = async () => { const amt = parseFloat(document.getElementById('withdraw-amt').value); if (!amt || amt < 0.1) return showT('Ошибка', 'Мин 0.1', '', null, true); try { const userRef = doc(db, "users", auth.currentUser.uid); await runTransaction(db, async (t) => { const d = (await t.get(userRef)).data(); const currentBank = calculateCompoundBalance(d.bankBalance, d.lastBankUpdate); if (amt > currentBank) throw "Funds"; t.update(userRef, { balance: d.balance + amt, bankBalance: currentBank - amt, lastBankUpdate: serverTimestamp() }); }); closeModal('withdraw'); document.getElementById('withdraw-amt').value = ''; showT('Банк', 'Успешно выведено'); } catch(e) { showT('Ошибка', e.message, '', null, true); } };
         
         window.updateQR = () => { const email = auth.currentUser.email; let amt = parseFloat(document.getElementById('receive-amt-req').value); const container = document.getElementById('qrcode-container'); if(isNaN(amt)) amt = 0; const data = JSON.stringify({ t: "req", e: email, a: amt }); container.innerHTML = ''; new QRCode(container, { text: data, width: 180, height: 180, colorDark : "#000000", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.M }); };
         document.getElementById('receive-amt-req').oninput = updateQR;
         
         window.startScannerV2 = () => { if (html5QrCode) return; html5QrCode = new Html5Qrcode("reader"); html5QrCode.start({ facingMode: "environment" }, { fps: 15, aspectRatio: window.innerHeight / window.innerWidth }, onScanSuccess, onScanError).catch(err => closeModal('scan')); };
-        const onScanSuccess = (decodedText) => { closeModal('scan'); try { const data = JSON.parse(decodedText); if(data.t === 'req' && data.e) openProposalModal(data); else showT('Error', 'QR?', '', null, true); } catch (e) { if(decodedText.includes('@')) openProposalModal({e: decodedText, a: 0}); else showT('Error', 'QR?', '', null, true); } };
+        const onScanSuccess = (decodedText) => { closeModal('scan'); try { const data = JSON.parse(decodedText); if(data.t === 'req' && data.e) openProposalModal(data); else showT('Ошибка', 'Неизвестный QR', '', null, true); } catch (e) { if(decodedText.includes('@')) openProposalModal({e: decodedText, a: 0}); else showT('Ошибка', 'Неизвестный QR', '', null, true); } };
         const onScanError = () => {};
         window.stopScannerV2 = () => { if (html5QrCode) { html5QrCode.stop().then(() => { html5QrCode.clear(); html5QrCode = null; }).catch(err => console.log(err)); } };
         function openProposalModal(data) { openModal('send'); document.getElementById('send-email').value = data.e; if (data.a > 0) { document.getElementById('send-amt').value = data.a; document.getElementById('send-amt').readOnly = true; document.getElementById('send-email').readOnly = true; document.getElementById('proposal-notice').classList.remove('hidden'); } }
         
         document.getElementById('btn-do-send').onclick = async () => {
             const to = document.getElementById('send-email').value.trim().toLowerCase(), amt = parseFloat(document.getElementById('send-amt').value), myEmail = auth.currentUser.email;
-            if (to === myEmail) return showT('Ошибка', 'Нельзя себе', '', null, true); if (!amt || amt < 0.1) return showT('Ошибка', 'Мин 0.1', '', null, true); if (amt > myData.balance) return showT('Ошибка', 'Недостаточно', '', null, true);
+            if (to === myEmail) return showT('Ошибка', 'Нельзя себе', '', null, true); if (!amt || amt < 0.1) return showT('Ошибка', 'Мин 0.1', '', null, true); if (amt > myData.balance) return showT('Ошибка', 'Недостаточно средств', '', null, true);
             const btn = document.getElementById('btn-do-send'); btn.disabled = true; btn.textContent = '...';
             try {
-                const q = query(collection(db, "users"), where("email", "==", to)); const res = await getDocs(q); if (res.empty) throw new Error("User not found");
+                const q = query(collection(db, "users"), where("email", "==", to)); const res = await getDocs(q); if (res.empty) throw new Error("Пользователь не найден");
                 await runTransaction(db, async (t) => {
                     const senderRef = doc(db, "users", auth.currentUser.uid), sData = (await t.get(senderRef)).data();
                     if (sData.balance < amt) throw new Error("Funds");
