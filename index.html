@@ -686,7 +686,7 @@
                     </div>
                     
                     <button id="btn-create-nft" onclick="mintNFT()" class="w-full md-btn md-btn-primary md-btn-large mt-4">Минт (Создать)</button>
-                    <p class="text-xs text-center md-on-surface-variant mt-4">Система Антиплагиат активна (70%)</p>
+                    <p class="text-xs text-center md-on-surface-variant mt-4">Система Антиплагиат активна (50%)</p>
                 </div>
             </div>
         </div>
@@ -1232,11 +1232,11 @@
                 let isPlagiarized = false;
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    if(data.hash && checkSimilarity(myHash, data.hash) > 0.70) isPlagiarized = true;
+                    if(data.hash && checkSimilarity(myHash, data.hash) > 0.50) isPlagiarized = true;
                 });
 
                 if(isPlagiarized) {
-                    showT('Отклонено', 'Сходство > 70% с существующим NFT', '', null, true);
+                    showT('Отклонено', 'Сходство > 50% с существующим NFT', '', null, true);
                     btn.disabled = false; btn.textContent = 'Минт (Создать)';
                     return;
                 }
